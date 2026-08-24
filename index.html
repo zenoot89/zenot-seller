@@ -227,6 +227,9 @@
     .admin-mobile-toggle{display:none;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);width:36px;height:36px;cursor:pointer;align-items:center;justify-content:center}
     .admin-content{flex:1;overflow-y:auto;padding:28px}
     .admin-content-inner{max-width:1100px;margin:0 auto}
+
+    /* ===== BOTTOM NAV (mobile only) ===== */
+    .admin-bottom-nav{display:none}
     .admin-section{display:none}
     .admin-section.active{display:block}
     .admin-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
@@ -414,9 +417,15 @@
     @media(max-width:860px){
       .admin-sidebar{position:fixed;top:0;bottom:0;left:0;width:220px;transform:translateX(-100%);transition:transform .2s;z-index:30}
       .admin-sidebar.open{transform:translateX(0)}
-      .admin-mobile-toggle{display:flex}
+      .admin-mobile-toggle{display:none}
       .admin-sidebar-scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:20}
       .admin-sidebar-scrim.open{display:block}
+      .admin-content{padding-bottom:80px}
+
+      .admin-bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;height:58px;background:var(--surface);border-top:1px solid var(--border);z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+      .admin-bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;color:var(--muted);font-family:'Inter',sans-serif;font-size:10.5px}
+      .admin-bn-item svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}
+      .admin-bn-item.active{color:var(--accent);font-weight:600}
     }
 
     /* ===== LOGIN ===== */
@@ -473,7 +482,7 @@
 
 <!-- ADMIN PAGE (Seller Center style) -->
 <div class="admin-page" id="admin-overlay">
-  <div class="admin-sidebar-scrim" id="admin-scrim" onclick="toggleSidebar(false)"></div>
+  <div class="admin-sidebar-scrim" id="admin-scrim" onclick="closeMoreMenu()"></div>
   <aside class="admin-sidebar" id="admin-sidebar">
     <div class="admin-sidebar-brand">
       <a href="#" class="logo">ZENOOT</a>
@@ -1144,6 +1153,26 @@
       </div>
     </div>
   </div>
+
+  <!-- BOTTOM NAV (mobile only) -->
+  <nav class="admin-bottom-nav" id="admin-bottom-nav">
+    <button class="admin-bn-item active" data-bn="products" onclick="switchTab('products', document.querySelector('.admin-nav-item[data-tab=products]'))">
+      <svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+      Produk
+    </button>
+    <button class="admin-bn-item" data-bn="performance" onclick="switchTab('performance', document.querySelector('.admin-nav-item[data-tab=performance]'))">
+      <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12.5" y="8" width="3" height="10"/><rect x="18" y="5" width="3" height="13"/></svg>
+      Performa
+    </button>
+    <button class="admin-bn-item" data-bn="orders" onclick="switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
+      <svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+      Pesanan
+    </button>
+    <button class="admin-bn-item" data-bn="more" onclick="openMoreMenu()">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+      Saya
+    </button>
+  </nav>
 </div>
 
 <!-- CONFIRM DIALOG (generic, dipakai buat aksi hapus dkk) -->
@@ -1293,6 +1322,26 @@ function toggleSidebar(open) {
 
 const TAB_TITLES = { products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan' };
 
+// Bottom nav (mobile) cuma punya 3 tab langsung; sisanya (vouchers/categories/reviews/dst) dianggap "Saya"/lainnya, dibuka lewat drawer sidebar yang sama
+const BOTTOM_NAV_TABS = ['products', 'performance', 'orders'];
+function syncBottomNav(tab) {
+  const bar = document.getElementById('admin-bottom-nav');
+  if (!bar) return;
+  bar.querySelectorAll('.admin-bn-item').forEach(b => b.classList.remove('active'));
+  const key = BOTTOM_NAV_TABS.includes(tab) ? tab : 'more';
+  const btn = bar.querySelector(`.admin-bn-item[data-bn="${key}"]`);
+  if (btn) btn.classList.add('active');
+}
+function openMoreMenu() {
+  syncBottomNav('more');
+  toggleSidebar(true);
+}
+function closeMoreMenu() {
+  toggleSidebar(false);
+  const activeTab = document.querySelector('.admin-nav-item.active[data-tab]');
+  syncBottomNav(activeTab ? activeTab.dataset.tab : 'products');
+}
+
 function toggleNavGroup(btn) {
   btn.classList.toggle('open');
   document.getElementById('promo-subnav').classList.toggle('open');
@@ -1304,6 +1353,7 @@ function switchTab(tab, el) {
   document.getElementById(`tab-${tab}`).classList.add('active');
   document.getElementById('admin-topbar-title').textContent = TAB_TITLES[tab] || '';
   toggleSidebar(false);
+  syncBottomNav(tab);
   if (tab === 'categories') { loadAdminCategories(); loadAdminSuppliers(); }
   if (tab === 'customers') loadAdminCustomers();
   if (tab === 'orders') loadOrdersAdmin();
