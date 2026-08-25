@@ -290,7 +290,12 @@
     .confirm-modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
     .variant-row td{padding:0 14px 14px;border-bottom:1px solid var(--border)}
     .prod-tabrow{display:flex;align-items:center;gap:22px;border-bottom:1px solid var(--border);margin:14px 0 14px;flex-wrap:wrap;row-gap:8px}
-    .prod-status-tabs{display:flex;gap:22px}
+    .prod-status-tabs,.prod-status-row{display:flex;gap:22px}
+    .prod-mobile-icons{display:none}
+    .prod-icon-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+    .prod-icon-btn svg{width:17px;height:17px;stroke:var(--text)}
+    .prod-icon-btn.active{background:var(--accent);border-color:var(--accent)}
+    .prod-icon-btn.active svg{stroke:#fff}
     .pstab{padding:10px 2px;font-size:14px;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit}
     .pstab.active{color:var(--text);font-weight:600;border-bottom-color:var(--text)}
     .prod-tabrow-right{margin-left:auto;display:flex;gap:10px;padding-bottom:8px}
@@ -468,6 +473,21 @@
       #perf-sub-tabs .orders-tab{flex:0 0 auto}
       #orders-status-tabs{flex-wrap:nowrap !important;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
       #orders-status-tabs .orders-tab{flex:0 0 auto}
+
+      /* ===== APP-NATIVE FEEL: judul topbar & kartu metrik ===== */
+      .admin-topbar-title{font-family:'Inter',sans-serif !important;font-weight:700;font-size:17px}
+      .perf-metric-grid{grid-template-columns:repeat(2,1fr) !important;gap:8px !important}
+      .perf-metric-grid .admin-card{padding:12px !important;border-radius:10px}
+      .perf-metric-grid .admin-card > div:first-child{font-size:11px !important;margin-bottom:3px !important}
+      .perf-metric-grid .admin-card > div:nth-child(2){font-size:17px !important}
+      .perf-delta{font-size:10.5px !important}
+
+      /* ===== PRODUK: search+filter di balik ikon ===== */
+      .prod-header-row{display:flex;align-items:center;gap:8px}
+      .prod-status-row{overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1;padding-bottom:2px}
+      .prod-mobile-icons{display:flex;gap:8px;align-items:center;flex-shrink:0}
+      .mobile-collapsible{display:none;margin-top:10px}
+      .mobile-collapsible.show{display:block}
     }
 
     /* ===== BERANDA / DASHBOARD ===== */
@@ -481,6 +501,7 @@
     .home-qa-item{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;color:var(--text)}
     .home-qa-icon{width:42px;height:42px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
     .home-qa-icon svg{width:19px;height:19px;stroke:var(--accent)}
+    .perf-metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px}
 
     /* ===== LOGIN ===== */
     .login-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;align-items:center;justify-content:center}
@@ -673,8 +694,25 @@
             <button class="btn-primary" style="width:auto;padding:10px 18px" onclick="openProductForm()">+ Produk</button>
           </div>
 
+          <!-- Ikon search+filter, cuma nongol di mobile -->
+          <div class="prod-header-row">
+            <div class="prod-status-row" id="prod-status-tabs"></div>
+            <div class="prod-mobile-icons" id="prod-mobile-icons">
+              <button class="prod-icon-btn" onclick="toggleProdSearch(this)" aria-label="Cari produk">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              </button>
+              <button class="prod-icon-btn" onclick="toggleProdFilterPanel(this)" aria-label="Filter produk">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="mobile-collapsible" id="prod-search-bar">
+            <input class="form-input" id="pf-search" placeholder="Cari nama produk..." oninput="renderAdminProductList()" style="width:100%"/>
+          </div>
+
+          <div class="mobile-collapsible" id="prod-filter-panel">
           <div class="prod-tabrow">
-            <div class="prod-status-tabs" id="prod-status-tabs"></div>
             <button class="pstab" id="pf-lowstock-chip" onclick="toggleLowStockFilter()">Stok Menipis</button>
             <button class="pstab" id="pf-nopromo-chip" onclick="toggleNoPromoFilter()">Belum Ada Promo</button>
             <div class="prod-tabrow-right">
@@ -701,7 +739,6 @@
                 <option value="sold-desc">Terjual Terbanyak</option>
                 <option value="supplier">Supplier A-Z</option>
               </select>
-              <input class="form-input" id="pf-search" placeholder="Cari nama produk..." oninput="renderAdminProductList()" style="flex:0 1 240px;margin-left:auto"/>
             </div>
             <div class="prod-bulkbar hidden" id="prod-bulkbar">
               <span id="prod-bulk-count">0 dipilih</span>
@@ -710,6 +747,7 @@
               <button class="btn-danger" onclick="bulkDelete()">Hapus</button>
               <button class="btn-edit" onclick="clearBulkSelection()" style="margin-left:auto">Batal</button>
             </div>
+          </div>
           </div>
 
           <div class="admin-card admin-product-list" style="padding:0;overflow-x:auto">
@@ -993,7 +1031,7 @@
 
           <!-- PANEL: TINJAUAN -->
           <div id="perf-panel-tinjauan" class="perf-panel">
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px">
+            <div class="perf-metric-grid">
               <div class="admin-card" style="margin:0">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Total Penjualan</div>
                 <div id="perf-revenue" style="font-size:22px;font-weight:700">Rp 0</div>
@@ -1048,7 +1086,7 @@
 
           <!-- PANEL: LAYANAN -->
           <div id="perf-panel-layanan" class="perf-panel" style="display:none">
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+            <div class="perf-metric-grid">
               <div class="admin-card" style="margin:0">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Rata-rata Waktu Konfirmasi Bayar</div>
                 <div id="perf-layanan-konfirmasi" style="font-size:20px;font-weight:700">–</div>
@@ -1066,7 +1104,7 @@
 
           <!-- PANEL: TINGKAT KUNJUNGAN -->
           <div id="perf-panel-kunjungan" class="perf-panel" style="display:none">
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px">
+            <div class="perf-metric-grid">
               <div class="admin-card" style="margin:0">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Total Pengunjung (unik)</div>
                 <div id="perf-kv-visitors" style="font-size:22px;font-weight:700">0</div>
@@ -1462,6 +1500,14 @@ function closeMoreMenu() {
 function toggleNavGroup(btn) {
   btn.classList.toggle('open');
   document.getElementById('promo-subnav').classList.toggle('open');
+}
+function toggleProdSearch(btn) {
+  document.getElementById('prod-search-bar').classList.toggle('show');
+  btn.classList.toggle('active');
+}
+function toggleProdFilterPanel(btn) {
+  document.getElementById('prod-filter-panel').classList.toggle('show');
+  btn.classList.toggle('active');
 }
 function switchTab(tab, el) {
   document.querySelectorAll('.admin-nav-item[data-tab]').forEach(t=>t.classList.remove('active'));
