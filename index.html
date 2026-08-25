@@ -28,7 +28,7 @@
       --bg:#f5f4f2;--surface:#fff;--border:#e0ddd8;--sep:#b5a898;
       --text:#1a1a1a;--muted:#9e9890;--sec:#6b6560;
       --accent:#1a1a1a;--radius:12px;--radius-sm:8px;
-      --green:#25D366;
+      --green:#25D366;--ink:#1a1a1a;
     }
     body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
@@ -428,6 +428,46 @@
       .admin-bn-item.active{color:var(--accent);font-weight:600}
       .home-stat-grid{grid-template-columns:repeat(2,1fr)}
       .home-quick-actions{grid-template-columns:repeat(3,1fr)}
+
+      /* ===== PRODUK: tabel -> kartu ===== */
+      .admin-list-header{flex-wrap:wrap;gap:10px}
+      .prod-toolbar-bottom .form-input,.prod-toolbar-bottom .prod-pill-select{flex:1 1 100% !important;margin-left:0 !important}
+      .admin-product-list{overflow-x:visible !important;padding:0 !important;background:none !important;border:none !important}
+      .prod-table{min-width:0;width:100%}
+      .prod-table thead{display:none}
+      .prod-table,.prod-table tbody,.prod-table tr{display:block;width:100%}
+      .prod-table tr{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;padding:12px}
+      .prod-table tr.variant-row{margin:-6px 0 10px;border-top:none;border-radius:0 0 10px 10px;background:var(--bg);padding-top:10px}
+      .prod-table td{display:block;padding:2px 0;border:none}
+      .prod-table td:nth-child(2)::before{content:"Kategori: ";color:var(--muted);font-size:11px;font-weight:600}
+      .prod-table td:nth-child(4)::before{content:"Stok: ";color:var(--muted);font-size:11px;font-weight:600}
+      .prod-table td:nth-child(5)::before{content:"Terjual: ";color:var(--muted);font-size:11px;font-weight:600}
+      .prod-table td:nth-child(6)::before{content:"Supplier: ";color:var(--muted);font-size:11px;font-weight:600}
+      .prod-table td:nth-child(2),.prod-table td:nth-child(4),.prod-table td:nth-child(5),.prod-table td:nth-child(6){display:inline-block;margin-right:14px;font-size:12.5px}
+      .prod-table td:nth-child(3){font-size:14px;margin:4px 0}
+      .prod-table td:nth-child(7){margin:6px 0}
+      .prod-table td:nth-child(8){padding-top:8px}
+      .prod-table td:nth-child(8) .btn-edit{width:100%;padding:9px 0;text-align:center}
+
+      /* ===== PESANAN: tabel -> kartu ===== */
+      .orders-table thead{display:none}
+      .orders-table,.orders-table tbody,.orders-table tr{display:block;width:100%}
+      .orders-table tr{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;padding:12px;position:relative}
+      .orders-table td{display:block;padding:3px 0 !important;border:none !important}
+      .orders-table td:nth-child(1){position:absolute;top:12px;right:12px;font-size:11px;color:var(--muted)}
+      .orders-table td:nth-child(2){font-weight:600;font-size:13.5px;padding-right:70px !important}
+      .orders-table td:nth-child(3)::before{content:"Produk: ";color:var(--muted);font-size:11px;font-weight:600}
+      .orders-table td:nth-child(4)::before{content:"Total: ";color:var(--muted);font-size:11px;font-weight:600}
+      .orders-table td:nth-child(4){font-weight:600}
+      .orders-table td:nth-child(5)::before{content:"Bayar: ";color:var(--muted);font-size:11px;font-weight:600}
+      .orders-table td:nth-child(6){margin:6px 0}
+      .orders-table td:nth-child(7){margin-top:8px}
+
+      /* ===== PERFORMA TOKO: sub-tab jadi scroll horizontal ===== */
+      #perf-sub-tabs{flex-wrap:nowrap !important;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+      #perf-sub-tabs .orders-tab{flex:0 0 auto}
+      #orders-status-tabs{flex-wrap:nowrap !important;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+      #orders-status-tabs .orders-tab{flex:0 0 auto}
     }
 
     /* ===== BERANDA / DASHBOARD ===== */
@@ -1884,7 +1924,7 @@ function renderOrdersAdminTable() {
   const rows = ordersAdminFilter ? ordersAdminData.filter(o => o.status === ordersAdminFilter) : ordersAdminData;
   if (!rows.length) { el.innerHTML = `<div style="font-size:13px;color:var(--muted);padding:20px 0">Tidak ada pesanan di kategori ini.</div>`; return; }
 
-  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">
+  el.innerHTML = `<div style="overflow-x:auto"><table class="orders-table" style="width:100%;border-collapse:collapse;font-size:12.5px">
     <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
       <th style="padding:8px 6px">Tanggal</th>
       <th style="padding:8px 6px">Pembeli</th>
