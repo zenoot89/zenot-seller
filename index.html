@@ -237,6 +237,8 @@
     .orders-tab{padding:9px 14px;font-size:12.5px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;white-space:nowrap}
     .orders-tab:hover{color:var(--ink)}
     .orders-tab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
+    .perf-period-btn{padding:8px 14px;font-size:12.5px;font-weight:500;background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--muted);cursor:pointer;white-space:nowrap}
+    .perf-period-btn.active{color:var(--accent);border-color:var(--accent);font-weight:600}
     .perf-delta{font-size:11.5px;margin-top:4px;font-weight:600}
     .perf-delta.up{color:#1e7a4c}
     .perf-delta.down{color:#a83232}
@@ -286,6 +288,13 @@
     .badge-promo{display:inline-block;background:#fff0e6;color:#c2540a;font-size:11px;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border-radius:4px;margin-left:6px}
     .confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;padding:16px}
     .confirm-overlay.open{display:flex}
+
+    .prod-sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:610;align-items:flex-end;justify-content:center}
+    .prod-sheet-overlay.open{display:flex}
+    .prod-sheet{background:var(--surface);width:100%;max-width:520px;max-height:82vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:18px}
+    .prod-sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .prod-sheet-head h3{font-size:15px;font-weight:600}
+    .prod-sheet-close{width:28px;height:28px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;font-size:16px;color:var(--muted)}
     .confirm-modal{background:var(--surface);border-radius:var(--radius);padding:24px;width:100%;max-width:380px}
     .confirm-modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
     .variant-row td{padding:0 14px 14px;border-bottom:1px solid var(--border)}
@@ -296,6 +305,8 @@
     .prod-icon-btn svg{width:17px;height:17px;stroke:var(--text)}
     .prod-icon-btn.active{background:var(--accent);border-color:var(--accent)}
     .prod-icon-btn.active svg{stroke:#fff}
+    .prod-aksi-row{display:flex;gap:8px;align-items:center}
+    .prod-more-btn{display:none}
     .pstab{padding:10px 2px;font-size:14px;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;white-space:nowrap;font-family:inherit}
     .pstab.active{color:var(--text);font-weight:600;border-bottom-color:var(--text)}
     .prod-tabrow-right{margin-left:auto;display:flex;gap:10px;padding-bottom:8px}
@@ -441,18 +452,20 @@
       .prod-table{min-width:0;width:100%}
       .prod-table thead{display:none}
       .prod-table,.prod-table tbody,.prod-table tr{display:block;width:100%}
-      .prod-table tr{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;padding:12px}
-      .prod-table tr.variant-row{margin:-6px 0 10px;border-top:none;border-radius:0 0 10px 10px;background:var(--bg);padding-top:10px}
-      .prod-table td{display:block;padding:2px 0;border:none}
+      .prod-table tr{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;padding:10px}
+      .prod-table tr.variant-row{margin:-4px 0 8px;border-top:none;border-radius:0 0 10px 10px;background:var(--bg);padding-top:8px}
+      .prod-table td{display:block !important;padding:1px 0 !important;border:none !important}
       .prod-table td:nth-child(2)::before{content:"Kategori: ";color:var(--muted);font-size:11px;font-weight:600}
       .prod-table td:nth-child(4)::before{content:"Stok: ";color:var(--muted);font-size:11px;font-weight:600}
       .prod-table td:nth-child(5)::before{content:"Terjual: ";color:var(--muted);font-size:11px;font-weight:600}
       .prod-table td:nth-child(6)::before{content:"Supplier: ";color:var(--muted);font-size:11px;font-weight:600}
-      .prod-table td:nth-child(2),.prod-table td:nth-child(4),.prod-table td:nth-child(5),.prod-table td:nth-child(6){display:inline-block;margin-right:14px;font-size:12.5px}
-      .prod-table td:nth-child(3){font-size:14px;margin:4px 0}
-      .prod-table td:nth-child(7){margin:6px 0}
-      .prod-table td:nth-child(8){padding-top:8px}
-      .prod-table td:nth-child(8) .btn-edit{width:100%;padding:9px 0;text-align:center}
+      .prod-table td:nth-child(2),.prod-table td:nth-child(4),.prod-table td:nth-child(5),.prod-table td:nth-child(6){display:inline-block !important;margin-right:12px;font-size:12px}
+      .prod-table td:nth-child(3){font-size:14px;margin:3px 0}
+      .prod-table td:nth-child(7){margin:4px 0}
+      .prod-table td:nth-child(8){padding-top:6px}
+      .prod-table td:nth-child(8) .btn-edit{flex:1;padding:8px 0;text-align:center}
+      .prod-more-btn{display:flex;width:34px;height:34px;flex-shrink:0;border-radius:50%;border:1px solid var(--border);background:var(--surface);align-items:center;justify-content:center;cursor:pointer}
+      .prod-more-btn svg{width:16px;height:16px}
 
       /* ===== PESANAN: tabel -> kartu ===== */
       .orders-table thead{display:none}
@@ -1011,22 +1024,32 @@
         <!-- TAB: ULASAN -->
         <!-- TAB: PERFORMA TOKO -->
         <div class="admin-section" id="tab-performance">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:10px">
-            <div id="perf-sub-tabs" style="display:flex;gap:2px;flex-wrap:wrap">
-              <button class="orders-tab active" data-perf="tinjauan" onclick="switchPerfTab('tinjauan',this)">Tinjauan</button>
-              <button class="orders-tab" data-perf="produk" onclick="switchPerfTab('produk',this)">Produk</button>
-              <button class="orders-tab" data-perf="penjualan" onclick="switchPerfTab('penjualan',this)">Penjualan</button>
-              <button class="orders-tab" data-perf="layanan" onclick="switchPerfTab('layanan',this)">Layanan</button>
-              <button class="orders-tab" data-perf="kunjungan" onclick="switchPerfTab('kunjungan',this)">Tingkat Kunjungan</button>
-              <button class="orders-tab" data-perf="promosi" onclick="switchPerfTab('promosi',this)">Promosi</button>
-              <button class="orders-tab" data-perf="panduan" onclick="switchPerfTab('panduan',this)">Panduan Penjualan</button>
-            </div>
-            <select id="perf-period" class="form-input" style="width:auto" onchange="loadPerfActiveTab()">
-              <option value="today">Hari Ini</option>
-              <option value="7d">7 Hari Terakhir</option>
-              <option value="30d">30 Hari Terakhir</option>
-            </select>
+          <div id="perf-sub-tabs" style="display:flex;gap:2px;flex-wrap:wrap;margin-bottom:10px">
+            <button class="orders-tab active" data-perf="tinjauan" onclick="switchPerfTab('tinjauan',this)">Tinjauan</button>
+            <button class="orders-tab" data-perf="produk" onclick="switchPerfTab('produk',this)">Produk</button>
+            <button class="orders-tab" data-perf="penjualan" onclick="switchPerfTab('penjualan',this)">Penjualan</button>
+            <button class="orders-tab" data-perf="layanan" onclick="switchPerfTab('layanan',this)">Layanan</button>
+            <button class="orders-tab" data-perf="kunjungan" onclick="switchPerfTab('kunjungan',this)">Tingkat Kunjungan</button>
+            <button class="orders-tab" data-perf="promosi" onclick="switchPerfTab('promosi',this)">Promosi</button>
+            <button class="orders-tab" data-perf="panduan" onclick="switchPerfTab('panduan',this)">Panduan Penjualan</button>
           </div>
+
+          <div id="perf-period-controls">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+              <div style="font-size:13px;color:var(--text)">Periode <span id="perf-clock" style="color:var(--muted)"></span></div>
+              <select id="perf-scope" class="form-input" style="width:auto" onchange="loadPerfActiveTab()">
+                <option value="dibuat">Pesanan Dibuat</option>
+                <option value="siap_kirim">Pesanan Siap Dikirim</option>
+              </select>
+            </div>
+            <div id="perf-period-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+              <button class="perf-period-btn active" data-period="today" onclick="setPerfPeriod('today')">Real-time</button>
+              <button class="perf-period-btn" data-period="yesterday" onclick="setPerfPeriod('yesterday')">Kemarin</button>
+              <button class="perf-period-btn" data-period="7d" onclick="setPerfPeriod('7d')">7 hari sebelumnya</button>
+              <button class="perf-period-btn" data-period="30d" onclick="setPerfPeriod('30d')">30 hari sebelumnya</button>
+            </div>
+          </div>
+          <input type="hidden" id="perf-period" value="today"/>
           <div style="font-size:12.5px;color:var(--muted);margin-bottom:16px">Data dihitung dari kunjungan &amp; pesanan tercatat di toko.</div>
 
           <!-- PANEL: TINJAUAN -->
@@ -1336,6 +1359,17 @@
   </div>
 </div>
 
+<!-- PRODUK: bottom sheet "Lainnya" (mobile, dari tombol titik-3) -->
+<div class="prod-sheet-overlay" id="prod-sheet-overlay" onclick="if(event.target===this) closeProductSheet()">
+  <div class="prod-sheet">
+    <div class="prod-sheet-head">
+      <h3>Lainnya</h3>
+      <button class="prod-sheet-close" onclick="closeProductSheet()">✕</button>
+    </div>
+    <div id="prod-sheet-body">Memuat...</div>
+  </div>
+</div>
+
 <!-- CATEGORY PICKER MODAL (dipakai di form produk) -->
 <div class="catpick-overlay" id="catpick-overlay">
   <div class="catpick-modal">
@@ -1534,9 +1568,19 @@ function switchTab(tab, el) {
 // ===================== PERFORMA TOKO =====================
 function perfRangeStart(period) {
   const now = new Date();
+  if (period === 'yesterday') { const d = new Date(now); d.setDate(d.getDate()-1); d.setHours(0,0,0,0); return d; }
   if (period === '7d') { const d = new Date(now); d.setDate(d.getDate()-6); d.setHours(0,0,0,0); return d; }
   if (period === '30d') { const d = new Date(now); d.setDate(d.getDate()-29); d.setHours(0,0,0,0); return d; }
-  const d = new Date(now); d.setHours(0,0,0,0); return d; // today
+  const d = new Date(now); d.setHours(0,0,0,0); return d; // today / realtime
+}
+// Batas akhir periode — cuma "Kemarin" yang punya batas atas (biar data hari ini nggak ikut kehitung); sisanya sampai sekarang
+function perfRangeEnd(period) {
+  if (period === 'yesterday') { const d = new Date(); d.setHours(0,0,0,0); return d; }
+  return null;
+}
+function perfRangeBounds(period) {
+  const end = perfRangeEnd(period);
+  return { start: perfRangeStart(period).toISOString(), end: (end || new Date('2099-01-01')).toISOString() };
 }
 // Rentang periode sebelumnya (durasi sama, persis sebelum periode saat ini) — buat hitung % perbandingan
 function perfPrevRange(period) {
@@ -1562,9 +1606,22 @@ function switchPerfTab(tab, el) {
   document.querySelectorAll('#perf-sub-tabs .orders-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   PERF_TAB_TITLES_ID.forEach(t => { const p = document.getElementById(`perf-panel-${t}`); if (p) p.style.display = (t===tab?'':'none'); });
-  document.getElementById('perf-period').style.display = (tab === 'promosi' || tab === 'panduan') ? 'none' : '';
+  document.getElementById('perf-period-controls').style.display = (tab === 'promosi' || tab === 'panduan') ? 'none' : '';
   loadPerfTabData(tab);
 }
+function setPerfPeriod(period) {
+  document.getElementById('perf-period').value = period;
+  document.querySelectorAll('.perf-period-btn').forEach(b => b.classList.toggle('active', b.dataset.period === period));
+  loadPerfActiveTab();
+}
+function updatePerfClock() {
+  const el = document.getElementById('perf-clock');
+  if (!el) return;
+  const wib = new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' });
+  el.textContent = `${wib} (GMT+7)`;
+}
+setInterval(updatePerfClock, 30000);
+updatePerfClock();
 function loadPerfActiveTab() {
   const active = document.querySelector('#perf-sub-tabs .orders-tab.active');
   loadPerfTabData(active ? active.dataset.perf : 'tinjauan');
@@ -1581,14 +1638,19 @@ function loadPerfTabData(tab) {
 
 async function loadPerformanceDashboard() {
   const period = document.getElementById('perf-period')?.value || 'today';
-  const start = perfRangeStart(period).toISOString();
+  const scope = document.getElementById('perf-scope')?.value || 'dibuat';
+  const { start, end } = perfRangeBounds(period);
   const { prevStart, prevEnd } = perfPrevRange(period);
 
+  let ordersQ = sb.from('orders').select('total, created_at, status').gte('created_at', start).lt('created_at', end);
+  let prevOrdersQ = sb.from('orders').select('total, created_at, status').gte('created_at', prevStart.toISOString()).lt('created_at', prevEnd.toISOString());
+  if (scope === 'siap_kirim') { ordersQ = ordersQ.eq('status', 'diproses'); prevOrdersQ = prevOrdersQ.eq('status', 'diproses'); }
+
   const [ordersRes, storeEventsRes, productEventsRes, prevOrdersRes, prevStoreEventsRes] = await Promise.all([
-    sb.from('orders').select('total, created_at').gte('created_at', start),
-    sb.from('analytics_events').select('session_id, created_at').eq('event_type', 'view_store').gte('created_at', start),
-    sb.from('analytics_events').select('product_id').eq('event_type', 'view_product').gte('created_at', start),
-    sb.from('orders').select('total, created_at').gte('created_at', prevStart.toISOString()).lt('created_at', prevEnd.toISOString()),
+    ordersQ,
+    sb.from('analytics_events').select('session_id, created_at').eq('event_type', 'view_store').gte('created_at', start).lt('created_at', end),
+    sb.from('analytics_events').select('product_id').eq('event_type', 'view_product').gte('created_at', start).lt('created_at', end),
+    prevOrdersQ,
     sb.from('analytics_events').select('session_id, created_at').eq('event_type', 'view_store').gte('created_at', prevStart.toISOString()).lt('created_at', prevEnd.toISOString()),
   ]);
 
@@ -1648,13 +1710,13 @@ async function loadPerformanceDashboard() {
 // ===================== TAB: PRODUK =====================
 async function loadPerfProduk() {
   const period = document.getElementById('perf-period')?.value || 'today';
-  const start = perfRangeStart(period).toISOString();
+  const { start, end } = perfRangeBounds(period);
   const el = document.getElementById('perf-produk-render');
   el.innerHTML = 'Memuat...';
 
   const [ordersRes, viewsRes] = await Promise.all([
-    sb.from('orders').select('items, created_at').gte('created_at', start),
-    sb.from('analytics_events').select('product_id').eq('event_type', 'view_product').gte('created_at', start),
+    sb.from('orders').select('items, created_at').gte('created_at', start).lt('created_at', end),
+    sb.from('analytics_events').select('product_id').eq('event_type', 'view_product').gte('created_at', start).lt('created_at', end),
   ]);
   const orders = ordersRes.data || [];
   const views = viewsRes.data || [];
@@ -1700,18 +1762,18 @@ async function loadPerfProduk() {
 // ===================== TAB: PENJUALAN =====================
 async function loadPerfPenjualan() {
   const period = document.getElementById('perf-period')?.value || 'today';
-  const start = perfRangeStart(period).toISOString();
+  const { start, end } = perfRangeBounds(period);
   const chartEl = document.getElementById('perf-penjualan-chart');
   const statusEl = document.getElementById('perf-penjualan-status');
   chartEl.innerHTML = 'Memuat...'; statusEl.innerHTML = 'Memuat...';
 
-  const { data, error } = await sb.from('orders').select('total, status, created_at').gte('created_at', start);
+  const { data, error } = await sb.from('orders').select('total, status, created_at').gte('created_at', start).lt('created_at', end);
   if (error) { chartEl.innerHTML = `<p style="color:#c0392b;font-size:13px">${error.message}</p>`; statusEl.innerHTML=''; return; }
   const orders = data || [];
 
-  // Grafik penjualan per hari (atau per jam kalau period=today)
+  // Grafik penjualan per hari (atau per jam kalau period=today/yesterday, cuma 1 hari)
   const buckets = {}; let labels = [];
-  if (period === 'today') {
+  if (period === 'today' || period === 'yesterday') {
     for (let h=0; h<24; h++) buckets[h]=0;
     orders.forEach(o => { const h = new Date(o.created_at).getHours(); buckets[h] += (o.total||0); });
     labels = Object.keys(buckets).map(Number).sort((a,b)=>a-b);
@@ -1738,8 +1800,8 @@ async function loadPerfPenjualan() {
 // ===================== TAB: LAYANAN =====================
 async function loadPerfLayanan() {
   const period = document.getElementById('perf-period')?.value || 'today';
-  const start = perfRangeStart(period).toISOString();
-  const { data, error } = await sb.from('orders').select('status, created_at').gte('created_at', start);
+  const { start, end } = perfRangeBounds(period);
+  const { data, error } = await sb.from('orders').select('status, created_at').gte('created_at', start).lt('created_at', end);
   if (error) return;
   const orders = data || [];
   const total = orders.length;
@@ -1759,10 +1821,10 @@ async function loadPerfLayanan() {
 // ===================== TAB: TINGKAT KUNJUNGAN =====================
 async function loadPerfKunjungan() {
   const period = document.getElementById('perf-period')?.value || 'today';
-  const start = perfRangeStart(period).toISOString();
+  const { start, end } = perfRangeBounds(period);
   const [storeRes, productRes] = await Promise.all([
-    sb.from('analytics_events').select('session_id, created_at').eq('event_type','view_store').gte('created_at', start),
-    sb.from('analytics_events').select('created_at').eq('event_type','view_product').gte('created_at', start),
+    sb.from('analytics_events').select('session_id, created_at').eq('event_type','view_store').gte('created_at', start).lt('created_at', end),
+    sb.from('analytics_events').select('created_at').eq('event_type','view_product').gte('created_at', start).lt('created_at', end),
   ]);
   const storeEvents = storeRes.data || [];
   const productEvents = productRes.data || [];
@@ -1771,7 +1833,7 @@ async function loadPerfKunjungan() {
   document.getElementById('perf-kv-productviews').textContent = productEvents.length.toLocaleString('id-ID');
 
   const buckets = {}; let labels = [];
-  if (period === 'today') {
+  if (period === 'today' || period === 'yesterday') {
     for (let h=0;h<24;h++) buckets[h]=0;
     storeEvents.forEach(e => { const h=new Date(e.created_at).getHours(); buckets[h]++; });
     labels = Object.keys(buckets).map(Number).sort((a,b)=>a-b);
@@ -1825,7 +1887,7 @@ function renderSvgLineChart(values, labels, period, valueFormatter) {
   const labelEls = labels.map((l, i) => {
     if (i % labelEvery !== 0 && i !== labels.length-1) return '';
     const x = pad + i * stepX;
-    const text = period === 'today' ? `${l}:00` : String(l).slice(5);
+    const text = (period === 'today' || period === 'yesterday') ? `${l}:00` : String(l).slice(5);
     return `<text x="${x}" y="${h-4}" font-size="9" fill="var(--muted)" text-anchor="middle">${text}</text>`;
   }).join('');
   return `
@@ -1838,7 +1900,7 @@ function renderSvgLineChart(values, labels, period, valueFormatter) {
 function renderPerfChart(storeEvents, period) {
   const el = document.getElementById('perf-chart');
   const buckets = {}; let labels = [];
-  if (period === 'today') {
+  if (period === 'today' || period === 'yesterday') {
     for (let h = 0; h < 24; h++) buckets[h] = 0;
     storeEvents.forEach(e => { const h = new Date(e.created_at).getHours(); buckets[h] = (buckets[h]||0)+1; });
     labels = Object.keys(buckets).map(Number).sort((a,b)=>a-b);
