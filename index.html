@@ -1392,7 +1392,12 @@
           </div>
 
           <div class="admin-card" style="margin-top:16px">
-            <h3 class="admin-card-title">Daftar Promosi</h3>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+              <h3 class="admin-card-title" style="margin:0">Daftar Promosi</h3>
+              <div id="promo-manage-toolbar" style="display:flex;gap:8px">
+                <button id="promo-manage-toggle" onclick="togglePromoManage()" style="padding:6px 12px;font-size:12px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer">Kelola</button>
+              </div>
+            </div>
             <div id="promo-list-render"><p style="font-size:13px;color:var(--muted)">Memuat...</p></div>
           </div>
         </div>
@@ -2873,7 +2878,7 @@ async function applyProductDiscount() {
       }
       const { error: promoErr } = await sb.from('promotions').insert({
         type: 'discount',
-        name: `${name} - ${item.name}`,
+        name: name,
         product_id: pid,
         value: netPrice,
         start_date: startIso,
@@ -2953,6 +2958,59 @@ function computePromoPerf(promo, orders) {
   return { revenue, orders: orderIds.size, unitsSold };
 }
 
+// ===================== KELOLA PROMOSI (bulk select) =====================
+let promoManageMode = false;
+let promoSelectedRows = new Set();
+
+function togglePromoManage() {
+  promoManageMode = !promoManageMode;
+  promoSelectedRows.clear();
+  renderPromoManageToolbar();
+  loadPromotions();
+}
+
+function togglePromoRowSelect(id, checked) {
+  if (checked) promoSelectedRows.add(id); else promoSelectedRows.delete(id);
+  renderPromoManageToolbar();
+}
+
+function renderPromoManageToolbar() {
+  const el = document.getElementById('promo-manage-toolbar');
+  const n = promoSelectedRows.size;
+  const toggleBtn = `<button id="promo-manage-toggle" onclick="togglePromoManage()" style="padding:6px 12px;font-size:12px;background:${promoManageMode ? 'var(--ink)' : '#fff'};color:${promoManageMode ? '#fff' : 'var(--ink)'};border:1px solid var(--border);border-radius:6px;cursor:pointer">${promoManageMode ? 'Selesai' : 'Kelola'}</button>`;
+  if (!promoManageMode || n === 0) {
+    el.innerHTML = toggleBtn;
+    return;
+  }
+  el.innerHTML = `${toggleBtn}
+    <button onclick="bulkEndPromotions()" style="padding:6px 12px;font-size:12px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer">Akhiri (${n})</button>
+    <button onclick="bulkDeletePromotions()" style="padding:6px 12px;font-size:12px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:6px;cursor:pointer">Hapus (${n})</button>`;
+}
+
+async function bulkDeletePromotions() {
+  if (!promoSelectedRows.size) return;
+  await sb.from('promotions').delete().in('id', Array.from(promoSelectedRows));
+  showToast(`${promoSelectedRows.size} promosi dihapus`);
+  promoSelectedRows.clear();
+  renderPromoManageToolbar();
+  loadPromotions();
+}
+
+async function bulkEndPromotions() {
+  if (!promoSelectedRows.size) return;
+  await sb.from('promotions').update({ end_date: new Date().toISOString(), status: 'berakhir' }).in('id', Array.from(promoSelectedRows));
+  showToast(`${promoSelectedRows.size} promosi diakhiri`);
+  promoSelectedRows.clear();
+  renderPromoManageToolbar();
+  loadPromotions();
+}
+
+async function deletePromotion(id) {
+  await sb.from('promotions').delete().eq('id', id);
+  showToast('Promosi dihapus');
+  loadPromotions();
+}
+
 async function loadPromotions() {
   const el = document.getElementById('promo-list-render');
   if (!el) return;
@@ -3010,6 +3068,7 @@ async function loadPromotions() {
   // Performa all-time (bukan cuma 7 hari) buat tiap baris, biar bisa liat histori lengkap
   el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">
     <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+      ${promoManageMode ? '<th style="padding:8px 6px"></th>' : ''}
       <th style="padding:8px 6px"></th>
       <th style="padding:8px 6px">Nama</th>
       <th style="padding:8px 6px">Tipe</th>
@@ -3024,11 +3083,12 @@ async function loadPromotions() {
       const perf = computePromoPerf(p, orders);
       const start = new Date(p.start_date).toLocaleDateString('id-ID',{day:'numeric',month:'short'});
       const end = p.end_date ? new Date(p.end_date).toLocaleDateString('id-ID',{day:'numeric',month:'short'}) : '–';
-      const isActive = !p.end_date || new Date(p.end_date) > new Date();
       const img = p.products?.image_url
         ? `<img src="${p.products.image_url}" style="width:36px;height:36px;object-fit:cover;border-radius:6px">`
         : `<div style="width:36px;height:36px;border-radius:6px;background:#f0ede8"></div>`;
+      const checked = promoSelectedRows.has(p.id) ? 'checked' : '';
       return `<tr style="border-bottom:1px solid var(--border)">
+        ${promoManageMode ? `<td style="padding:8px 6px"><input type="checkbox" ${checked} onclick="togglePromoRowSelect('${p.id}', this.checked)" style="width:15px;height:15px"></td>` : ''}
         <td style="padding:8px 6px">${img}</td>
         <td style="padding:8px 6px;font-weight:500">${p.name}</td>
         <td style="padding:8px 6px">${p.type === 'discount' ? 'Diskon %' : 'Flash Sale'}</td>
@@ -3038,7 +3098,7 @@ async function loadPromotions() {
         <td style="padding:8px 6px">${perf.orders}</td>
         <td style="padding:8px 6px">${perf.unitsSold}</td>
         <td style="padding:8px 6px">
-          ${isActive ? `<button onclick="endPromotion('${p.id}')" style="padding:5px 10px;font-size:11px;background:#fff;border:1px solid var(--border);border-radius:5px;cursor:pointer">Akhiri</button>` : `<span style="color:var(--muted)">Berakhir</span>`}
+          <button onclick="deletePromotion('${p.id}')" style="padding:5px 10px;font-size:11px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Hapus</button>
         </td>
       </tr>`;
     }).join('')}</tbody>
