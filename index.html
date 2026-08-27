@@ -2974,6 +2974,15 @@ function togglePromoRowSelect(id, checked) {
   renderPromoManageToolbar();
 }
 
+function togglePromoSelectAll(checked) {
+  document.querySelectorAll('#promo-list-render tbody input[type=checkbox]').forEach(cb => {
+    cb.checked = checked;
+    const id = cb.getAttribute('data-promo-id');
+    if (checked) promoSelectedRows.add(id); else promoSelectedRows.delete(id);
+  });
+  renderPromoManageToolbar();
+}
+
 function renderPromoManageToolbar() {
   const el = document.getElementById('promo-manage-toolbar');
   const n = promoSelectedRows.size;
@@ -3068,7 +3077,7 @@ async function loadPromotions() {
   // Performa all-time (bukan cuma 7 hari) buat tiap baris, biar bisa liat histori lengkap
   el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">
     <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
-      ${promoManageMode ? '<th style="padding:8px 6px"></th>' : ''}
+      ${promoManageMode ? `<th style="padding:8px 6px"><input type="checkbox" id="promo-select-all" onclick="togglePromoSelectAll(this.checked)" style="width:15px;height:15px"></th>` : ''}
       <th style="padding:8px 6px"></th>
       <th style="padding:8px 6px">Nama</th>
       <th style="padding:8px 6px">Tipe</th>
@@ -3088,7 +3097,7 @@ async function loadPromotions() {
         : `<div style="width:36px;height:36px;border-radius:6px;background:#f0ede8"></div>`;
       const checked = promoSelectedRows.has(p.id) ? 'checked' : '';
       return `<tr style="border-bottom:1px solid var(--border)">
-        ${promoManageMode ? `<td style="padding:8px 6px"><input type="checkbox" ${checked} onclick="togglePromoRowSelect('${p.id}', this.checked)" style="width:15px;height:15px"></td>` : ''}
+        ${promoManageMode ? `<td style="padding:8px 6px"><input type="checkbox" data-promo-id="${p.id}" ${checked} onclick="togglePromoRowSelect('${p.id}', this.checked)" style="width:15px;height:15px"></td>` : ''}
         <td style="padding:8px 6px">${img}</td>
         <td style="padding:8px 6px;font-weight:500">${p.name}</td>
         <td style="padding:8px 6px">${p.type === 'discount' ? 'Diskon %' : 'Flash Sale'}</td>
