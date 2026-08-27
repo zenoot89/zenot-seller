@@ -1397,24 +1397,56 @@
           </div>
         </div>
 
-        <!-- MODAL: Diskon Produk -->
+        <!-- MODAL: Diskon Produk (harga net, ala Shopee Promo Toko) -->
         <div class="modal-overlay" id="promo-modal-discount">
-          <div class="modal">
+          <div class="modal" style="max-width:640px">
             <h3 class="admin-card-title">Diskon Produk</h3>
-            <p style="font-size:13px;color:var(--sec);margin-bottom:16px">Terapkan diskon % ke satu atau beberapa produk sekaligus. Harga diskon otomatis dihitung dan ditampilkan di katalog.</p>
-            <div class="form-row" style="margin-bottom:12px">
-              <div class="form-group">
-                <label class="form-label">Pilih Produk</label>
-                <select class="form-input" id="promo-product-id"><option value="">-- Semua Produk --</option></select>
+            <p style="font-size:13px;color:var(--sec);margin-bottom:16px">Set harga promo langsung (bukan persen). Persentase diskon dihitung & ditampilkan otomatis ke pembeli dari harga normal vs harga promo.</p>
+
+            <div style="margin-bottom:16px">
+              <div class="form-group" style="margin-bottom:10px">
+                <label class="form-label">Nama Promo (internal, tidak tampil ke pembeli)</label>
+                <input class="form-input" id="promo-name" placeholder="cth: Promo Akhir Bulan"/>
               </div>
-              <div class="form-group">
-                <label class="form-label">Diskon (%)</label>
-                <input class="form-input" id="promo-discount" type="number" min="1" max="99" placeholder="cth: 20"/>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Mulai</label>
+                  <input class="form-input" id="promo-period-start" type="datetime-local"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Berakhir</label>
+                  <input class="form-input" id="promo-period-end" type="datetime-local"/>
+                </div>
               </div>
             </div>
+
+            <div style="margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <label class="form-label" style="margin:0">Produk dalam Promo</label>
+                <button onclick="openProductPickerModal()" style="padding:7px 14px;font-size:12px;background:#fff;border:1px solid var(--ink);border-radius:7px;cursor:pointer;font-weight:500">+ Tambah Produk</button>
+              </div>
+              <div id="promo-selected-products"><p style="font-size:12.5px;color:var(--muted)">Belum ada produk dipilih.</p></div>
+            </div>
+
             <div style="display:flex;gap:8px">
               <button class="btn-primary" onclick="applyProductDiscount()">Terapkan Diskon</button>
               <button onclick="closePromoModal('discount')" style="padding:11px 20px;font-size:13px;background:#fff;border:1px solid var(--border);border-radius:8px;cursor:pointer">Batal</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODAL bersarang: Pilih Produk buat Diskon -->
+        <div class="modal-overlay" id="promo-pick-product-modal">
+          <div class="modal" style="max-width:600px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+              <h3 class="admin-card-title" style="margin:0">Pilih Produk</h3>
+              <span onclick="closeProductPickerModal()" style="cursor:pointer;font-size:20px;line-height:1;color:var(--muted)">&times;</span>
+            </div>
+            <input class="form-input" id="promo-pick-search" placeholder="Cari nama produk..." style="margin-bottom:12px" oninput="renderProductPickerList()"/>
+            <div id="promo-pick-list" style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:8px"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
+              <button onclick="closeProductPickerModal()" style="padding:10px 18px;font-size:13px;background:#fff;border:1px solid var(--border);border-radius:8px;cursor:pointer">Batal</button>
+              <button class="btn-primary" onclick="confirmProductPicker()">Konfirmasi</button>
             </div>
           </div>
         </div>
@@ -1812,11 +1844,9 @@ function switchTab(tab, el) {
   if (tab === 'performance') loadPerfActiveTab();
   if (tab === 'promotions') {
     loadCategories();
-    ['promo-product-id','flash-product-id'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = `<option value="">-- ${id.includes('flash')?'Pilih':'Semua'} Produk --</option>` +
-        adminProductsData.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
-    });
+    const el = document.getElementById('flash-product-id');
+    if (el) el.innerHTML = `<option value="">-- Pilih Produk --</option>` +
+      adminProductsData.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   }
 }
 // ===================== PERFORMA TOKO =====================
@@ -2483,14 +2513,12 @@ async function loadCategories() {
   allCategories = data || [];
   populateCategoryFilter();
   populateGenderOptions();
-  // Update dropdown di promosi
-  ['promo-product-id','flash-product-id'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el && adminProductsData.length) {
-      el.innerHTML = `<option value="">-- ${id.includes('flash') ? 'Pilih' : 'Semua'} Produk --</option>` +
-        adminProductsData.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-    }
-  });
+  // Update dropdown di promosi (flash sale masih pakai dropdown single-produk)
+  const flashEl = document.getElementById('flash-product-id');
+  if (flashEl && adminProductsData.length) {
+    flashEl.innerHTML = `<option value="">-- Pilih Produk --</option>` +
+      adminProductsData.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  }
 }
 
 function populateCategoryFilter() {
@@ -2696,51 +2724,156 @@ async function deleteSupplier(id, name) {
 }
 
 // ===================== PROMOTIONS =====================
+let promoSelectedProducts = {}; // productId -> { name, hargaNormal, netPrice }
+
 function openPromoModal(type) {
+  if (type === 'discount') {
+    promoSelectedProducts = {};
+    document.getElementById('promo-name').value = '';
+    document.getElementById('promo-period-start').value = '';
+    document.getElementById('promo-period-end').value = '';
+    renderPromoSelectedProducts();
+  }
   document.getElementById(`promo-modal-${type}`).classList.add('open');
 }
 function closePromoModal(type) {
   document.getElementById(`promo-modal-${type}`).classList.remove('open');
 }
 
-async function applyProductDiscount() {
-  const productId = document.getElementById('promo-product-id').value;
-  const disc = parseInt(document.getElementById('promo-discount').value);
-  if (!disc || disc < 1 || disc > 99) { showToast('Isi persen diskon (1-99)'); return; }
+// harga normal representatif produk = harga asli (original_price kalau lagi promo, kalau nggak ya price) terendah antar varian
+function productBasePrice(p) {
+  const vars = p.variants || [];
+  if (!vars.length) return 0;
+  return Math.min(...vars.map(v => v.original_price || v.price || 0));
+}
 
-  let variants;
-  if (productId) {
-    const { data } = await sb.from('variants').select('id,price').eq('product_id', productId);
-    variants = data;
-  } else {
-    const { data } = await sb.from('variants').select('id,price');
-    variants = data;
-  }
-  if (!variants || !variants.length) { showToast('Tidak ada varian ditemukan'); return; }
+function openProductPickerModal() {
+  document.getElementById('promo-pick-search').value = '';
+  renderProductPickerList();
+  document.getElementById('promo-pick-product-modal').classList.add('open');
+}
+function closeProductPickerModal() {
+  document.getElementById('promo-pick-product-modal').classList.remove('open');
+}
 
-  for (const v of variants) {
-    const newPrice = Math.round(v.price * (1 - disc/100));
-    const origPrice = v.price;
-    await sb.from('variants').update({price: newPrice, original_price: origPrice}).eq('id', v.id);
-  }
+function renderProductPickerList() {
+  const q = (document.getElementById('promo-pick-search').value || '').toLowerCase();
+  const el = document.getElementById('promo-pick-list');
+  const list = adminProductsData.filter(p => p.name.toLowerCase().includes(q));
+  if (!list.length) { el.innerHTML = `<p style="padding:14px;font-size:12.5px;color:var(--muted)">Produk tidak ditemukan.</p>`; return; }
 
-  const productSelect = document.getElementById('promo-product-id');
-  const productName = productId ? (productSelect.selectedOptions[0]?.textContent || 'Produk') : 'Semua Produk';
-  const { error: promoErr } = await sb.from('promotions').insert({
-    type: 'discount',
-    name: `Diskon ${disc}% - ${productName}`,
-    product_id: productId || null,
-    value: disc,
-    start_date: new Date().toISOString(),
-    end_date: null,
-    status: 'aktif'
+  el.innerHTML = list.map(p => {
+    const checked = promoSelectedProducts[p.id] ? 'checked' : '';
+    const base = productBasePrice(p);
+    return `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px">
+      <input type="checkbox" data-pid="${p.id}" data-pname="${p.name.replace(/"/g,'&quot;')}" data-base="${base}" ${checked}>
+      <span style="flex:1">${p.name}</span>
+      <span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px">Rp ${base.toLocaleString('id-ID')}</span>
+    </label>`;
+  }).join('');
+}
+
+function confirmProductPicker() {
+  document.querySelectorAll('#promo-pick-list input[type=checkbox]').forEach(cb => {
+    const pid = cb.dataset.pid;
+    if (cb.checked && !promoSelectedProducts[pid]) {
+      promoSelectedProducts[pid] = { name: cb.dataset.pname, hargaNormal: parseInt(cb.dataset.base) || 0, netPrice: '' };
+    } else if (!cb.checked && promoSelectedProducts[pid]) {
+      delete promoSelectedProducts[pid];
+    }
   });
-  if (promoErr) console.warn('Gagal catat tracking promosi (tabel promotions belum ada?):', promoErr.message);
+  closeProductPickerModal();
+  renderPromoSelectedProducts();
+}
 
-  showToast(`Diskon ${disc}% berhasil diterapkan ✓`);
+function removePromoProduct(pid) {
+  delete promoSelectedProducts[pid];
+  renderPromoSelectedProducts();
+}
+
+function updatePromoNetPrice(pid, val) {
+  if (promoSelectedProducts[pid]) promoSelectedProducts[pid].netPrice = val;
+  renderPromoPercentPreview(pid);
+}
+
+function renderPromoPercentPreview(pid) {
+  const item = promoSelectedProducts[pid];
+  const el = document.getElementById(`promo-pct-${pid}`);
+  if (!item || !el) return;
+  const net = parseInt(item.netPrice);
+  if (!net || !item.hargaNormal) { el.textContent = ''; return; }
+  const pct = Math.round((1 - net / item.hargaNormal) * 100);
+  el.textContent = pct > 0 ? `-${pct}%` : (pct < 0 ? `+${Math.abs(pct)}%` : '0%');
+  el.style.color = pct > 0 ? '#1e7a4c' : (pct < 0 ? '#a83232' : 'var(--muted)');
+}
+
+function renderPromoSelectedProducts() {
+  const el = document.getElementById('promo-selected-products');
+  const ids = Object.keys(promoSelectedProducts);
+  if (!ids.length) { el.innerHTML = `<p style="font-size:12.5px;color:var(--muted)">Belum ada produk dipilih.</p>`; return; }
+
+  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">
+    <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+      <th style="padding:6px">Produk</th>
+      <th style="padding:6px">Harga Normal</th>
+      <th style="padding:6px">Harga Promo</th>
+      <th style="padding:6px">Diskon</th>
+      <th style="padding:6px"></th>
+    </tr></thead>
+    <tbody>${ids.map(pid => {
+      const item = promoSelectedProducts[pid];
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:6px;max-width:160px">${item.name}</td>
+        <td style="padding:6px;color:var(--muted)">Rp ${item.hargaNormal.toLocaleString('id-ID')}</td>
+        <td style="padding:6px"><input type="number" value="${item.netPrice}" placeholder="cth: 90000" oninput="updatePromoNetPrice('${pid}', this.value)" style="width:100px;padding:5px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px"></td>
+        <td style="padding:6px;font-weight:600" id="promo-pct-${pid}"></td>
+        <td style="padding:6px"><span onclick="removePromoProduct('${pid}')" style="cursor:pointer;color:var(--muted)">&times;</span></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+
+  ids.forEach(pid => renderPromoPercentPreview(pid));
+}
+
+async function applyProductDiscount() {
+  const name = document.getElementById('promo-name').value.trim() || 'Diskon Produk';
+  const startVal = document.getElementById('promo-period-start').value;
+  const endVal = document.getElementById('promo-period-end').value;
+  const ids = Object.keys(promoSelectedProducts);
+
+  if (!ids.length) { showToast('Pilih minimal 1 produk'); return; }
+  const invalid = ids.find(pid => !parseInt(promoSelectedProducts[pid].netPrice));
+  if (invalid) { showToast('Isi harga promo buat semua produk yang dipilih'); return; }
+
+  const startIso = startVal ? new Date(startVal).toISOString() : new Date().toISOString();
+  const endIso = endVal ? new Date(endVal).toISOString() : null;
+
+  for (const pid of ids) {
+    const item = promoSelectedProducts[pid];
+    const netPrice = parseInt(item.netPrice);
+    const { data: vars } = await sb.from('variants').select('id,price,original_price').eq('product_id', pid);
+    if (!vars || !vars.length) continue;
+    for (const v of vars) {
+      const origPrice = v.original_price || v.price;
+      await sb.from('variants').update({ price: netPrice, original_price: origPrice }).eq('id', v.id);
+    }
+    const { error: promoErr } = await sb.from('promotions').insert({
+      type: 'discount',
+      name: `${name} - ${item.name}`,
+      product_id: pid,
+      value: netPrice,
+      start_date: startIso,
+      end_date: endIso,
+      status: 'aktif'
+    });
+    if (promoErr) console.warn('Gagal catat tracking promosi (tabel promotions belum ada?):', promoErr.message);
+  }
+
+  showToast(`Diskon berhasil diterapkan ke ${ids.length} produk ✓`);
   closePromoModal('discount');
   loadPromotions();
 }
+
 
 async function saveFlashSale() {
   const productId = document.getElementById('flash-product-id').value;
