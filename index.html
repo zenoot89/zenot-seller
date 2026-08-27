@@ -442,8 +442,8 @@
       .admin-bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;color:var(--muted);font-family:'Inter',sans-serif;font-size:10.5px}
       .admin-bn-item svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}
       .admin-bn-item.active{color:var(--accent);font-weight:600}
-      .home-stat-grid{grid-template-columns:repeat(2,1fr)}
-      .home-quick-actions{grid-template-columns:repeat(3,1fr)}
+      .home-stat-grid{grid-template-columns:repeat(2,1fr) !important}
+      .home-quick-actions{grid-template-columns:repeat(3,1fr) !important}
 
       /* ===== PRODUK: tabel -> kartu ===== */
       .admin-list-header{flex-wrap:wrap;gap:10px}
@@ -690,7 +690,6 @@
                 <div id="home-ctr-count" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">–</div>
               </div>
             </div>
-            <p style="font-size:11.5px;color:var(--muted);margin:12px 0 0">Ini data keseluruhan toko. Buat lihat data per produk, cek <a href="javascript:void(0)" onclick="switchTab('performance', document.querySelector('.admin-nav-item[data-tab=performance]'))" style="color:var(--ink);text-decoration:underline">Performa Toko</a>.</p>
           </div>
 
           <div class="admin-card">
@@ -1579,10 +1578,8 @@ function showDashboard() {
   loadAdminVouchers();
   loadAdminReviews();
 
-  // Mobile buka Beranda dulu (kayak app Shopee); desktop tetap landing di Produk seperti biasa
-  if (window.innerWidth <= 860) {
-    switchTab('home', document.querySelector('.admin-nav-item[data-tab=home]'));
-  }
+  // Landing default: Beranda, baik di mobile maupun desktop
+  switchTab('home', document.querySelector('.admin-nav-item[data-tab=home]'));
 }
 
 function visitStore() {
