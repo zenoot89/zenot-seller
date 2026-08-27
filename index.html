@@ -517,7 +517,7 @@
     .home-stat-num{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--text)}
     .home-stat-label{font-size:11.5px;color:var(--muted)}
     .home-stat-note{font-size:9.5px;color:var(--muted)}
-    .home-quick-actions{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+    .home-quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 10px}
     .home-qa-item{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;color:var(--text)}
     .home-qa-icon{width:42px;height:42px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
     .home-qa-icon svg{width:19px;height:19px;stroke:var(--accent)}
@@ -674,24 +674,46 @@
 
         <!-- TAB: BERANDA -->
         <div class="admin-section active" id="tab-home">
-          <div class="home-stat-grid">
-            <button class="home-stat-card" onclick="switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
-              <span class="home-stat-num" id="home-stat-shipping">–</span>
-              <span class="home-stat-label">Perlu Dikirim</span>
-            </button>
-            <button class="home-stat-card" onclick="switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
-              <span class="home-stat-num" id="home-stat-cancel">–</span>
-              <span class="home-stat-label">Pembatalan</span>
-            </button>
-            <div class="home-stat-card disabled">
-              <span class="home-stat-num">–</span>
-              <span class="home-stat-label">Pengembalian</span>
-              <span class="home-stat-note">Segera hadir</span>
+          <div class="admin-card">
+            <h3 class="admin-card-title">Pengunjung</h3>
+            <div id="home-visit-summary" style="display:flex;gap:24px">
+              <div>
+                <div style="font-size:11.5px;color:var(--muted)">Pengunjung</div>
+                <div id="home-visitor-count" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">–</div>
+              </div>
+              <div>
+                <div style="font-size:11.5px;color:var(--muted)">Produk Dilihat</div>
+                <div id="home-productview-count" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">–</div>
+              </div>
+              <div>
+                <div style="font-size:11.5px;color:var(--muted)">CTR Toko</div>
+                <div id="home-ctr-count" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">–</div>
+              </div>
             </div>
-            <button class="home-stat-card" onclick="switchTab('reviews', document.querySelector('.admin-nav-item[data-tab=reviews]'))">
-              <span class="home-stat-num" id="home-stat-reviews">–</span>
-              <span class="home-stat-label">Ulasan</span>
-            </button>
+            <p style="font-size:11.5px;color:var(--muted);margin:12px 0 0">Ini data keseluruhan toko. Buat lihat data per produk, cek <a href="javascript:void(0)" onclick="switchTab('performance', document.querySelector('.admin-nav-item[data-tab=performance]'))" style="color:var(--ink);text-decoration:underline">Performa Toko</a>.</p>
+          </div>
+
+          <div class="admin-card">
+            <h3 class="admin-card-title">Pesanan</h3>
+            <div class="home-stat-grid" style="margin:0">
+              <button class="home-stat-card" onclick="switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
+                <span class="home-stat-num" id="home-stat-shipping">–</span>
+                <span class="home-stat-label">Perlu Dikirim</span>
+              </button>
+              <button class="home-stat-card" onclick="switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
+                <span class="home-stat-num" id="home-stat-cancel">–</span>
+                <span class="home-stat-label">Pembatalan</span>
+              </button>
+              <div class="home-stat-card disabled">
+                <span class="home-stat-num">–</span>
+                <span class="home-stat-label">Pengembalian</span>
+                <span class="home-stat-note">Segera hadir</span>
+              </div>
+              <button class="home-stat-card" onclick="switchTab('reviews', document.querySelector('.admin-nav-item[data-tab=reviews]'))">
+                <span class="home-stat-num" id="home-stat-reviews">–</span>
+                <span class="home-stat-label">Ulasan</span>
+              </button>
+            </div>
           </div>
 
           <div class="admin-card">
@@ -722,22 +744,6 @@
                 Bagikan Toko
               </button>
             </div>
-          </div>
-
-          <div class="admin-card">
-            <h3 class="admin-card-title">Ringkasan Hari Ini</h3>
-            <div id="home-visit-summary" style="display:flex;gap:20px;margin-bottom:14px">
-              <div>
-                <div style="font-size:11.5px;color:var(--muted)">Pengunjung</div>
-                <div id="home-visitor-count" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">–</div>
-              </div>
-              <div>
-                <div style="font-size:11.5px;color:var(--muted)">Produk Dilihat</div>
-                <div id="home-productview-count" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">–</div>
-              </div>
-            </div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Produk Terpopuler</div>
-            <div id="home-top-products"></div>
           </div>
         </div>
 
@@ -2120,7 +2126,7 @@ async function loadHomeStats() {
 async function loadHomeVisitSummary() {
   const elVisitor = document.getElementById('home-visitor-count');
   const elPV = document.getElementById('home-productview-count');
-  const elTop = document.getElementById('home-top-products');
+  const elCTR = document.getElementById('home-ctr-count');
   if (!elVisitor) return;
 
   const start = new Date(); start.setHours(0,0,0,0);
@@ -2135,25 +2141,13 @@ async function loadHomeVisitSummary() {
   const prodEvents = prodRes.data || [];
   const uniqueVisitors = new Set(storeEvents.map(e => e.session_id)).size;
 
+  // CTR toko (global, keseluruhan) = total produk dilihat / total pengunjung toko.
+  // Detail per produk ada di halaman Performa Toko, bukan di sini.
+  const ctr = uniqueVisitors > 0 ? (prodEvents.length / uniqueVisitors * 100) : 0;
+
   elVisitor.textContent = uniqueVisitors.toLocaleString('id-ID');
   elPV.textContent = prodEvents.length.toLocaleString('id-ID');
-
-  if (!elTop) return;
-  if (!prodEvents.length) { elTop.innerHTML = `<div style="font-size:12.5px;color:var(--muted)">Belum ada produk dilihat hari ini.</div>`; return; }
-
-  const viewCount = {};
-  prodEvents.forEach(e => { if (e.product_id) viewCount[e.product_id] = (viewCount[e.product_id]||0)+1; });
-  const top = Object.entries(viewCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
-
-  elTop.innerHTML = top.map(([pid, views]) => {
-    const p = adminProductsData.find(x => x.id === pid);
-    const name = p ? p.name : 'Produk';
-    const ctr = uniqueVisitors > 0 ? (views / uniqueVisitors * 100) : 0;
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border);font-size:12.5px">
-      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px">${name}</span>
-      <span style="color:var(--muted);white-space:nowrap">${views} dilihat · CTR ${ctr.toFixed(1)}%</span>
-    </div>`;
-  }).join('');
+  if (elCTR) elCTR.textContent = `${ctr.toFixed(1)}%`;
 }
 
 async function loadOrdersAdmin() {
