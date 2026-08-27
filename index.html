@@ -2765,10 +2765,14 @@ function renderProductPickerList() {
   el.innerHTML = list.map(p => {
     const checked = promoSelectedProducts[p.id] ? 'checked' : '';
     const base = productBasePrice(p);
-    return `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px">
-      <input type="checkbox" data-pid="${p.id}" data-pname="${p.name.replace(/"/g,'&quot;')}" data-base="${base}" ${checked}>
-      <span style="flex:1">${p.name}</span>
-      <span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12px">Rp ${base.toLocaleString('id-ID')}</span>
+    const img = p.image_url
+      ? `<img src="${p.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0">`
+      : `<div style="width:40px;height:40px;border-radius:6px;background:#f0ede8;flex-shrink:0"></div>`;
+    return `<label style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border);cursor:pointer;font-size:13.5px">
+      <input type="checkbox" data-pid="${p.id}" data-pname="${p.name.replace(/"/g,'&quot;')}" data-base="${base}" ${checked} style="width:16px;height:16px;flex-shrink:0">
+      ${img}
+      <span style="flex:1;line-height:1.3">${p.name}</span>
+      <span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12.5px;white-space:nowrap">Rp ${base.toLocaleString('id-ID')}</span>
     </label>`;
   }).join('');
 }
