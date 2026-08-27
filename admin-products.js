@@ -192,7 +192,7 @@ function rebuildVariantTable() {
     sizeTags.forEach((s, si) => {
       const key = variantKey(c.name, s);
       const d = variantData[key] || {};
-      const existingImg = d.image_url || '';
+      const existingImg = d.preview_url || d.image_url || '';
       const showPhoto = si === 0; // hanya 1 foto per warna (baris pertama ukuran)
       const isActive = d.active !== false; // default aktif kecuali eksplisit dimatikan
       rows.push(`
@@ -232,8 +232,11 @@ function updateVariantData(key, field, val) {
 function previewVariantPhotoNew(input, key) {
   if (!input.files || !input.files[0]) return;
   variantPhotoFiles[key] = input.files[0];
+  const objUrl = URL.createObjectURL(input.files[0]);
+  if (!variantData[key]) variantData[key] = {};
+  variantData[key].preview_url = objUrl; // simpan di state biar gak ilang pas tabel di-render ulang (nambah warna/ukuran)
   const preview = document.getElementById(`vph-${key}`);
-  if (preview) preview.style.backgroundImage = `url(${URL.createObjectURL(input.files[0])})`;
+  if (preview) preview.style.backgroundImage = `url(${objUrl})`;
 }
 
 function applyToAll() {
@@ -598,6 +601,10 @@ async function saveProduct() {
     }
   }
 
+  // === mulai proses upload & simpan: tampilkan loading, biar admin tau lagi proses (bukan freeze) ===
+  setProductSaving(true);
+  try {
+
   // Upload foto produk dari photoSlots (url=langsung pakai, file/cropped=upload dulu)
   const finalUrls = [];
   for (const slot of photoSlots) {
@@ -672,6 +679,39 @@ async function saveProduct() {
   showToast(editingProductId ? 'Produk berhasil diupdate ✓' : 'Produk berhasil disimpan ✓');
   closeProductForm();
   loadAdminProducts();
+  } finally {
+    setProductSaving(false);
+  }
+}
+
+function setProductSaving(isSaving) {
+  const btn = document.getElementById('save-product-btn-final');
+  if (btn) {
+    btn.disabled = isSaving;
+    btn.style.opacity = isSaving ? '0.7' : '';
+    btn.style.cursor = isSaving ? 'not-allowed' : '';
+    if (isSaving) {
+      btn.dataset.originalText = btn.textContent;
+      btn.innerHTML = `<span class="pf-spinner" style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;vertical-align:-2px;margin-right:7px;animation:pf-spin .7s linear infinite"></span>Menyimpan...`;
+    } else if (btn.dataset.originalText) {
+      btn.textContent = btn.dataset.originalText;
+    }
+  }
+  let overlay = document.getElementById('product-saving-overlay');
+  if (isSaving) {
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'product-saving-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,.55);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(1px)';
+      overlay.innerHTML = `<div style="background:#1a1a1a;color:#fff;padding:14px 22px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.2)">
+        <span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:pf-spin .7s linear infinite"></span>
+        Menyimpan produk, mohon tunggu...
+      </div>`;
+      document.body.appendChild(overlay);
+    }
+  } else if (overlay) {
+    overlay.remove();
+  }
 }
 
 function resetProductForm() {
