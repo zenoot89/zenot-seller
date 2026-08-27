@@ -444,6 +444,8 @@
       .admin-bn-item.active{color:var(--accent);font-weight:600}
       .home-stat-grid{grid-template-columns:repeat(2,1fr) !important}
       .home-quick-actions{grid-template-columns:repeat(3,1fr) !important}
+      .home-visit-grid{grid-template-columns:repeat(3,1fr) !important;gap:14px 10px !important}
+      .home-visit-tile:nth-child(1),.home-visit-tile:nth-child(2),.home-visit-tile:nth-child(3),.home-visit-tile:nth-child(6){display:none}
 
       /* ===== PRODUK: tabel -> kartu ===== */
       .admin-list-header{flex-wrap:wrap;gap:10px}
@@ -552,6 +554,11 @@
     @keyframes pf-spin{to{transform:rotate(360deg)}}
 
     .promo-hub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+
+    .home-visit-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:16px}
+    .home-visit-tile{min-width:0}
+    .home-visit-label{font-size:11.5px;color:var(--muted);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .home-visit-value{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600}
     .promo-hub-card{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:16px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;transition:box-shadow .15s,border-color .15s;font-family:'Inter',sans-serif}
     .promo-hub-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.07);border-color:#d8d3c9}
     .promo-hub-icon{font-size:22px;line-height:1}
@@ -559,6 +566,10 @@
     .promo-hub-desc{font-size:11.5px;color:var(--muted);line-height:1.4}
     @media(max-width:700px){.promo-hub-grid{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:420px){.promo-hub-grid{grid-template-columns:1fr}}
+
+    .ptr-indicator{display:flex;align-items:center;justify-content:center;height:0;overflow:hidden;transition:height .15s;color:var(--muted)}
+    .ptr-spinner{width:22px;height:22px;border:2.5px solid var(--border);border-top-color:var(--ink);border-radius:50%;display:inline-block}
+    .ptr-spinner.spin{animation:pf-spin .6s linear infinite}
   </style>
 </head>
 <body>
@@ -669,25 +680,47 @@
       </div>
     </div>
 
-    <div class="admin-content">
+    <div class="admin-content" id="admin-content-scroll">
+      <div id="ptr-indicator" class="ptr-indicator"><span class="ptr-spinner"></span></div>
       <div class="admin-content-inner">
 
         <!-- TAB: BERANDA -->
         <div class="admin-section active" id="tab-home">
           <div class="admin-card">
             <h3 class="admin-card-title">Pengunjung</h3>
-            <div id="home-visit-summary" style="display:flex;gap:24px">
-              <div>
-                <div style="font-size:11.5px;color:var(--muted)">Pengunjung</div>
-                <div id="home-visitor-count" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">–</div>
+            <div id="home-visit-summary" class="home-visit-grid">
+              <div class="home-visit-tile">
+                <div class="home-visit-label">Total Penjualan Hari Ini</div>
+                <div id="home-sales-count" class="home-visit-value">–</div>
+                <div id="home-sales-delta" class="perf-delta"></div>
               </div>
-              <div>
-                <div style="font-size:11.5px;color:var(--muted)">Produk Dilihat</div>
-                <div id="home-productview-count" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">–</div>
+              <div class="home-visit-tile">
+                <div class="home-visit-label">Pesanan Hari Ini</div>
+                <div id="home-orders-count" class="home-visit-value">–</div>
+                <div id="home-orders-delta" class="perf-delta"></div>
               </div>
-              <div>
-                <div style="font-size:11.5px;color:var(--muted)">CTR Toko</div>
-                <div id="home-ctr-count" style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600">–</div>
+              <div class="home-visit-tile">
+                <div class="home-visit-label">Total Kunjungan</div>
+                <div id="home-hits-count" class="home-visit-value">–</div>
+                <div id="home-hits-delta" class="perf-delta"></div>
+              </div>
+              <div class="home-visit-tile">
+                <div class="home-visit-label">Pengunjung</div>
+                <div id="home-visitor-count" class="home-visit-value">–</div>
+                <div id="home-visitor-delta" class="perf-delta"></div>
+              </div>
+              <div class="home-visit-tile">
+                <div class="home-visit-label">Produk Dilihat</div>
+                <div id="home-productview-count" class="home-visit-value">–</div>
+                <div id="home-pv-delta" class="perf-delta"></div>
+              </div>
+              <div class="home-visit-tile">
+                <div class="home-visit-label">Tingkat Konversi</div>
+                <div id="home-conversion-count" class="home-visit-value">–</div>
+              </div>
+              <div class="home-visit-tile">
+                <div class="home-visit-label">CTR Toko</div>
+                <div id="home-ctr-count" class="home-visit-value">–</div>
               </div>
             </div>
           </div>
@@ -1586,6 +1619,48 @@ function visitStore() {
   window.open('https://zenoot.web.id', '_blank');
 }
 
+// ===================== PULL-TO-REFRESH (mobile) — reload penuh biar ambil kode+data terbaru =====================
+(function initPullToRefresh() {
+  const scrollEl = document.getElementById('admin-content-scroll');
+  const indicator = document.getElementById('ptr-indicator');
+  if (!scrollEl || !indicator) return;
+
+  let startY = 0, pulling = false, ready = false;
+  const THRESHOLD = 70;
+
+  scrollEl.addEventListener('touchstart', (e) => {
+    if (window.innerWidth > 860) return; // fitur ini khusus mobile
+    if (scrollEl.scrollTop > 0) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
+    ready = false;
+  }, { passive: true });
+
+  scrollEl.addEventListener('touchmove', (e) => {
+    if (!pulling) return;
+    const diff = e.touches[0].clientY - startY;
+    if (diff <= 0) { indicator.style.height = '0px'; return; }
+    const h = Math.min(diff * 0.5, 90);
+    indicator.style.height = h + 'px';
+    ready = h >= THRESHOLD;
+    indicator.querySelector('.ptr-spinner').style.transform = `rotate(${h * 3}deg)`;
+  }, { passive: true });
+
+  scrollEl.addEventListener('touchend', () => {
+    if (!pulling) return;
+    pulling = false;
+    if (ready) {
+      indicator.style.height = '48px';
+      indicator.querySelector('.ptr-spinner').classList.add('spin');
+      // Reload penuh dengan cache-busting query, biar bukan cuma data yang ke-refresh
+      // tapi juga kode terbaru (index.html/admin-products.js), ngatasin cache PWA iOS/Android.
+      setTimeout(() => { location.href = location.pathname + '?_r=' + Date.now(); }, 300);
+    } else {
+      indicator.style.height = '0px';
+    }
+  }, { passive: true });
+})();
+
 function shareStore() {
   const shareData = {
     title: 'Zenoot',
@@ -2122,29 +2197,50 @@ async function loadHomeStats() {
 
 async function loadHomeVisitSummary() {
   const elVisitor = document.getElementById('home-visitor-count');
-  const elPV = document.getElementById('home-productview-count');
-  const elCTR = document.getElementById('home-ctr-count');
   if (!elVisitor) return;
 
-  const start = new Date(); start.setHours(0,0,0,0);
-  const startIso = start.toISOString();
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  const yestStart = new Date(todayStart); yestStart.setDate(yestStart.getDate() - 1);
+  const todayIso = todayStart.toISOString();
+  const yestIso = yestStart.toISOString();
 
-  const [storeRes, prodRes] = await Promise.all([
-    sb.from('analytics_events').select('session_id').eq('event_type', 'view_store').gte('created_at', startIso),
-    sb.from('analytics_events').select('product_id').eq('event_type', 'view_product').gte('created_at', startIso)
+  const [storeToday, storeYest, prodToday, prodYest, ordersToday, ordersYest] = await Promise.all([
+    sb.from('analytics_events').select('session_id').eq('event_type', 'view_store').gte('created_at', todayIso),
+    sb.from('analytics_events').select('session_id').eq('event_type', 'view_store').gte('created_at', yestIso).lt('created_at', todayIso),
+    sb.from('analytics_events').select('product_id').eq('event_type', 'view_product').gte('created_at', todayIso),
+    sb.from('analytics_events').select('product_id').eq('event_type', 'view_product').gte('created_at', yestIso).lt('created_at', todayIso),
+    sb.from('orders').select('total').gte('created_at', todayIso),
+    sb.from('orders').select('total').gte('created_at', yestIso).lt('created_at', todayIso)
   ]);
 
-  const storeEvents = storeRes.data || [];
-  const prodEvents = prodRes.data || [];
-  const uniqueVisitors = new Set(storeEvents.map(e => e.session_id)).size;
+  const hitsToday = (storeToday.data || []).length;
+  const hitsYest = (storeYest.data || []).length;
+  const visitorsToday = new Set((storeToday.data || []).map(e => e.session_id)).size;
+  const visitorsYest = new Set((storeYest.data || []).map(e => e.session_id)).size;
+  const pvToday = (prodToday.data || []).length;
+  const pvYest = (prodYest.data || []).length;
+  const ordersDataToday = ordersToday.data || [];
+  const ordersDataYest = ordersYest.data || [];
+  const salesToday = ordersDataToday.reduce((s,o) => s + (o.total || 0), 0);
+  const salesYest = ordersDataYest.reduce((s,o) => s + (o.total || 0), 0);
 
-  // CTR toko (global, keseluruhan) = total produk dilihat / total pengunjung toko.
-  // Detail per produk ada di halaman Performa Toko, bukan di sini.
-  const ctr = uniqueVisitors > 0 ? (prodEvents.length / uniqueVisitors * 100) : 0;
+  // CTR toko (global) = total produk dilihat / total pengunjung. Tingkat Konversi = pesanan / pengunjung.
+  const ctr = visitorsToday > 0 ? (pvToday / visitorsToday * 100) : 0;
+  const conversion = visitorsToday > 0 ? (ordersDataToday.length / visitorsToday * 100) : 0;
 
-  elVisitor.textContent = uniqueVisitors.toLocaleString('id-ID');
-  elPV.textContent = prodEvents.length.toLocaleString('id-ID');
-  if (elCTR) elCTR.textContent = `${ctr.toFixed(1)}%`;
+  document.getElementById('home-sales-count').textContent = `Rp ${salesToday.toLocaleString('id-ID')}`;
+  document.getElementById('home-orders-count').textContent = ordersDataToday.length.toLocaleString('id-ID');
+  document.getElementById('home-hits-count').textContent = hitsToday.toLocaleString('id-ID');
+  elVisitor.textContent = visitorsToday.toLocaleString('id-ID');
+  document.getElementById('home-productview-count').textContent = pvToday.toLocaleString('id-ID');
+  document.getElementById('home-conversion-count').textContent = `${conversion.toFixed(1)}%`;
+  document.getElementById('home-ctr-count').textContent = `${ctr.toFixed(1)}%`;
+
+  perfDeltaHTML(salesToday, salesYest, 'home-sales-delta');
+  perfDeltaHTML(ordersDataToday.length, ordersDataYest.length, 'home-orders-delta');
+  perfDeltaHTML(hitsToday, hitsYest, 'home-hits-delta');
+  perfDeltaHTML(visitorsToday, visitorsYest, 'home-visitor-delta');
+  perfDeltaHTML(pvToday, pvYest, 'home-pv-delta');
 }
 
 async function loadOrdersAdmin() {
