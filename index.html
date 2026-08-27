@@ -1429,7 +1429,7 @@
             </div>
 
             <div style="display:flex;gap:8px">
-              <button class="btn-primary" onclick="applyProductDiscount()">Terapkan Diskon</button>
+              <button class="btn-primary" id="apply-discount-btn" onclick="applyProductDiscount()">Terapkan Diskon</button>
               <button onclick="closePromoModal('discount')" style="padding:11px 20px;font-size:13px;background:#fff;border:1px solid var(--border);border-radius:8px;cursor:pointer">Batal</button>
             </div>
           </div>
@@ -2769,7 +2769,7 @@ function renderProductPickerList() {
       ? `<img src="${p.image_url}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0">`
       : `<div style="width:40px;height:40px;border-radius:6px;background:#f0ede8;flex-shrink:0"></div>`;
     return `<label style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border);cursor:pointer;font-size:13.5px">
-      <input type="checkbox" data-pid="${p.id}" data-pname="${p.name.replace(/"/g,'&quot;')}" data-base="${base}" ${checked} style="width:16px;height:16px;flex-shrink:0">
+      <input type="checkbox" data-pid="${p.id}" data-pname="${p.name.replace(/"/g,'&quot;')}" data-base="${base}" data-img="${p.image_url||''}" ${checked} style="width:16px;height:16px;flex-shrink:0">
       ${img}
       <span style="flex:1;line-height:1.3">${p.name}</span>
       <span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12.5px;white-space:nowrap">Rp ${base.toLocaleString('id-ID')}</span>
@@ -2781,7 +2781,7 @@ function confirmProductPicker() {
   document.querySelectorAll('#promo-pick-list input[type=checkbox]').forEach(cb => {
     const pid = cb.dataset.pid;
     if (cb.checked && !promoSelectedProducts[pid]) {
-      promoSelectedProducts[pid] = { name: cb.dataset.pname, hargaNormal: parseInt(cb.dataset.base) || 0, netPrice: '' };
+      promoSelectedProducts[pid] = { name: cb.dataset.pname, hargaNormal: parseInt(cb.dataset.base) || 0, netPrice: '', img: cb.dataset.img || '' };
     } else if (!cb.checked && promoSelectedProducts[pid]) {
       delete promoSelectedProducts[pid];
     }
@@ -2826,8 +2826,11 @@ function renderPromoSelectedProducts() {
     </tr></thead>
     <tbody>${ids.map(pid => {
       const item = promoSelectedProducts[pid];
+      const img = item.img
+        ? `<img src="${item.img}" style="width:32px;height:32px;object-fit:cover;border-radius:5px;flex-shrink:0">`
+        : `<div style="width:32px;height:32px;border-radius:5px;background:#f0ede8;flex-shrink:0"></div>`;
       return `<tr style="border-bottom:1px solid var(--border)">
-        <td style="padding:6px;max-width:160px">${item.name}</td>
+        <td style="padding:6px;max-width:180px"><div style="display:flex;align-items:center;gap:8px">${img}<span>${item.name}</span></div></td>
         <td style="padding:6px;color:var(--muted)">Rp ${item.hargaNormal.toLocaleString('id-ID')}</td>
         <td style="padding:6px"><input type="number" value="${item.netPrice}" placeholder="cth: 90000" oninput="updatePromoNetPrice('${pid}', this.value)" style="width:100px;padding:5px 7px;border:1px solid var(--border);border-radius:5px;font-size:12px"></td>
         <td style="padding:6px;font-weight:600" id="promo-pct-${pid}"></td>
@@ -2840,6 +2843,8 @@ function renderPromoSelectedProducts() {
 }
 
 async function applyProductDiscount() {
+  const btn = document.getElementById('apply-discount-btn');
+  if (btn.disabled) return; // cegah klik dobel
   const name = document.getElementById('promo-name').value.trim() || 'Diskon Produk';
   const startVal = document.getElementById('promo-period-start').value;
   const endVal = document.getElementById('promo-period-end').value;
@@ -2852,30 +2857,39 @@ async function applyProductDiscount() {
   const startIso = startVal ? new Date(startVal).toISOString() : new Date().toISOString();
   const endIso = endVal ? new Date(endVal).toISOString() : null;
 
-  for (const pid of ids) {
-    const item = promoSelectedProducts[pid];
-    const netPrice = parseInt(item.netPrice);
-    const { data: vars } = await sb.from('variants').select('id,price,original_price').eq('product_id', pid);
-    if (!vars || !vars.length) continue;
-    for (const v of vars) {
-      const origPrice = v.original_price || v.price;
-      await sb.from('variants').update({ price: netPrice, original_price: origPrice }).eq('id', v.id);
-    }
-    const { error: promoErr } = await sb.from('promotions').insert({
-      type: 'discount',
-      name: `${name} - ${item.name}`,
-      product_id: pid,
-      value: netPrice,
-      start_date: startIso,
-      end_date: endIso,
-      status: 'aktif'
-    });
-    if (promoErr) console.warn('Gagal catat tracking promosi (tabel promotions belum ada?):', promoErr.message);
-  }
+  btn.disabled = true;
+  btn.dataset.originalText = btn.textContent;
+  btn.innerHTML = `<span class="pf-spinner" style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;vertical-align:-2px;margin-right:7px;animation:pf-spin .7s linear infinite"></span>Menerapkan...`;
 
-  showToast(`Diskon berhasil diterapkan ke ${ids.length} produk ✓`);
-  closePromoModal('discount');
-  loadPromotions();
+  try {
+    for (const pid of ids) {
+      const item = promoSelectedProducts[pid];
+      const netPrice = parseInt(item.netPrice);
+      const { data: vars } = await sb.from('variants').select('id,price,original_price').eq('product_id', pid);
+      if (!vars || !vars.length) continue;
+      for (const v of vars) {
+        const origPrice = v.original_price || v.price;
+        await sb.from('variants').update({ price: netPrice, original_price: origPrice }).eq('id', v.id);
+      }
+      const { error: promoErr } = await sb.from('promotions').insert({
+        type: 'discount',
+        name: `${name} - ${item.name}`,
+        product_id: pid,
+        value: netPrice,
+        start_date: startIso,
+        end_date: endIso,
+        status: 'aktif'
+      });
+      if (promoErr) console.warn('Gagal catat tracking promosi (tabel promotions belum ada?):', promoErr.message);
+    }
+
+    showToast(`Diskon berhasil diterapkan ke ${ids.length} produk ✓`);
+    closePromoModal('discount');
+    loadPromotions();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = btn.dataset.originalText || 'Terapkan Diskon';
+  }
 }
 
 
@@ -2946,7 +2960,7 @@ async function loadPromotions() {
 
   const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   const [promoRes, ordersRes] = await Promise.all([
-    sb.from('promotions').select('*,products(name)').order('created_at', { ascending: false }),
+    sb.from('promotions').select('*,products(name,image_url)').order('created_at', { ascending: false }),
     sb.from('orders').select('id,created_at,items,shipping_address').gte('created_at', sevenDaysAgo.toISOString())
   ]);
 
@@ -2996,6 +3010,7 @@ async function loadPromotions() {
   // Performa all-time (bukan cuma 7 hari) buat tiap baris, biar bisa liat histori lengkap
   el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">
     <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+      <th style="padding:8px 6px"></th>
       <th style="padding:8px 6px">Nama</th>
       <th style="padding:8px 6px">Tipe</th>
       <th style="padding:8px 6px">Produk</th>
@@ -3010,7 +3025,11 @@ async function loadPromotions() {
       const start = new Date(p.start_date).toLocaleDateString('id-ID',{day:'numeric',month:'short'});
       const end = p.end_date ? new Date(p.end_date).toLocaleDateString('id-ID',{day:'numeric',month:'short'}) : '–';
       const isActive = !p.end_date || new Date(p.end_date) > new Date();
+      const img = p.products?.image_url
+        ? `<img src="${p.products.image_url}" style="width:36px;height:36px;object-fit:cover;border-radius:6px">`
+        : `<div style="width:36px;height:36px;border-radius:6px;background:#f0ede8"></div>`;
       return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 6px">${img}</td>
         <td style="padding:8px 6px;font-weight:500">${p.name}</td>
         <td style="padding:8px 6px">${p.type === 'discount' ? 'Diskon %' : 'Flash Sale'}</td>
         <td style="padding:8px 6px">${p.products?.name || 'Semua Produk'}</td>
