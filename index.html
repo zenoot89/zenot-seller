@@ -1059,6 +1059,25 @@
         <!-- TAB: VOUCHER -->
         <div class="admin-section" id="tab-vouchers">
           <div class="admin-card">
+            <h3 class="admin-card-title">Buat Promosi</h3>
+            <div class="promo-hub-grid">
+              <div class="promo-hub-card" style="cursor:default">
+                <span class="promo-hub-icon">🎟️</span>
+                <span class="promo-hub-title">Voucher Toko</span>
+                <span class="promo-hub-desc">Berikan kode voucher diskon untuk pembeli</span>
+                <button class="btn-primary" style="margin-top:10px;padding:8px 16px;font-size:12.5px" onclick="event.stopPropagation(); openVoucherModal()">Buat</button>
+              </div>
+            </div>
+          </div>
+          <div class="admin-card" style="margin-top:16px">
+            <h3 class="admin-card-title">Daftar Voucher</h3>
+            <div id="voucher-list"></div>
+          </div>
+        </div>
+
+        <!-- MODAL: Buat Voucher -->
+        <div class="modal-overlay" id="voucher-modal">
+          <div class="modal">
             <h3 class="admin-card-title">Buat Voucher</h3>
             <div class="form-row">
               <div class="form-group">
@@ -1093,13 +1112,13 @@
                 <input class="form-input" id="v-expires" type="date"/>
               </div>
             </div>
-            <button class="btn-primary" onclick="saveVoucher()">Simpan Voucher</button>
-          </div>
-          <div class="admin-card">
-            <h3 class="admin-card-title">Daftar Voucher</h3>
-            <div id="voucher-list"></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-primary" onclick="saveVoucher()">Simpan Voucher</button>
+              <button onclick="closeVoucherModal()" style="padding:11px 20px;font-size:13px;background:#fff;border:1px solid var(--border);border-radius:8px;cursor:pointer">Batal</button>
+            </div>
           </div>
         </div>
+
 
         <!-- TAB: ULASAN -->
         <!-- TAB: PERFORMA TOKO -->
@@ -1331,6 +1350,56 @@
         <!-- TAB: PROMOSI -->
         <div class="admin-section" id="tab-promotions">
           <div class="admin-card">
+            <h3 class="admin-card-title">Buat Promosi</h3>
+            <p style="font-size:12.5px;color:var(--muted);margin:-8px 0 16px">Buat diskon atau flash sale buat tingkatkan penjualan produkmu.</p>
+            <div class="promo-hub-grid">
+              <div class="promo-hub-card" style="cursor:default">
+                <span class="promo-hub-icon">🏷️</span>
+                <span class="promo-hub-title">Diskon Produk</span>
+                <span class="promo-hub-desc">Terapkan diskon % ke satu/semua produk sekaligus</span>
+                <button class="btn-primary" style="margin-top:10px;padding:8px 16px;font-size:12.5px" onclick="event.stopPropagation(); openPromoModal('discount')">Buat</button>
+              </div>
+              <div class="promo-hub-card" style="cursor:default">
+                <span class="promo-hub-icon">⚡</span>
+                <span class="promo-hub-title">Flash Sale</span>
+                <span class="promo-hub-desc">Harga spesial + durasi waktu, badge otomatis muncul</span>
+                <button class="btn-primary" style="margin-top:10px;padding:8px 16px;font-size:12.5px" onclick="event.stopPropagation(); openPromoModal('flash')">Buat</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card" style="margin-top:16px">
+            <h3 class="admin-card-title">Performa Promosi</h3>
+            <p style="font-size:11.5px;color:var(--muted);margin:-8px 0 14px">7 hari terakhir, dihitung dari pesanan yang mengandung produk berpromo selama periode promo berjalan.</p>
+            <div class="home-visit-grid" style="grid-template-columns:repeat(4,1fr)">
+              <div class="home-visit-tile">
+                <div class="home-visit-label">Penjualan</div>
+                <div id="promo-perf-sales" class="home-visit-value">–</div>
+              </div>
+              <div class="home-visit-tile">
+                <div class="home-visit-label">Pesanan</div>
+                <div id="promo-perf-orders" class="home-visit-value">–</div>
+              </div>
+              <div class="home-visit-tile">
+                <div class="home-visit-label">Jumlah Terjual</div>
+                <div id="promo-perf-units" class="home-visit-value">–</div>
+              </div>
+              <div class="home-visit-tile">
+                <div class="home-visit-label">Pembeli</div>
+                <div id="promo-perf-buyers" class="home-visit-value">–</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-card" style="margin-top:16px">
+            <h3 class="admin-card-title">Daftar Promosi</h3>
+            <div id="promo-list-render"><p style="font-size:13px;color:var(--muted)">Memuat...</p></div>
+          </div>
+        </div>
+
+        <!-- MODAL: Diskon Produk -->
+        <div class="modal-overlay" id="promo-modal-discount">
+          <div class="modal">
             <h3 class="admin-card-title">Diskon Produk</h3>
             <p style="font-size:13px;color:var(--sec);margin-bottom:16px">Terapkan diskon % ke satu atau beberapa produk sekaligus. Harga diskon otomatis dihitung dan ditampilkan di katalog.</p>
             <div class="form-row" style="margin-bottom:12px">
@@ -1343,9 +1412,16 @@
                 <input class="form-input" id="promo-discount" type="number" min="1" max="99" placeholder="cth: 20"/>
               </div>
             </div>
-            <button class="btn-primary" onclick="applyProductDiscount()">Terapkan Diskon</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn-primary" onclick="applyProductDiscount()">Terapkan Diskon</button>
+              <button onclick="closePromoModal('discount')" style="padding:11px 20px;font-size:13px;background:#fff;border:1px solid var(--border);border-radius:8px;cursor:pointer">Batal</button>
+            </div>
           </div>
-          <div class="admin-card" style="margin-top:16px">
+        </div>
+
+        <!-- MODAL: Flash Sale -->
+        <div class="modal-overlay" id="promo-modal-flash">
+          <div class="modal">
             <h3 class="admin-card-title">Flash Sale</h3>
             <p style="font-size:13px;color:var(--sec);margin-bottom:16px">Atur harga flash sale + durasi waktu. Otomatis badge "FLASH SALE" muncul di produk selama periode berlaku.</p>
             <div class="form-row">
@@ -1368,13 +1444,13 @@
                 <input class="form-input" id="flash-end" type="datetime-local"/>
               </div>
             </div>
-            <button class="btn-primary" onclick="saveFlashSale()">Simpan Flash Sale</button>
-          </div>
-          <div class="admin-card" style="margin-top:16px">
-            <h3 class="admin-card-title">Promo Aktif</h3>
-            <div id="promo-list-render"><p style="font-size:13px;color:var(--muted)">Belum ada promo aktif.</p></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-primary" onclick="saveFlashSale()">Simpan Flash Sale</button>
+              <button onclick="closePromoModal('flash')" style="padding:11px 20px;font-size:13px;background:#fff;border:1px solid var(--border);border-radius:8px;cursor:pointer">Batal</button>
+            </div>
           </div>
         </div>
+
 
         <!-- TAB: DATA MASTER (Kategori, Supplier, dst) -->
         <div class="admin-section" id="tab-categories">
@@ -1729,6 +1805,7 @@ function switchTab(tab, el) {
   syncBottomNav(tab);
   if (tab === 'categories') { loadAdminCategories(); loadAdminSuppliers(); }
   if (tab === 'products') loadAdminProducts();
+  if (tab === 'promotions') loadPromotions();
   if (tab === 'customers') loadAdminCustomers();
   if (tab === 'orders') loadOrdersAdmin();
   if (tab === 'home') loadHomeStats();
@@ -2342,6 +2419,13 @@ async function saveOrderResi(orderId) {
 }
 
 // ===================== VOUCHER ADMIN =====================
+function openVoucherModal() {
+  document.getElementById('voucher-modal').classList.add('open');
+}
+function closeVoucherModal() {
+  document.getElementById('voucher-modal').classList.remove('open');
+}
+
 async function saveVoucher() {
   const code = document.getElementById('v-code').value.trim().toUpperCase();
   const discount_type = document.getElementById('v-type').value;
@@ -2353,6 +2437,7 @@ async function saveVoucher() {
   const { error } = await sb.from('vouchers').insert({code,discount_type,discount_value,min_order,max_uses,expires_at});
   if (error) { showToast(error.message); return; }
   showToast('Voucher disimpan ✓');
+  closeVoucherModal();
   loadAdminVouchers();
 }
 
@@ -2611,6 +2696,13 @@ async function deleteSupplier(id, name) {
 }
 
 // ===================== PROMOTIONS =====================
+function openPromoModal(type) {
+  document.getElementById(`promo-modal-${type}`).classList.add('open');
+}
+function closePromoModal(type) {
+  document.getElementById(`promo-modal-${type}`).classList.remove('open');
+}
+
 async function applyProductDiscount() {
   const productId = document.getElementById('promo-product-id').value;
   const disc = parseInt(document.getElementById('promo-discount').value);
@@ -2631,7 +2723,23 @@ async function applyProductDiscount() {
     const origPrice = v.price;
     await sb.from('variants').update({price: newPrice, original_price: origPrice}).eq('id', v.id);
   }
+
+  const productSelect = document.getElementById('promo-product-id');
+  const productName = productId ? (productSelect.selectedOptions[0]?.textContent || 'Produk') : 'Semua Produk';
+  const { error: promoErr } = await sb.from('promotions').insert({
+    type: 'discount',
+    name: `Diskon ${disc}% - ${productName}`,
+    product_id: productId || null,
+    value: disc,
+    start_date: new Date().toISOString(),
+    end_date: null,
+    status: 'aktif'
+  });
+  if (promoErr) console.warn('Gagal catat tracking promosi (tabel promotions belum ada?):', promoErr.message);
+
   showToast(`Diskon ${disc}% berhasil diterapkan ✓`);
+  closePromoModal('discount');
+  loadPromotions();
 }
 
 async function saveFlashSale() {
@@ -2651,7 +2759,140 @@ async function saveFlashSale() {
       flash_sale_end: end
     }).eq('id', v.id);
   }
+
+  const flashSelect = document.getElementById('flash-product-id');
+  const productName = flashSelect.selectedOptions[0]?.textContent || 'Produk';
+  const { error: promoErr } = await sb.from('promotions').insert({
+    type: 'flash_sale',
+    name: `Flash Sale - ${productName}`,
+    product_id: productId,
+    value: price,
+    start_date: start ? new Date(start).toISOString() : new Date().toISOString(),
+    end_date: new Date(end).toISOString(),
+    status: 'aktif'
+  });
+  if (promoErr) console.warn('Gagal catat tracking promosi (tabel promotions belum ada?):', promoErr.message);
+
   showToast('Flash Sale berhasil disimpan ✓');
+  closePromoModal('flash');
+  loadPromotions();
+}
+
+// Hitung performa 1 promosi dari daftar pesanan (dicocokkan manual di client, bukan pakai view SQL)
+function computePromoPerf(promo, orders) {
+  const start = new Date(promo.start_date).getTime();
+  const end = promo.end_date ? new Date(promo.end_date).getTime() : Date.now();
+  let revenue = 0, unitsSold = 0;
+  const orderIds = new Set();
+
+  orders.forEach(o => {
+    const t = new Date(o.created_at).getTime();
+    if (t < start || t > end) return;
+    const items = o.items || [];
+    let matched = false;
+    items.forEach(it => {
+      if (promo.product_id && it.productId !== promo.product_id) return;
+      matched = true;
+      revenue += (it.price || 0) * (it.qty || 0);
+      unitsSold += (it.qty || 0);
+    });
+    if (matched) orderIds.add(o.id);
+  });
+
+  return { revenue, orders: orderIds.size, unitsSold };
+}
+
+async function loadPromotions() {
+  const el = document.getElementById('promo-list-render');
+  if (!el) return;
+  el.innerHTML = `<p style="font-size:13px;color:var(--muted)">Memuat...</p>`;
+
+  const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const [promoRes, ordersRes] = await Promise.all([
+    sb.from('promotions').select('*,products(name)').order('created_at', { ascending: false }),
+    sb.from('orders').select('id,created_at,items,shipping_address').gte('created_at', sevenDaysAgo.toISOString())
+  ]);
+
+  if (promoRes.error) {
+    el.innerHTML = `<p style="font-size:12.5px;color:#a83232">Tabel "promotions" belum ada di database. Jalankan dulu file promotions_migration.sql di Supabase SQL Editor.</p>`;
+    document.getElementById('promo-perf-sales').textContent = '–';
+    document.getElementById('promo-perf-orders').textContent = '–';
+    document.getElementById('promo-perf-units').textContent = '–';
+    document.getElementById('promo-perf-buyers').textContent = '–';
+    return;
+  }
+
+  const promos = promoRes.data || [];
+  const orders = ordersRes.data || [];
+
+  // Ringkasan 7 hari terakhir
+  let totalSales = 0, totalOrders = 0, totalUnits = 0;
+  const allBuyers = new Set();
+  promos.forEach(p => {
+    const perf = computePromoPerf(p, orders);
+    totalSales += perf.revenue;
+    totalOrders += perf.orders;
+    totalUnits += perf.unitsSold;
+  });
+  orders.forEach(o => {
+    const items = o.items || [];
+    const inAnyPromo = promos.some(p => {
+      const start = new Date(p.start_date).getTime();
+      const end = p.end_date ? new Date(p.end_date).getTime() : Date.now();
+      const t = new Date(o.created_at).getTime();
+      if (t < start || t > end) return false;
+      return items.some(it => !p.product_id || it.productId === p.product_id);
+    });
+    if (inAnyPromo) {
+      const addr = o.shipping_address || {};
+      allBuyers.add(addr.phone || addr.recipient_name || o.id);
+    }
+  });
+
+  document.getElementById('promo-perf-sales').textContent = `Rp ${totalSales.toLocaleString('id-ID')}`;
+  document.getElementById('promo-perf-orders').textContent = totalOrders.toLocaleString('id-ID');
+  document.getElementById('promo-perf-units').textContent = totalUnits.toLocaleString('id-ID');
+  document.getElementById('promo-perf-buyers').textContent = allBuyers.size.toLocaleString('id-ID');
+
+  if (!promos.length) { el.innerHTML = `<p style="font-size:13px;color:var(--muted)">Belum ada promo dibuat.</p>`; return; }
+
+  // Performa all-time (bukan cuma 7 hari) buat tiap baris, biar bisa liat histori lengkap
+  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">
+    <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+      <th style="padding:8px 6px">Nama</th>
+      <th style="padding:8px 6px">Tipe</th>
+      <th style="padding:8px 6px">Produk</th>
+      <th style="padding:8px 6px">Periode</th>
+      <th style="padding:8px 6px">Penjualan</th>
+      <th style="padding:8px 6px">Pesanan</th>
+      <th style="padding:8px 6px">Terjual</th>
+      <th style="padding:8px 6px">Aksi</th>
+    </tr></thead>
+    <tbody>${promos.map(p => {
+      const perf = computePromoPerf(p, orders);
+      const start = new Date(p.start_date).toLocaleDateString('id-ID',{day:'numeric',month:'short'});
+      const end = p.end_date ? new Date(p.end_date).toLocaleDateString('id-ID',{day:'numeric',month:'short'}) : '–';
+      const isActive = !p.end_date || new Date(p.end_date) > new Date();
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 6px;font-weight:500">${p.name}</td>
+        <td style="padding:8px 6px">${p.type === 'discount' ? 'Diskon %' : 'Flash Sale'}</td>
+        <td style="padding:8px 6px">${p.products?.name || 'Semua Produk'}</td>
+        <td style="padding:8px 6px">${start} - ${end}</td>
+        <td style="padding:8px 6px">Rp ${perf.revenue.toLocaleString('id-ID')}</td>
+        <td style="padding:8px 6px">${perf.orders}</td>
+        <td style="padding:8px 6px">${perf.unitsSold}</td>
+        <td style="padding:8px 6px">
+          ${isActive ? `<button onclick="endPromotion('${p.id}')" style="padding:5px 10px;font-size:11px;background:#fff;border:1px solid var(--border);border-radius:5px;cursor:pointer">Akhiri</button>` : `<span style="color:var(--muted)">Berakhir</span>`}
+        </td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+async function endPromotion(id) {
+  await sb.from('promotions').update({ end_date: new Date().toISOString(), status: 'berakhir' }).eq('id', id);
+  showToast('Promosi diakhiri');
+  loadPromotions();
 }
 // ===================== REVIEWS ADMIN =====================
 async function loadAdminReviews() {
