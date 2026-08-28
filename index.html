@@ -1180,7 +1180,8 @@
               <div id="perf-chart" style="margin-top:10px"></div>
             </div>
             <div class="admin-card">
-              <h3 class="admin-card-title">Produk Terpopuler (paling banyak diklik)</h3>
+              <h3 class="admin-card-title">Analisis Produk</h3>
+              <p style="font-size:11.5px;color:var(--muted);margin:-8px 0 4px">Klik judul kolom buat urutin (misal CTR atau Conversion Rate tertinggi).</p>
               <div id="perf-top-products" style="margin-top:10px;font-size:13px;color:var(--muted)">Memuat...</div>
             </div>
           </div>
@@ -1931,8 +1932,8 @@ async function loadPerformanceDashboard() {
   const { start, end } = perfRangeBounds(period);
   const { prevStart, prevEnd } = perfPrevRange(period);
 
-  let ordersQ = sb.from('orders').select('total, created_at, status').gte('created_at', start).lt('created_at', end);
-  let prevOrdersQ = sb.from('orders').select('total, created_at, status').gte('created_at', prevStart.toISOString()).lt('created_at', prevEnd.toISOString());
+  let ordersQ = sb.from('orders').select('total, created_at, status, items').gte('created_at', start).lt('created_at', end);
+  let prevOrdersQ = sb.from('orders').select('total, created_at, status, items').gte('created_at', prevStart.toISOString()).lt('created_at', prevEnd.toISOString());
   if (scope === 'siap_kirim') { ordersQ = ordersQ.eq('status', 'diproses'); prevOrdersQ = prevOrdersQ.eq('status', 'diproses'); }
 
   const [ordersRes, storeEventsRes, productEventsRes, prevOrdersRes, prevStoreEventsRes] = await Promise.all([
@@ -1971,29 +1972,86 @@ async function loadPerformanceDashboard() {
 
   renderPerfChart(storeEvents, period);
 
-  const countByProduct = {};
-  productEvents.forEach(e => { if (e.product_id) countByProduct[e.product_id] = (countByProduct[e.product_id]||0) + 1; });
-  const top = Object.entries(countByProduct).sort((a,b) => b[1]-a[1]).slice(0, 5);
-  const topEl = document.getElementById('perf-top-products');
-  if (!top.length) {
-    topEl.innerHTML = '<p style="font-size:13px;color:var(--muted)">Belum ada data klik produk di periode ini.</p>';
+  perfProductAnalysisData = { productEvents, orders, uniqueVisitors };
+  renderPerfProductAnalysis();
+}
+
+// ===================== ANALISIS PRODUK (Dilihat, CTR, Conversion Rate) =====================
+let perfProductAnalysisData = { productEvents: [], orders: [], uniqueVisitors: 0 };
+let perfProductSortKey = 'views';
+let perfProductSortDir = 'desc';
+
+function sortPerfProduct(key) {
+  if (perfProductSortKey === key) {
+    perfProductSortDir = perfProductSortDir === 'desc' ? 'asc' : 'desc';
   } else {
-    topEl.innerHTML = `
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
-        <thead><tr style="border-bottom:1px solid var(--border);text-align:left">
-          <th style="padding:8px 4px">Produk</th><th style="padding:8px 4px;text-align:right">Kali Diklik</th>
-        </tr></thead>
-        <tbody>
-          ${top.map(([pid, count]) => {
-            const p = adminProductsData.find(x => x.id === pid);
-            return `<tr style="border-bottom:1px solid var(--border)">
-              <td style="padding:8px 4px">${p ? p.name : '(produk sudah dihapus)'}</td>
-              <td style="padding:8px 4px;text-align:right;font-weight:600">${count}</td>
-            </tr>`;
-          }).join('')}
-        </tbody>
-      </table>`;
+    perfProductSortKey = key;
+    perfProductSortDir = 'desc';
   }
+  renderPerfProductAnalysis();
+}
+
+function renderPerfProductAnalysis() {
+  const { productEvents, orders, uniqueVisitors } = perfProductAnalysisData;
+  const topEl = document.getElementById('perf-top-products');
+  if (!topEl) return;
+
+  const viewsByProduct = {};
+  productEvents.forEach(e => { if (e.product_id) viewsByProduct[e.product_id] = (viewsByProduct[e.product_id]||0) + 1; });
+
+  const ordersByProduct = {}; // productId -> Set of order-ish keys (dihitung per pesanan, bukan qty)
+  orders.forEach((o, idx) => {
+    const items = o.items || [];
+    const seenInThisOrder = new Set();
+    items.forEach(it => {
+      if (!it.productId || seenInThisOrder.has(it.productId)) return;
+      seenInThisOrder.add(it.productId);
+      ordersByProduct[it.productId] = (ordersByProduct[it.productId] || 0) + 1;
+    });
+  });
+
+  let rows = Object.keys(viewsByProduct).map(pid => {
+    const p = adminProductsData.find(x => x.id === pid);
+    const views = viewsByProduct[pid] || 0;
+    const productOrders = ordersByProduct[pid] || 0;
+    const ctr = uniqueVisitors > 0 ? (views / uniqueVisitors * 100) : 0;
+    const conv = views > 0 ? (productOrders / views * 100) : 0;
+    return { name: p ? p.name : '(produk sudah dihapus)', views, productOrders, ctr, conv };
+  });
+
+  if (!rows.length) {
+    topEl.innerHTML = '<p style="font-size:13px;color:var(--muted)">Belum ada data dilihat produk di periode ini.</p>';
+    return;
+  }
+
+  rows.sort((a, b) => {
+    const map = { views: 'views', ctr: 'ctr', pesanan: 'productOrders', conv: 'conv' };
+    const k = map[perfProductSortKey] || 'views';
+    return perfProductSortDir === 'desc' ? b[k] - a[k] : a[k] - b[k];
+  });
+
+  const arrow = (key) => perfProductSortKey === key ? (perfProductSortDir === 'desc' ? ' ↓' : ' ↑') : '';
+  const th = (key, label, align) => `<th onclick="sortPerfProduct('${key}')" style="padding:8px 4px;cursor:pointer;user-select:none;${align?'text-align:right':''}">${label}${arrow(key)}</th>`;
+
+  topEl.innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="border-bottom:1px solid var(--border);text-align:left">
+        <th style="padding:8px 4px">Produk</th>
+        ${th('views','Dilihat',true)}
+        ${th('ctr','CTR',true)}
+        ${th('pesanan','Pesanan',true)}
+        ${th('conv','Conversion Rate',true)}
+      </tr></thead>
+      <tbody>
+        ${rows.slice(0, 10).map(r => `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 4px">${r.name}</td>
+          <td style="padding:8px 4px;text-align:right;font-weight:600">${r.views}</td>
+          <td style="padding:8px 4px;text-align:right">${r.ctr.toFixed(1)}%</td>
+          <td style="padding:8px 4px;text-align:right">${r.productOrders}</td>
+          <td style="padding:8px 4px;text-align:right;font-weight:600">${r.conv.toFixed(1)}%</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
 }
 
 // ===================== TAB: PRODUK =====================
