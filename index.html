@@ -1170,18 +1170,30 @@
                 <div id="perf-visitors-delta" class="perf-delta"></div>
               </div>
               <div class="admin-card" style="margin:0">
-                <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Tingkat Konversi</div>
+                <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Tingkat Konversi Pesanan</div>
                 <div id="perf-conversion" style="font-size:22px;font-weight:700">0,00%</div>
                 <div id="perf-conversion-delta" class="perf-delta"></div>
               </div>
+              <div class="admin-card" style="margin:0">
+                <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Tingkat Konversi Pembeli</div>
+                <div id="perf-conversion-buyer" style="font-size:22px;font-weight:700">0,00%</div>
+                <div id="perf-conversion-buyer-delta" class="perf-delta"></div>
+              </div>
             </div>
             <div class="admin-card" style="margin-bottom:16px">
-              <h3 class="admin-card-title">Kunjungan per Jam</h3>
+              <h3 class="admin-card-title" style="margin:0">Kunjungan per Jam</h3>
+                <span id="perf-live-badge" style="display:none;font-size:11px;color:#1e7a4c;font-weight:600;margin-left:8px">● Live</span>
               <div id="perf-chart" style="margin-top:10px"></div>
             </div>
             <div class="admin-card">
-              <h3 class="admin-card-title">Analisis Produk</h3>
-              <p style="font-size:11.5px;color:var(--muted);margin:-8px 0 4px">Klik judul kolom buat urutin (misal CTR atau Conversion Rate tertinggi).</p>
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+                <h3 class="admin-card-title" style="margin:0">Analisis Produk</h3>
+                <div style="display:flex;gap:2px">
+                  <button class="orders-tab active" data-panview="performa" onclick="switchProdAnalysisView('performa',this)">Performa Terbaik</button>
+                  <button class="orders-tab" data-panview="baru" onclick="switchProdAnalysisView('baru',this)">Baru Ditambahkan</button>
+                </div>
+              </div>
+              <p style="font-size:11.5px;color:var(--muted);margin:8px 0 4px">Klik judul kolom buat urutin (misal CTR atau Conversion Rate tertinggi).</p>
               <div id="perf-top-products" style="margin-top:10px;font-size:13px;color:var(--muted)">Memuat...</div>
             </div>
           </div>
@@ -1932,8 +1944,8 @@ async function loadPerformanceDashboard() {
   const { start, end } = perfRangeBounds(period);
   const { prevStart, prevEnd } = perfPrevRange(period);
 
-  let ordersQ = sb.from('orders').select('total, created_at, status, items').gte('created_at', start).lt('created_at', end);
-  let prevOrdersQ = sb.from('orders').select('total, created_at, status, items').gte('created_at', prevStart.toISOString()).lt('created_at', prevEnd.toISOString());
+  let ordersQ = sb.from('orders').select('total, created_at, status, items, shipping_address').gte('created_at', start).lt('created_at', end);
+  let prevOrdersQ = sb.from('orders').select('total, created_at, status, items, shipping_address').gte('created_at', prevStart.toISOString()).lt('created_at', prevEnd.toISOString());
   if (scope === 'siap_kirim') { ordersQ = ordersQ.eq('status', 'diproses'); prevOrdersQ = prevOrdersQ.eq('status', 'diproses'); }
 
   const [ordersRes, storeEventsRes, productEventsRes, prevOrdersRes, prevStoreEventsRes] = await Promise.all([
@@ -1954,16 +1966,22 @@ async function loadPerformanceDashboard() {
   const totalOrders = orders.length;
   const uniqueVisitors = new Set(storeEvents.map(e => e.session_id)).size;
   const conversion = uniqueVisitors > 0 ? (totalOrders / uniqueVisitors * 100) : 0;
+  const uniqueBuyers = new Set(orders.map(o => { const a = o.shipping_address || {}; return a.phone || a.recipient_name; }).filter(Boolean)).size;
+  const conversionBuyer = uniqueVisitors > 0 ? (uniqueBuyers / uniqueVisitors * 100) : 0;
 
   const prevRevenue = prevOrders.reduce((s, o) => s + (o.total || 0), 0);
   const prevOrdersCount = prevOrders.length;
   const prevVisitors = new Set(prevStoreEvents.map(e => e.session_id)).size;
   const prevConversion = prevVisitors > 0 ? (prevOrdersCount / prevVisitors * 100) : 0;
+  const prevUniqueBuyers = new Set(prevOrders.map(o => { const a = o.shipping_address || {}; return a.phone || a.recipient_name; }).filter(Boolean)).size;
+  const prevConversionBuyer = prevVisitors > 0 ? (prevUniqueBuyers / prevVisitors * 100) : 0;
 
   document.getElementById('perf-revenue').textContent = 'Rp ' + totalRevenue.toLocaleString('id-ID');
   document.getElementById('perf-orders').textContent = totalOrders.toLocaleString('id-ID');
   document.getElementById('perf-visitors').textContent = uniqueVisitors.toLocaleString('id-ID');
   document.getElementById('perf-conversion').textContent = conversion.toLocaleString('id-ID', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%';
+  document.getElementById('perf-conversion-buyer').textContent = conversionBuyer.toLocaleString('id-ID', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%';
+  perfDeltaHTML(conversionBuyer, prevConversionBuyer, 'perf-conversion-buyer-delta');
 
   perfDeltaHTML(totalRevenue, prevRevenue, 'perf-revenue-delta');
   perfDeltaHTML(totalOrders, prevOrdersCount, 'perf-orders-delta');
@@ -1972,14 +1990,36 @@ async function loadPerformanceDashboard() {
 
   renderPerfChart(storeEvents, period);
 
-  perfProductAnalysisData = { productEvents, orders, uniqueVisitors };
+  const liveBadge = document.getElementById('perf-live-badge');
+  if (liveBadge) liveBadge.style.display = (period === 'today') ? 'inline' : 'none';
+  setupPerfAutoRefresh(period);
+
+  perfProductAnalysisData = { productEvents, orders, uniqueVisitors, allProducts: adminProductsData };
   renderPerfProductAnalysis();
 }
 
+let perfAutoRefreshTimer = null;
+function setupPerfAutoRefresh(period) {
+  if (perfAutoRefreshTimer) { clearInterval(perfAutoRefreshTimer); perfAutoRefreshTimer = null; }
+  if (period !== 'today') return;
+  perfAutoRefreshTimer = setInterval(() => {
+    const active = document.querySelector('#perf-sub-tabs .orders-tab.active');
+    if (active && active.dataset.perf === 'tinjauan') loadPerformanceDashboard();
+    else if (perfAutoRefreshTimer) { clearInterval(perfAutoRefreshTimer); perfAutoRefreshTimer = null; }
+  }, 20000);
+}
+
 // ===================== ANALISIS PRODUK (Dilihat, CTR, Conversion Rate) =====================
-let perfProductAnalysisData = { productEvents: [], orders: [], uniqueVisitors: 0 };
+let perfProductAnalysisData = { productEvents: [], orders: [], uniqueVisitors: 0, allProducts: [] };
 let perfProductSortKey = 'views';
 let perfProductSortDir = 'desc';
+let perfProductAnalysisView = 'performa'; // 'performa' | 'baru'
+
+function switchProdAnalysisView(view, el) {
+  perfProductAnalysisView = view;
+  document.querySelectorAll('[data-panview]').forEach(b => b.classList.toggle('active', b === el));
+  renderPerfProductAnalysis();
+}
 
 function sortPerfProduct(key) {
   if (perfProductSortKey === key) {
@@ -1991,16 +2031,18 @@ function sortPerfProduct(key) {
   renderPerfProductAnalysis();
 }
 
+const RANK_MEDAL = ['🥇','🥈','🥉'];
+
 function renderPerfProductAnalysis() {
-  const { productEvents, orders, uniqueVisitors } = perfProductAnalysisData;
+  const { productEvents, orders, uniqueVisitors, allProducts } = perfProductAnalysisData;
   const topEl = document.getElementById('perf-top-products');
   if (!topEl) return;
 
   const viewsByProduct = {};
   productEvents.forEach(e => { if (e.product_id) viewsByProduct[e.product_id] = (viewsByProduct[e.product_id]||0) + 1; });
 
-  const ordersByProduct = {}; // productId -> Set of order-ish keys (dihitung per pesanan, bukan qty)
-  orders.forEach((o, idx) => {
+  const ordersByProduct = {}; // productId -> jumlah pesanan yang ngandung produk ini (dihitung per pesanan, bukan qty)
+  orders.forEach((o) => {
     const items = o.items || [];
     const seenInThisOrder = new Set();
     items.forEach(it => {
@@ -2010,46 +2052,73 @@ function renderPerfProductAnalysis() {
     });
   });
 
-  let rows = Object.keys(viewsByProduct).map(pid => {
-    const p = adminProductsData.find(x => x.id === pid);
-    const views = viewsByProduct[pid] || 0;
-    const productOrders = ordersByProduct[pid] || 0;
-    const ctr = uniqueVisitors > 0 ? (views / uniqueVisitors * 100) : 0;
-    const conv = views > 0 ? (productOrders / views * 100) : 0;
-    return { name: p ? p.name : '(produk sudah dihapus)', views, productOrders, ctr, conv };
-  });
+  let rows;
+  if (perfProductAnalysisView === 'baru') {
+    // Produk Baru Ditambahkan: urut dari created_at terbaru, tetap tampilin metrik yang ada (dari periode terpilih)
+    rows = [...(allProducts || [])]
+      .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 10)
+      .map(p => {
+        const views = viewsByProduct[p.id] || 0;
+        const productOrders = ordersByProduct[p.id] || 0;
+        const ctr = uniqueVisitors > 0 ? (views / uniqueVisitors * 100) : 0;
+        const conv = views > 0 ? (productOrders / views * 100) : 0;
+        return { id: p.id, name: p.name, img: p.image_url, views, productOrders, ctr, conv };
+      });
+  } else {
+    rows = Object.keys(viewsByProduct).map(pid => {
+      const p = allProducts.find(x => x.id === pid);
+      const views = viewsByProduct[pid] || 0;
+      const productOrders = ordersByProduct[pid] || 0;
+      const ctr = uniqueVisitors > 0 ? (views / uniqueVisitors * 100) : 0;
+      const conv = views > 0 ? (productOrders / views * 100) : 0;
+      return { id: pid, name: p ? p.name : '(produk sudah dihapus)', img: p?.image_url, views, productOrders, ctr, conv };
+    });
+
+    if (rows.length) {
+      rows.sort((a, b) => {
+        const map = { views: 'views', ctr: 'ctr', pesanan: 'productOrders', conv: 'conv' };
+        const k = map[perfProductSortKey] || 'views';
+        return perfProductSortDir === 'desc' ? b[k] - a[k] : a[k] - b[k];
+      });
+    }
+  }
 
   if (!rows.length) {
-    topEl.innerHTML = '<p style="font-size:13px;color:var(--muted)">Belum ada data dilihat produk di periode ini.</p>';
+    topEl.innerHTML = `<p style="font-size:13px;color:var(--muted)">${perfProductAnalysisView === 'baru' ? 'Belum ada produk.' : 'Belum ada data dilihat produk di periode ini.'}</p>`;
     return;
   }
 
-  rows.sort((a, b) => {
-    const map = { views: 'views', ctr: 'ctr', pesanan: 'productOrders', conv: 'conv' };
-    const k = map[perfProductSortKey] || 'views';
-    return perfProductSortDir === 'desc' ? b[k] - a[k] : a[k] - b[k];
-  });
-
-  const arrow = (key) => perfProductSortKey === key ? (perfProductSortDir === 'desc' ? ' ↓' : ' ↑') : '';
-  const th = (key, label, align) => `<th onclick="sortPerfProduct('${key}')" style="padding:8px 4px;cursor:pointer;user-select:none;${align?'text-align:right':''}">${label}${arrow(key)}</th>`;
+  const arrow = (key) => (perfProductAnalysisView === 'performa' && perfProductSortKey === key) ? (perfProductSortDir === 'desc' ? ' ↓' : ' ↑') : '';
+  const th = (key, label) => perfProductAnalysisView === 'performa'
+    ? `<th onclick="sortPerfProduct('${key}')" style="padding:8px 4px;cursor:pointer;user-select:none;text-align:right">${label}${arrow(key)}</th>`
+    : `<th style="padding:8px 4px;text-align:right;color:var(--muted)">${label}</th>`;
 
   topEl.innerHTML = `
     <table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead><tr style="border-bottom:1px solid var(--border);text-align:left">
+        <th style="padding:8px 4px;width:28px"></th>
         <th style="padding:8px 4px">Produk</th>
-        ${th('views','Dilihat',true)}
-        ${th('ctr','CTR',true)}
-        ${th('pesanan','Pesanan',true)}
-        ${th('conv','Conversion Rate',true)}
+        ${th('views','Dilihat')}
+        ${th('ctr','CTR')}
+        ${th('pesanan','Pesanan')}
+        ${th('conv','Conversion Rate')}
       </tr></thead>
       <tbody>
-        ${rows.slice(0, 10).map(r => `<tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:8px 4px">${r.name}</td>
+        ${rows.slice(0, 10).map((r, i) => {
+          const img = r.img
+            ? `<img src="${r.img}" style="width:32px;height:32px;object-fit:cover;border-radius:5px;flex-shrink:0">`
+            : `<div style="width:32px;height:32px;border-radius:5px;background:#f0ede8;flex-shrink:0"></div>`;
+          const rankBadge = perfProductAnalysisView === 'performa' && RANK_MEDAL[i] ? RANK_MEDAL[i] : (i+1);
+          return `<tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:8px 4px;text-align:center">${rankBadge}</td>
+          <td style="padding:8px 4px"><div style="display:flex;align-items:center;gap:8px">${img}<span>${r.name}</span></div></td>
           <td style="padding:8px 4px;text-align:right;font-weight:600">${r.views}</td>
           <td style="padding:8px 4px;text-align:right">${r.ctr.toFixed(1)}%</td>
           <td style="padding:8px 4px;text-align:right">${r.productOrders}</td>
           <td style="padding:8px 4px;text-align:right;font-weight:600">${r.conv.toFixed(1)}%</td>
-        </tr>`).join('')}
+        </tr>`;
+        }).join('')}
       </tbody>
     </table>`;
 }
