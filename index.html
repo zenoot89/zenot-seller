@@ -2578,24 +2578,18 @@ function renderOrderRow(o) {
     </div>` : '';
 
   let actions = '';
-  const btnEditAlamat = `<button onclick="orderEditAlamatId='${o.id}';orderEditItemId=null;renderOrdersAdminTable()" style="padding:6px 10px;font-size:11.5px;background:#f0f0f0;color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer">✏️ Edit Alamat</button>`;
-  const btnEditItem = `<button onclick="orderEditItemId='${o.id}';orderEditAlamatId=null;renderOrdersAdminTable()" style="padding:6px 10px;font-size:11.5px;background:#f0f0f0;color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer">📦 Edit Item</button>`;
   const btnBatal = `<button onclick="if(confirm('Batalkan pesanan ini?'))updateOrderStatus('${o.id}','dibatalkan')" style="padding:6px 10px;font-size:11.5px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Batalkan</button>`;
   const btnCetak = `<button onclick="printLabel('${o.id}')" style="padding:6px 10px;font-size:11.5px;background:#f0f0f0;color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer">🖨️ Cetak Label</button>`;
   if (o.status === 'menunggu_pembayaran') {
     actions = `<div style="display:flex;flex-direction:column;gap:5px">
       <button onclick="updateOrderStatus('${o.id}','diproses')" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Konfirmasi Bayar</button>
       ${btnCetak}
-      ${btnEditAlamat}
-      ${btnEditItem}
       ${btnBatal}
     </div>`;
   } else if (o.status === 'diproses') {
     actions = `<div style="display:flex;flex-direction:column;gap:5px">
       ${btnCetak}
-      ${btnEditAlamat}
-      ${btnEditItem}
-      <button onclick="orderResiOpenId='${o.id}';renderOrdersAdminTable()" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Input Resi & Kirim</button>
+      <button onclick="orderResiOpenId='${o.id}';renderOrdersAdminTable()" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Proses Pesanan</button>
       ${btnBatal}
     </div>`;
   } else if (o.status === 'dikirim') {
@@ -2611,38 +2605,6 @@ function renderOrderRow(o) {
     </div>`;
   }
 
-  // Panel edit alamat
-  const editAlamatRow = orderEditAlamatId === o.id ? `
-    <div style="margin-top:8px;padding:10px;background:#f7f6f3;border-radius:6px">
-      <div style="font-size:11px;font-weight:600;color:var(--sec);text-transform:uppercase;margin-bottom:6px">Edit Alamat Pengiriman</div>
-      <input type="text" id="ea-name-${o.id}" placeholder="Nama penerima" value="${addr.recipient_name||''}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;margin-bottom:5px">
-      <input type="text" id="ea-phone-${o.id}" placeholder="No. HP" value="${addr.phone||''}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;margin-bottom:5px">
-      <input type="text" id="ea-addr-${o.id}" placeholder="Alamat lengkap" value="${addr.address||''}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;margin-bottom:5px">
-      <input type="text" id="ea-city-${o.id}" placeholder="Kota / Kabupaten" value="${addr.city||''}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;margin-bottom:5px">
-      <input type="text" id="ea-post-${o.id}" placeholder="Kode pos" value="${addr.postal_code||''}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;margin-bottom:6px">
-      <div style="display:flex;gap:6px">
-        <button onclick="saveEditAlamat('${o.id}')" style="padding:6px 12px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Simpan</button>
-        <button onclick="orderEditAlamatId=null;renderOrdersAdminTable()" style="padding:6px 12px;font-size:11.5px;background:#fff;border:1px solid var(--border);border-radius:5px;cursor:pointer">Batal</button>
-      </div>
-    </div>` : '';
-
-  // Panel edit item (SKU/variasi/warna)
-  const editItemRow = orderEditItemId === o.id ? `
-    <div style="margin-top:8px;padding:10px;background:#f7f6f3;border-radius:6px">
-      <div style="font-size:11px;font-weight:600;color:var(--sec);text-transform:uppercase;margin-bottom:6px">Edit Item Pesanan</div>
-      ${(o.items||[]).map((item,idx) => `
-        <div style="border:1px solid var(--border);border-radius:5px;padding:8px;margin-bottom:6px">
-          <div style="font-size:11.5px;font-weight:600;margin-bottom:5px">${item.name}</div>
-          <input type="text" id="ei-color-${o.id}-${idx}" placeholder="Warna" value="${item.color||''}" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;margin-bottom:4px">
-          <input type="text" id="ei-size-${o.id}-${idx}" placeholder="Ukuran / Size" value="${item.size||''}" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;margin-bottom:4px">
-          <input type="number" id="ei-qty-${o.id}-${idx}" placeholder="Qty" value="${item.qty||1}" min="1" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px">
-        </div>`).join('')}
-      <div style="display:flex;gap:6px">
-        <button onclick="saveEditItem('${o.id}')" style="padding:6px 12px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Simpan</button>
-        <button onclick="orderEditItemId=null;renderOrdersAdminTable()" style="padding:6px 12px;font-size:11.5px;background:#fff;border:1px solid var(--border);border-radius:5px;cursor:pointer">Batal</button>
-      </div>
-    </div>` : '';
-
   return `
     <tr style="border-bottom:1px solid var(--border);vertical-align:top" data-order-id="${o.id}">
       <td style="padding:8px 6px;white-space:nowrap">${date}</td>
@@ -2651,14 +2613,23 @@ function renderOrderRow(o) {
       <td style="padding:8px 6px;white-space:nowrap">Rp ${(o.total||0).toLocaleString('id-ID')}</td>
       <td style="padding:8px 6px;white-space:nowrap">${payMethod}<br><span style="color:var(--muted)">${payStatus}</span></td>
       <td style="padding:8px 6px"><span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${s.color};background:${s.bg};white-space:nowrap">${s.label}</span></td>
-      <td style="padding:8px 6px;min-width:160px">${actions}${resiRow}${editAlamatRow}${editItemRow}</td>
+      <td style="padding:8px 6px;min-width:160px">${actions}${resiRow}</td>
     </tr>`;
+}
+
+const ORDERS_TAB_LABEL = { menunggu_pembayaran:'Menunggu Pembayaran', diproses:'Perlu Dikirim', dikirim:'Dikirim', selesai:'Selesai', dibatalkan:'Dibatalkan' };
+function setOrdersFilterTab(status) {
+  ordersAdminFilter = status;
+  document.querySelectorAll('.orders-tab').forEach(t => {
+    t.classList.toggle('active', (t.dataset.status || '') === status);
+  });
 }
 
 async function updateOrderStatus(orderId, newStatus) {
   const { error } = await sb.from('orders').update({ status: newStatus }).eq('id', orderId);
   if (error) { showToast('Gagal update status: ' + error.message); return; }
-  showToast('Status pesanan diperbarui');
+  setOrdersFilterTab(newStatus);
+  showToast('Status pesanan diperbarui — pindah ke tab ' + (ORDERS_TAB_LABEL[newStatus] || newStatus));
   loadOrdersAdmin();
 }
 
@@ -2669,7 +2640,8 @@ async function saveOrderResi(orderId) {
   const { error } = await sb.from('orders').update({ courier, resi, status: 'dikirim' }).eq('id', orderId);
   if (error) { showToast('Gagal simpan resi: ' + error.message); return; }
   orderResiOpenId = null;
-  showToast('Resi tersimpan, status jadi Dikirim');
+  setOrdersFilterTab('dikirim');
+  showToast('Resi tersimpan, status jadi Dikirim — pindah ke tab Dikirim');
   loadOrdersAdmin();
 }
 
@@ -2684,13 +2656,6 @@ function printLabel(orderId) {
   const items = (o.items||[]).map(i => `<tr><td style="padding:3px 6px;border:1px solid #ccc">${i.name}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${i.color}, ${i.size}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${i.qty}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:right">Rp ${(i.price*i.qty).toLocaleString('id-ID')}</td></tr>`).join('');
   const payMethod = {'cod':'COD (Bayar di Tempat)','transfer_bca':'Transfer / QRIS BCA','gopay':'GoPay'}[o.payment_method] || o.payment_method || '-';
   const resiInfo = o.resi ? `${o.courier||'Kurir'}: <strong>${o.resi}</strong>` : '<em style="color:#999">Resi belum diinput</em>';
-
-  // Generate barcode SVG sederhana (Code 128 style visual — representasi visual)
-  const barcodeStr = orderNum;
-  const bars = barcodeStr.split('').map(c => {
-    const w = (c.charCodeAt(0) % 3) + 1;
-    return `<rect x="0" y="0" width="${w}" height="40" fill="#000" style="margin-right:1px"/>`;
-  }).join('');
 
   const labelHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
   <title>AWB - ${orderNum}</title>
@@ -2712,12 +2677,6 @@ function printLabel(orderId) {
     .items-table { width: 100%; border-collapse: collapse; font-size: 10px; }
     .items-table th { background: #f0f0f0; padding: 3px 6px; border: 1px solid #ccc; text-align: left; }
     .items-table td { padding: 3px 6px; border: 1px solid #ccc; }
-    .barcode-area { text-align: center; margin: 6px 0 5px; }
-    .barcode-img { display: flex; gap: 1px; justify-content: center; align-items: flex-end; height: 40px; }
-    .barcode-bar { background: #000; width: 2px; height: 40px; display: inline-block; }
-    .barcode-bar.w2 { width: 3px; }
-    .barcode-bar.w3 { width: 5px; }
-    .barcode-text { font-family: monospace; font-size: 9px; margin-top: 2px; letter-spacing: 0.1em; }
     .footer-row { display: flex; justify-content: space-between; font-size: 9px; color: #888; margin-top: 6px; border-top: 1px solid #eee; padding-top: 4px; }
     .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 9px; font-weight: bold; }
     .badge-cod { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
@@ -2756,11 +2715,6 @@ function printLabel(orderId) {
         <thead><tr><th>Produk</th><th>Var</th><th>Qty</th><th>Harga</th></tr></thead>
         <tbody>${items}</tbody>
       </table>
-    </div>
-
-    <div class="barcode-area">
-      ${generateBarcodeHTML(orderNum)}
-      <div class="barcode-text">${orderNum}</div>
     </div>
 
     <div class="footer-row">
