@@ -2700,8 +2700,9 @@ function printLabel(orderId) {
       <div class="sec-title">Penerima</div>
       <div class="big-addr">${addr.recipient_name||'-'}</div>
       <div class="small-info">${addr.phone||''}</div>
-      <div class="small-info">${addr.address||''}</div>
-      <div class="small-info">${[addr.subdistrict,addr.district,addr.city,addr.province].filter(Boolean).join(', ')}</div>
+      <div class="small-info">${addr.address_detail||''}</div>
+      ${addr.address_note ? `<div class="small-info" style="font-style:italic">${addr.address_note}</div>` : ''}
+      <div class="small-info">${[addr.village,addr.district,addr.city,addr.province].filter(Boolean).join(', ')}</div>
       <div class="small-info" style="font-weight:bold">${addr.postal_code||''}</div>
     </div>
 
