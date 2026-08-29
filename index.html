@@ -1257,6 +1257,11 @@
               <h3 class="admin-card-title">Tren Kunjungan</h3>
               <div id="perf-kv-chart">Memuat...</div>
             </div>
+            <div class="admin-card">
+              <h3 class="admin-card-title">Sumber Kunjungan</h3>
+              <p style="font-size:11.5px;color:var(--muted);margin:-8px 0 12px">Dari mana pengunjung datang ke toko (link IG/TikTok/WA/Google yang ditandai ?utm_source=, atau dari dalam web sendiri).</p>
+              <div id="perf-kv-sources">Memuat...</div>
+            </div>
           </div>
 
           <!-- PANEL: PROMOSI -->
@@ -1791,7 +1796,7 @@ function shareStore() {
   const shareData = {
     title: 'Zenoot',
     text: 'Cek koleksi Zenoot di sini!',
-    url: 'https://zenoot.web.id'
+    url: 'https://zenoot.web.id?utm_source=share'
   };
   if (navigator.share) {
     navigator.share(shareData).catch(() => {});
@@ -2239,8 +2244,8 @@ async function loadPerfKunjungan() {
   const period = document.getElementById('perf-period')?.value || 'today';
   const { start, end } = perfRangeBounds(period);
   const [storeRes, productRes] = await Promise.all([
-    sb.from('analytics_events').select('session_id, created_at').eq('event_type','view_store').gte('created_at', start).lt('created_at', end),
-    sb.from('analytics_events').select('created_at').eq('event_type','view_product').gte('created_at', start).lt('created_at', end),
+    sb.from('analytics_events').select('session_id, created_at, source').eq('event_type','view_store').gte('created_at', start).lt('created_at', end),
+    sb.from('analytics_events').select('created_at, source').eq('event_type','view_product').gte('created_at', start).lt('created_at', end),
   ]);
   const storeEvents = storeRes.data || [];
   const productEvents = productRes.data || [];
@@ -2260,6 +2265,43 @@ async function loadPerfKunjungan() {
   }
   const values = labels.map(l=>buckets[l]);
   document.getElementById('perf-kv-chart').innerHTML = renderSvgLineChart(values, labels, period, v=>String(v));
+
+  renderPerfSources(storeEvents);
+}
+
+const SOURCE_LABEL = {
+  langsung: 'Langsung', share: 'Bagikan Toko', whatsapp: 'WhatsApp', wa: 'WhatsApp',
+  instagram: 'Instagram', ig: 'Instagram', tiktok: 'TikTok', facebook: 'Facebook', fb: 'Facebook',
+  google: 'Google Search', google_maps: 'Google Maps', threads: 'Threads', telegram: 'Telegram', pinterest: 'Pinterest',
+};
+
+function renderPerfSources(storeEvents) {
+  const el = document.getElementById('perf-kv-sources');
+  if (!el) return;
+  if (!storeEvents.length) { el.innerHTML = `<p style="font-size:12.5px;color:var(--muted)">Belum ada data kunjungan di periode ini.</p>`; return; }
+
+  // Dedup per session_id dulu, biar 1 pengunjung yang buka berkali-kali gak numpuk sumbernya
+  const bySession = {};
+  storeEvents.forEach(e => { if (!bySession[e.session_id]) bySession[e.session_id] = e.source || 'langsung'; });
+
+  const counts = {};
+  Object.values(bySession).forEach(src => { counts[src] = (counts[src]||0) + 1; });
+  const total = Object.values(counts).reduce((a,b)=>a+b, 0);
+  const rows = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+
+  el.innerHTML = `<div style="display:flex;flex-direction:column;gap:10px">${rows.map(([src, count]) => {
+    const pct = total > 0 ? (count/total*100) : 0;
+    const label = SOURCE_LABEL[src] || src.charAt(0).toUpperCase() + src.slice(1);
+    return `<div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px">
+        <span>${label}</span>
+        <span style="color:var(--muted)">${count} pengunjung (${pct.toFixed(1)}%)</span>
+      </div>
+      <div style="height:6px;background:#f0ede8;border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:var(--ink);border-radius:3px"></div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 // ===================== TAB: PROMOSI =====================
