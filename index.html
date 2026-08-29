@@ -2638,8 +2638,13 @@ function setOrdersFilterTab(status) {
 }
 
 async function updateOrderStatus(orderId, newStatus) {
-  const { error } = await sb.from('orders').update({ status: newStatus }).eq('id', orderId);
+  const { data, error } = await sb.from('orders').update({ status: newStatus }).eq('id', orderId).select();
   if (error) { showToast('Gagal update status: ' + error.message); return; }
+  if (!data || data.length === 0) {
+    showToast('⚠️ Update DITOLAK sistem (kemungkinan izin akses RLS di tabel orders) — status TIDAK berubah. Cek kebijakan RLS.');
+    console.error('updateOrderStatus: 0 baris berubah, kemungkinan diblokir RLS. orderId=', orderId, 'newStatus=', newStatus);
+    return;
+  }
   setOrdersFilterTab(newStatus);
   showToast('Status pesanan diperbarui — pindah ke tab ' + (ORDERS_TAB_LABEL[newStatus] || newStatus));
   loadOrdersAdmin();
@@ -2649,8 +2654,13 @@ async function saveResiOnly(orderId) {
   const courier = document.getElementById(`resi-input-${orderId}`).value.trim();
   const resi = document.getElementById(`resi-num-${orderId}`).value.trim();
   if (!resi) { showToast('Isi nomor resi dulu'); return; }
-  const { error } = await sb.from('orders').update({ courier, resi }).eq('id', orderId);
+  const { data, error } = await sb.from('orders').update({ courier, resi }).eq('id', orderId).select();
   if (error) { showToast('Gagal simpan resi: ' + error.message); return; }
+  if (!data || data.length === 0) {
+    showToast('⚠️ Simpan resi DITOLAK sistem (kemungkinan izin akses RLS di tabel orders) — resi TIDAK tersimpan.');
+    console.error('saveResiOnly: 0 baris berubah, kemungkinan diblokir RLS. orderId=', orderId);
+    return;
+  }
   orderResiOpenId = null;
   showToast('Resi tersimpan. Klik "Tandai Dikirim" kalau paket udah beneran diserahkan ke kurir.');
   loadOrdersAdmin();
