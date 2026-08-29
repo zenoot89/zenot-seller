@@ -2449,6 +2449,8 @@ const PAYMENT_STATUS_LABEL = { pending: 'Belum Bayar', paid: 'Sudah Bayar', fail
 let ordersAdminData = [];
 let ordersAdminFilter = '';
 let orderResiOpenId = null;
+let orderEditAlamatId = null;
+let orderEditItemId = null;
 
 function filterOrdersTab(status, btn) {
   ordersAdminFilter = status;
@@ -2525,6 +2527,9 @@ async function loadHomeVisitSummary() {
 }
 
 async function loadOrdersAdmin() {
+  orderResiOpenId = null;
+  orderEditAlamatId = null;
+  orderEditItemId = null;
   const el = document.getElementById('orders-admin-render');
   if (!el) return;
   el.innerHTML = `<div style="font-size:13px;color:var(--muted)">Memuat...</div>`;
@@ -2573,24 +2578,70 @@ function renderOrderRow(o) {
     </div>` : '';
 
   let actions = '';
+  const btnEditAlamat = `<button onclick="orderEditAlamatId='${o.id}';orderEditItemId=null;renderOrdersAdminTable()" style="padding:6px 10px;font-size:11.5px;background:#f0f0f0;color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer">✏️ Edit Alamat</button>`;
+  const btnEditItem = `<button onclick="orderEditItemId='${o.id}';orderEditAlamatId=null;renderOrdersAdminTable()" style="padding:6px 10px;font-size:11.5px;background:#f0f0f0;color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer">📦 Edit Item</button>`;
+  const btnBatal = `<button onclick="if(confirm('Batalkan pesanan ini?'))updateOrderStatus('${o.id}','dibatalkan')" style="padding:6px 10px;font-size:11.5px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Batalkan</button>`;
+  const btnCetak = `<button onclick="printLabel('${o.id}')" style="padding:6px 10px;font-size:11.5px;background:#f0f0f0;color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer">🖨️ Cetak Label</button>`;
   if (o.status === 'menunggu_pembayaran') {
     actions = `<div style="display:flex;flex-direction:column;gap:5px">
       <button onclick="updateOrderStatus('${o.id}','diproses')" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Konfirmasi Bayar</button>
-      <button onclick="updateOrderStatus('${o.id}','dibatalkan')" style="padding:6px 10px;font-size:11.5px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Batalkan</button>
+      ${btnCetak}
+      ${btnEditAlamat}
+      ${btnEditItem}
+      ${btnBatal}
     </div>`;
   } else if (o.status === 'diproses') {
     actions = `<div style="display:flex;flex-direction:column;gap:5px">
+      ${btnCetak}
+      ${btnEditAlamat}
+      ${btnEditItem}
       <button onclick="orderResiOpenId='${o.id}';renderOrdersAdminTable()" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Input Resi & Kirim</button>
-      <button onclick="updateOrderStatus('${o.id}','dibatalkan')" style="padding:6px 10px;font-size:11.5px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Batalkan</button>
+      ${btnBatal}
     </div>`;
   } else if (o.status === 'dikirim') {
     actions = `<div style="display:flex;flex-direction:column;gap:5px">
+      ${btnCetak}
       <button onclick="updateOrderStatus('${o.id}','selesai')" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Tandai Selesai</button>
       <span style="font-size:11px;color:var(--muted)">${o.courier||'Kurir'}: ${o.resi||'-'}</span>
     </div>`;
   } else {
-    actions = `<span style="font-size:11px;color:var(--muted)">${o.status==='selesai' && o.resi ? (o.courier||'Kurir')+': '+o.resi : '—'}</span>`;
+    actions = `<div style="display:flex;flex-direction:column;gap:5px">
+      ${btnCetak}
+      <span style="font-size:11px;color:var(--muted)">${o.status==='selesai' && o.resi ? (o.courier||'Kurir')+': '+o.resi : '—'}</span>
+    </div>`;
   }
+
+  // Panel edit alamat
+  const editAlamatRow = orderEditAlamatId === o.id ? `
+    <div style="margin-top:8px;padding:10px;background:#f7f6f3;border-radius:6px">
+      <div style="font-size:11px;font-weight:600;color:var(--sec);text-transform:uppercase;margin-bottom:6px">Edit Alamat Pengiriman</div>
+      <input type="text" id="ea-name-${o.id}" placeholder="Nama penerima" value="${addr.recipient_name||''}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;margin-bottom:5px">
+      <input type="text" id="ea-phone-${o.id}" placeholder="No. HP" value="${addr.phone||''}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;margin-bottom:5px">
+      <input type="text" id="ea-addr-${o.id}" placeholder="Alamat lengkap" value="${addr.address||''}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;margin-bottom:5px">
+      <input type="text" id="ea-city-${o.id}" placeholder="Kota / Kabupaten" value="${addr.city||''}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;margin-bottom:5px">
+      <input type="text" id="ea-post-${o.id}" placeholder="Kode pos" value="${addr.postal_code||''}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px;margin-bottom:6px">
+      <div style="display:flex;gap:6px">
+        <button onclick="saveEditAlamat('${o.id}')" style="padding:6px 12px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Simpan</button>
+        <button onclick="orderEditAlamatId=null;renderOrdersAdminTable()" style="padding:6px 12px;font-size:11.5px;background:#fff;border:1px solid var(--border);border-radius:5px;cursor:pointer">Batal</button>
+      </div>
+    </div>` : '';
+
+  // Panel edit item (SKU/variasi/warna)
+  const editItemRow = orderEditItemId === o.id ? `
+    <div style="margin-top:8px;padding:10px;background:#f7f6f3;border-radius:6px">
+      <div style="font-size:11px;font-weight:600;color:var(--sec);text-transform:uppercase;margin-bottom:6px">Edit Item Pesanan</div>
+      ${(o.items||[]).map((item,idx) => `
+        <div style="border:1px solid var(--border);border-radius:5px;padding:8px;margin-bottom:6px">
+          <div style="font-size:11.5px;font-weight:600;margin-bottom:5px">${item.name}</div>
+          <input type="text" id="ei-color-${o.id}-${idx}" placeholder="Warna" value="${item.color||''}" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;margin-bottom:4px">
+          <input type="text" id="ei-size-${o.id}-${idx}" placeholder="Ukuran / Size" value="${item.size||''}" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px;margin-bottom:4px">
+          <input type="number" id="ei-qty-${o.id}-${idx}" placeholder="Qty" value="${item.qty||1}" min="1" style="width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:4px;font-size:12px">
+        </div>`).join('')}
+      <div style="display:flex;gap:6px">
+        <button onclick="saveEditItem('${o.id}')" style="padding:6px 12px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Simpan</button>
+        <button onclick="orderEditItemId=null;renderOrdersAdminTable()" style="padding:6px 12px;font-size:11.5px;background:#fff;border:1px solid var(--border);border-radius:5px;cursor:pointer">Batal</button>
+      </div>
+    </div>` : '';
 
   return `
     <tr style="border-bottom:1px solid var(--border);vertical-align:top" data-order-id="${o.id}">
@@ -2600,7 +2651,7 @@ function renderOrderRow(o) {
       <td style="padding:8px 6px;white-space:nowrap">Rp ${(o.total||0).toLocaleString('id-ID')}</td>
       <td style="padding:8px 6px;white-space:nowrap">${payMethod}<br><span style="color:var(--muted)">${payStatus}</span></td>
       <td style="padding:8px 6px"><span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${s.color};background:${s.bg};white-space:nowrap">${s.label}</span></td>
-      <td style="padding:8px 6px;min-width:150px">${actions}${resiRow}</td>
+      <td style="padding:8px 6px;min-width:160px">${actions}${resiRow}${editAlamatRow}${editItemRow}</td>
     </tr>`;
 }
 
@@ -2619,6 +2670,209 @@ async function saveOrderResi(orderId) {
   if (error) { showToast('Gagal simpan resi: ' + error.message); return; }
   orderResiOpenId = null;
   showToast('Resi tersimpan, status jadi Dikirim');
+  loadOrdersAdmin();
+}
+
+// ===================== PRINT LABEL =====================
+function printLabel(orderId) {
+  const o = ordersAdminData.find(x => x.id === orderId);
+  if (!o) return;
+  const addr = o.shipping_address || {};
+  const date = new Date(o.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
+  const orderNum = o.order_number || ('ZNT-' + new Date(o.created_at).toISOString().slice(2,10).replace(/-/g,'') + '-' + orderId.slice(-4).toUpperCase());
+  const items = (o.items||[]).map(i => `<tr><td style="padding:3px 6px;border:1px solid #ccc">${i.name}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${i.color}, ${i.size}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${i.qty}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:right">Rp ${(i.price*i.qty).toLocaleString('id-ID')}</td></tr>`).join('');
+  const payMethod = {'cod':'COD (Bayar di Tempat)','transfer_bca':'Transfer / QRIS BCA','gopay':'GoPay'}[o.payment_method] || o.payment_method || '-';
+  const resiInfo = o.resi ? `${o.courier||'Kurir'}: <strong>${o.resi}</strong>` : '<em style="color:#999">Resi belum diinput</em>';
+
+  // Generate barcode SVG sederhana (Code 128 style visual — representasi visual)
+  const barcodeStr = orderNum;
+  const bars = barcodeStr.split('').map(c => {
+    const w = (c.charCodeAt(0) % 3) + 1;
+    return `<rect x="0" y="0" width="${w}" height="40" fill="#000" style="margin-right:1px"/>`;
+  }).join('');
+
+  const labelHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <title>Label Pengiriman - ${orderNum}</title>
+  <style>
+    @page { size: A6 portrait; margin: 6mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 10px; color: #000; }
+    .wrap { display: block; width: 100%; }
+    .label-box { border: 2px solid #000; border-radius: 4px; padding: 8px; width: 100%; }
+    .label-box.copy { border-style: dashed; page-break-before: always; }
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #000; padding-bottom: 6px; margin-bottom: 8px; }
+    .store-name { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; }
+    .order-num { font-family: monospace; font-size: 11px; font-weight: bold; }
+    .section { margin-bottom: 7px; }
+    .sec-title { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: #666; font-weight: bold; margin-bottom: 3px; border-bottom: 1px solid #ddd; padding-bottom: 2px; }
+    .big-addr { font-size: 12px; font-weight: bold; line-height: 1.5; }
+    .small-info { font-size: 10px; color: #333; line-height: 1.5; }
+    .sender { font-size: 10px; line-height: 1.5; }
+    .items-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+    .items-table th { background: #f0f0f0; padding: 3px 6px; border: 1px solid #ccc; text-align: left; }
+    .barcode-area { text-align: center; margin: 5px 0; }
+    .barcode-img { display: flex; gap: 1px; justify-content: center; align-items: flex-end; height: 40px; }
+    .barcode-bar { background: #000; width: 2px; height: 40px; display: inline-block; }
+    .barcode-bar.w2 { width: 3px; }
+    .barcode-bar.w3 { width: 5px; }
+    .barcode-text { font-family: monospace; font-size: 9px; margin-top: 2px; letter-spacing: 0.1em; }
+    .footer-row { display: flex; justify-content: space-between; font-size: 9px; color: #888; margin-top: 6px; border-top: 1px solid #eee; padding-top: 4px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 9px; font-weight: bold; }
+    .badge-cod { background: #fff3cd; color: #856404; border: 1px solid #ffc107; }
+    .badge-transfer { background: #cce5ff; color: #004085; border: 1px solid #b8daff; }
+    .badge-gopay { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .copy-watermark { text-align: center; font-size: 8px; color: #bbb; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4px; }
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  </style></head><body>
+  <div class="wrap">
+    <!-- LABEL PENGIRIM (untuk ditempel di paket) -->
+    <div class="label-box">
+      <div class="header">
+        <div class="store-name">ZENOOT</div>
+        <div style="text-align:right">
+          <div class="order-num">${orderNum}</div>
+          <div style="font-size:9px;color:#888">${date}</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-title">📦 Penerima</div>
+        <div class="big-addr">${addr.recipient_name||'-'}</div>
+        <div class="small-info">${addr.phone||''}</div>
+        <div class="small-info">${addr.address||''}</div>
+        <div class="small-info">${[addr.subdistrict,addr.district,addr.city,addr.province].filter(Boolean).join(', ')}</div>
+        <div class="small-info" style="font-weight:bold">${addr.postal_code||''}</div>
+      </div>
+
+      <div class="section">
+        <div class="sec-title">🏪 Pengirim</div>
+        <div class="sender"><strong>Zenoot Official Store</strong></div>
+        <div class="sender">WA: 0895-3488-8444</div>
+        <div class="sender">zenoot.web.id</div>
+      </div>
+
+      <div class="section">
+        <div class="sec-title">📋 Item Pesanan</div>
+        <table class="items-table">
+          <thead><tr><th>Produk</th><th>Var</th><th>Qty</th><th>Harga</th></tr></thead>
+          <tbody>${items}</tbody>
+        </table>
+      </div>
+
+      <div class="barcode-area">
+        ${generateBarcodeHTML(orderNum)}
+        <div class="barcode-text">${orderNum}</div>
+      </div>
+
+      <div class="footer-row">
+        <span>Pembayaran: <span class="badge ${o.payment_method==='cod'?'badge-cod':o.payment_method==='gopay'?'badge-gopay':'badge-transfer'}">${payMethod}</span></span>
+        <span>Total: <strong>Rp ${(o.total||0).toLocaleString('id-ID')}</strong></span>
+      </div>
+      <div class="footer-row">
+        <span>Resi: ${resiInfo}</span>
+      </div>
+    </div>
+
+    <!-- SALINAN SELLER (arsip internal) -->
+    <div class="label-box copy">
+      <div class="copy-watermark">— Salinan Seller —</div>
+      <div class="header">
+        <div class="store-name">ZENOOT</div>
+        <div style="text-align:right">
+          <div class="order-num">${orderNum}</div>
+          <div style="font-size:9px;color:#888">${date}</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-title">📦 Penerima</div>
+        <div class="big-addr">${addr.recipient_name||'-'}</div>
+        <div class="small-info">${addr.phone||''}</div>
+        <div class="small-info">${addr.address||''}</div>
+        <div class="small-info">${[addr.subdistrict,addr.district,addr.city,addr.province].filter(Boolean).join(', ')}</div>
+        <div class="small-info" style="font-weight:bold">${addr.postal_code||''}</div>
+      </div>
+
+      <div class="section">
+        <div class="sec-title">📋 Item</div>
+        <table class="items-table">
+          <thead><tr><th>Produk</th><th>Var</th><th>Qty</th><th>Harga</th></tr></thead>
+          <tbody>${items}</tbody>
+        </table>
+      </div>
+
+      <div class="footer-row">
+        <span>Bayar: <strong>${payMethod}</strong></span>
+        <span>Total: <strong>Rp ${(o.total||0).toLocaleString('id-ID')}</strong></span>
+      </div>
+      <div class="footer-row">
+        <span>Subtotal: Rp ${(o.subtotal||0).toLocaleString('id-ID')} | Diskon: Rp ${(o.discount||0).toLocaleString('id-ID')}</span>
+      </div>
+      <div class="footer-row">
+        <span>Resi: ${resiInfo}</span>
+      </div>
+      <div class="barcode-area">
+        ${generateBarcodeHTML(orderNum)}
+        <div class="barcode-text">${orderNum}</div>
+      </div>
+    </div>
+  </div>
+  <script>window.onload = () => { setTimeout(() => window.print(), 400); }<\/script>
+  </body></html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(labelHTML);
+  win.document.close();
+}
+
+function generateBarcodeHTML(text) {
+  // Visual barcode dari karakter — bukan scan-able, tapi visual representatif
+  const chars = text.replace(/-/g,'');
+  let bars = '';
+  for (let i = 0; i < chars.length; i++) {
+    const code = chars.charCodeAt(i);
+    const w = (code % 3) === 0 ? 'w3' : (code % 2) === 0 ? 'w2' : '';
+    bars += `<span class="barcode-bar ${w}"></span>`;
+    if (i % 2 === 0) bars += `<span style="display:inline-block;width:1px"></span>`;
+  }
+  return `<div class="barcode-img">${bars}</div>`;
+}
+
+async function saveEditAlamat(orderId) {
+  const o = ordersAdminData.find(x => x.id === orderId);
+  if (!o) return;
+  const newAddr = {
+    ...( o.shipping_address || {} ),
+    recipient_name: document.getElementById(`ea-name-${orderId}`).value.trim(),
+    phone:          document.getElementById(`ea-phone-${orderId}`).value.trim(),
+    address:        document.getElementById(`ea-addr-${orderId}`).value.trim(),
+    city:           document.getElementById(`ea-city-${orderId}`).value.trim(),
+    postal_code:    document.getElementById(`ea-post-${orderId}`).value.trim(),
+  };
+  const { error } = await sb.from('orders').update({ shipping_address: newAddr }).eq('id', orderId);
+  if (error) { showToast('Gagal simpan alamat: ' + error.message); return; }
+  orderEditAlamatId = null;
+  showToast('Alamat pengiriman diperbarui ✓');
+  loadOrdersAdmin();
+}
+
+async function saveEditItem(orderId) {
+  const o = ordersAdminData.find(x => x.id === orderId);
+  if (!o) return;
+  const newItems = (o.items||[]).map((item, idx) => ({
+    ...item,
+    color: document.getElementById(`ei-color-${orderId}-${idx}`)?.value.trim() || item.color,
+    size:  document.getElementById(`ei-size-${orderId}-${idx}`)?.value.trim()  || item.size,
+    qty:   parseInt(document.getElementById(`ei-qty-${orderId}-${idx}`)?.value) || item.qty,
+  }));
+  const newSubtotal = newItems.reduce((s,i) => s + i.price * i.qty, 0);
+  const disc = o.discount || 0;
+  const shipping = (o.total || 0) - (o.subtotal || 0) + disc;
+  const newTotal = newSubtotal - disc + Math.max(0, shipping);
+  const { error } = await sb.from('orders').update({ items: newItems, subtotal: newSubtotal, total: newTotal }).eq('id', orderId);
+  if (error) { showToast('Gagal simpan item: ' + error.message); return; }
+  orderEditItemId = null;
+  showToast('Item pesanan diperbarui ✓');
   loadOrdersAdmin();
 }
 
