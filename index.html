@@ -1318,6 +1318,9 @@
           <div class="admin-card">
             <h3 class="admin-card-title">Pesanan Masuk</h3>
             <p style="font-size:13px;color:var(--sec);margin-bottom:16px">Kelola status pesanan, input resi, dan pantau pembayaran.</p>
+            <div style="margin-bottom:12px">
+              <input type="text" id="orders-search" placeholder="Cari No. Pesanan / nama / no. HP pembeli..." oninput="renderOrdersAdminTable()" style="width:100%;max-width:340px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:12.5px">
+            </div>
             <div id="orders-status-tabs" style="display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap">
               <button class="orders-tab active" data-status="" onclick="filterOrdersTab('', this)">Semua</button>
               <button class="orders-tab" data-status="menunggu_pembayaran" onclick="filterOrdersTab('menunggu_pembayaran', this)">Menunggu Pembayaran</button>
@@ -2526,6 +2529,10 @@ async function loadHomeVisitSummary() {
   perfDeltaHTML(pvToday, pvYest, 'home-pv-delta');
 }
 
+function makeOrderNumber(o) {
+  return 'ZNT-' + new Date(o.created_at).toISOString().slice(2,10).replace(/-/g,'') + '-' + o.id.slice(-4).toUpperCase();
+}
+
 async function loadOrdersAdmin() {
   orderResiOpenId = null;
   orderEditAlamatId = null;
@@ -2536,17 +2543,38 @@ async function loadOrdersAdmin() {
   const { data, error } = await sb.from('orders').select('*').order('created_at', {ascending:false});
   if (error) { el.innerHTML = `<p style="font-size:13px;color:#c0392b">${error.message}</p>`; return; }
   ordersAdminData = data || [];
+
+  // Backfill order_number buat order lama yang kolomnya masih kosong
+  const missing = ordersAdminData.filter(o => !o.order_number);
+  if (missing.length) {
+    await Promise.all(missing.map(async o => {
+      const num = makeOrderNumber(o);
+      const { error: e } = await sb.from('orders').update({ order_number: num }).eq('id', o.id);
+      if (!e) o.order_number = num;
+    }));
+  }
+
   renderOrdersAdminTable();
 }
 
 function renderOrdersAdminTable() {
   const el = document.getElementById('orders-admin-render');
   if (!el) return;
-  const rows = ordersAdminFilter ? ordersAdminData.filter(o => o.status === ordersAdminFilter) : ordersAdminData;
+  let rows = ordersAdminFilter ? ordersAdminData.filter(o => o.status === ordersAdminFilter) : ordersAdminData;
+  const q = (document.getElementById('orders-search')?.value || '').trim().toLowerCase();
+  if (q) {
+    rows = rows.filter(o => {
+      const addr = o.shipping_address || {};
+      return (o.order_number||'').toLowerCase().includes(q)
+        || (addr.recipient_name||'').toLowerCase().includes(q)
+        || (addr.phone||'').toLowerCase().includes(q);
+    });
+  }
   if (!rows.length) { el.innerHTML = `<div style="font-size:13px;color:var(--muted);padding:20px 0">Tidak ada pesanan di kategori ini.</div>`; return; }
 
   el.innerHTML = `<div style="overflow-x:auto"><table class="orders-table" style="width:100%;border-collapse:collapse;font-size:12.5px">
     <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+      <th style="padding:8px 6px">No. Pesanan</th>
       <th style="padding:8px 6px">Tanggal</th>
       <th style="padding:8px 6px">Pembeli</th>
       <th style="padding:8px 6px">Produk</th>
@@ -2633,6 +2661,7 @@ function renderOrderRow(o) {
 
   return `
     <tr style="border-bottom:1px solid var(--border);vertical-align:top" data-order-id="${o.id}">
+      <td style="padding:8px 6px;white-space:nowrap;font-family:monospace;font-size:11px">${o.order_number || makeOrderNumber(o)}</td>
       <td style="padding:8px 6px;white-space:nowrap">${date}</td>
       <td style="padding:8px 6px">${addr.recipient_name||'-'}<br><span style="color:var(--muted)">${addr.phone||''}</span></td>
       <td style="padding:8px 6px;max-width:220px">
@@ -2697,7 +2726,7 @@ function printLabel(orderId) {
   if (!o) return;
   const addr = o.shipping_address || {};
   const date = new Date(o.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
-  const orderNum = o.order_number || ('ZNT-' + new Date(o.created_at).toISOString().slice(2,10).replace(/-/g,'') + '-' + orderId.slice(-4).toUpperCase());
+  const orderNum = o.order_number || makeOrderNumber(o);
   const items = (o.items||[]).map(i => `<tr><td style="padding:3px 6px;border:1px solid #ccc">${i.name}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${i.color}, ${i.size}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${i.qty}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:right">Rp ${(i.price*i.qty).toLocaleString('id-ID')}</td></tr>`).join('');
   const payMethod = {'cod':'COD (Bayar di Tempat)','transfer_bca':'Transfer / QRIS BCA','gopay':'GoPay'}[o.payment_method] || o.payment_method || '-';
   const resiInfo = o.resi ? `${o.courier||'Kurir'}: <strong>${o.resi}</strong>` : '<em style="color:#999">Resi belum diinput</em>';
