@@ -206,7 +206,7 @@
     .admin-sidebar-brand p{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:4px}
     .admin-nav{flex:1;padding:14px 12px;overflow-y:auto}
     .admin-nav-group-label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:10px 12px 6px}
-    .admin-nav-item{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border-radius:var(--radius-sm);background:none;border:none;color:rgba(255,255,255,.62);font-family:'Inter',sans-serif;font-size:13.5px;cursor:pointer;text-align:left;margin-bottom:2px;transition:background .15s,color .15s}
+    .admin-nav-item{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border-radius:var(--radius-sm);background:none;border:none;color:rgba(255,255,255,.62);font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;text-align:left;margin-bottom:2px;transition:background .15s,color .15s;text-decoration:none}
     .admin-nav-item svg{width:17px;height:17px;flex-shrink:0}
     .admin-nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
     .admin-nav-item.active{background:#fff;color:#1a1a1a;font-weight:500}
@@ -439,7 +439,7 @@
       .admin-content{padding-bottom:80px}
 
       .admin-bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;height:58px;background:var(--surface);border-top:1px solid var(--border);z-index:40;padding-bottom:env(safe-area-inset-bottom)}
-      .admin-bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;color:var(--muted);font-family:'Inter',sans-serif;font-size:10.5px}
+      .admin-bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;color:var(--muted);font-family:'Inter',sans-serif;font-size:10.5px;text-decoration:none}
       .admin-bn-item svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}
       .admin-bn-item.active{color:var(--accent);font-weight:600}
       .home-stat-grid{grid-template-columns:repeat(2,1fr) !important}
@@ -2693,7 +2693,7 @@ function renderOrderRow(o) {
     <div class="order-card" data-order-id="${o.id}" style="border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;background:#fff">
       <div style="background:#f6f5f2;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;border-bottom:1px solid var(--border)">
         <span style="color:var(--sec)">👤 ${addr.recipient_name||'-'} <span style="color:var(--muted)">· ${date}</span></span>
-        <a href="#tab=orders&order=${encodeURIComponent(o.order_number || makeOrderNumber(o))}" onclick="event.preventDefault();openOrderDetail('${o.id}');history.pushState(null,'','#tab=orders&order='+encodeURIComponent('${o.order_number || makeOrderNumber(o)}'))" style="color:var(--ink);font-weight:600;cursor:pointer;text-decoration:underline;font-family:monospace">No. Pesanan ${o.order_number || makeOrderNumber(o)}</a>
+        <a href="#tab=orders&order=${encodeURIComponent(o.order_number || makeOrderNumber(o))}" onclick="event.preventDefault();openOrderDetail('${o.id}');history.pushState(null,'','#tab=orders&order='+encodeURIComponent('${o.order_number || makeOrderNumber(o)}'))" style="color:var(--ink);font-weight:600;cursor:pointer;text-decoration:none;font-family:monospace" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">No. Pesanan ${o.order_number || makeOrderNumber(o)}</a>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:14px;padding:12px 14px;align-items:flex-start">
         <div style="flex:2 1 220px;display:flex;gap:8px;align-items:center">
