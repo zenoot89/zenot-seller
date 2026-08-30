@@ -1583,11 +1583,11 @@
                 </div>
                 <div>
                   <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">TikTok Shop</label>
-                  <input class="form-input bl-field" id="bl-tiktokshop" placeholder="https://shop-id.tokopedia.com/..." disabled/>
+                  <input class="form-input bl-field" id="bl-tiktokshop" placeholder="https://vt.tiktok.com/... (link toko TikTok Shop)" disabled/>
                 </div>
                 <div>
-                  <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Tokopedia</label>
-                  <input class="form-input bl-field" id="bl-tokopedia" placeholder="https://tokopedia.com/..." disabled/>
+                  <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Lazada</label>
+                  <input class="form-input bl-field" id="bl-lazada" placeholder="https://lazada.co.id/shop/..." disabled/>
                 </div>
               </div>
 
@@ -1936,7 +1936,7 @@ async function loadBioLinks(){
     document.getElementById('bl-web').value = data.web_url || '';
     document.getElementById('bl-shopee').value = data.shopee_url || '';
     document.getElementById('bl-tiktokshop').value = data.tiktokshop_url || '';
-    document.getElementById('bl-tokopedia').value = data.tokopedia_url || '';
+    document.getElementById('bl-lazada').value = data.lazada_url || '';
     document.getElementById('bl-wa').value = data.wa_number || '';
     document.getElementById('bl-alamat').value = data.alamat_text || '';
     document.getElementById('bl-maps').value = data.maps_url || '';
@@ -1970,7 +1970,7 @@ async function saveBioLinks(){
     web_url: document.getElementById('bl-web').value.trim(),
     shopee_url: document.getElementById('bl-shopee').value.trim(),
     tiktokshop_url: document.getElementById('bl-tiktokshop').value.trim(),
-    tokopedia_url: document.getElementById('bl-tokopedia').value.trim(),
+    lazada_url: document.getElementById('bl-lazada').value.trim(),
     wa_number: document.getElementById('bl-wa').value.trim(),
     alamat_text: document.getElementById('bl-alamat').value.trim(),
     maps_url: document.getElementById('bl-maps').value.trim(),
