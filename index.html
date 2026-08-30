@@ -234,7 +234,7 @@
     .admin-section.active{display:block}
     .admin-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px}
     .admin-card-title{font-family:'Source Serif 4',serif;font-size:17px;font-weight:600;margin-bottom:18px}
-    .orders-tab{padding:9px 14px;font-size:12.5px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;white-space:nowrap}
+    .orders-tab{padding:9px 14px;font-size:12.5px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block}
     .orders-tab:hover{color:var(--ink)}
     .orders-tab.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:600}
     .perf-period-btn{padding:8px 14px;font-size:12.5px;font-weight:500;background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--muted);cursor:pointer;white-space:nowrap}
@@ -315,7 +315,7 @@
 
     /* ===== DATA MASTER SUB-TABS ===== */
     .dm-subtabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--border)}
-    .dm-subtab-btn{background:none;border:none;padding:10px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+    .dm-subtab-btn{background:none;border:none;padding:10px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;text-decoration:none;display:inline-block}
     .dm-subtab-btn.active{color:var(--text);border-bottom-color:var(--accent)}
 
     .prod-toolbar{display:flex;gap:10px;flex-wrap:wrap}
@@ -514,13 +514,13 @@
 
     /* ===== BERANDA / DASHBOARD ===== */
     .home-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-    .home-stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;cursor:pointer;font-family:inherit}
+    .home-stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;cursor:pointer;font-family:inherit;text-decoration:none;color:inherit}
     .home-stat-card.disabled{cursor:default;opacity:.55}
     .home-stat-num{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--text)}
     .home-stat-label{font-size:11.5px;color:var(--muted)}
     .home-stat-note{font-size:9.5px;color:var(--muted)}
     .home-quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 10px}
-    .home-qa-item{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;color:var(--text)}
+    .home-qa-item{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;color:var(--text);text-decoration:none}
     .home-qa-icon{width:42px;height:42px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
     .home-qa-icon svg{width:19px;height:19px;stroke:var(--accent)}
     .perf-metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px}
@@ -559,7 +559,7 @@
     .home-visit-tile{min-width:0}
     .home-visit-label{font-size:11.5px;color:var(--muted);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .home-visit-value{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600}
-    .promo-hub-card{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:16px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;transition:box-shadow .15s,border-color .15s;font-family:'Inter',sans-serif}
+    .promo-hub-card{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:16px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;transition:box-shadow .15s,border-color .15s;font-family:'Inter',sans-serif;text-decoration:none;color:inherit}
     .promo-hub-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.07);border-color:#d8d3c9}
     .promo-hub-icon{font-size:22px;line-height:1}
     .promo-hub-title{font-weight:600;font-size:13.5px;color:var(--ink)}
@@ -728,23 +728,23 @@
           <div class="admin-card">
             <h3 class="admin-card-title">Pesanan</h3>
             <div class="home-stat-grid" style="margin:0">
-              <button class="home-stat-card" onclick="switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
+              <a href="#tab=orders&status=diproses" class="home-stat-card" onclick="event.preventDefault();goToOrdersStatus('diproses')">
                 <span class="home-stat-num" id="home-stat-shipping">–</span>
                 <span class="home-stat-label">Perlu Dikirim</span>
-              </button>
-              <button class="home-stat-card" onclick="switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
+              </a>
+              <a href="#tab=orders&status=dibatalkan" class="home-stat-card" onclick="event.preventDefault();goToOrdersStatus('dibatalkan')">
                 <span class="home-stat-num" id="home-stat-cancel">–</span>
                 <span class="home-stat-label">Pembatalan</span>
-              </button>
+              </a>
               <div class="home-stat-card disabled">
                 <span class="home-stat-num">–</span>
                 <span class="home-stat-label">Pengembalian</span>
                 <span class="home-stat-note">Segera hadir</span>
               </div>
-              <button class="home-stat-card" onclick="switchTab('reviews', document.querySelector('.admin-nav-item[data-tab=reviews]'))">
+              <a href="#tab=reviews" class="home-stat-card" onclick="event.preventDefault();switchTab('reviews', document.querySelector('.admin-nav-item[data-tab=reviews]'))">
                 <span class="home-stat-num" id="home-stat-reviews">–</span>
                 <span class="home-stat-label">Ulasan</span>
-              </button>
+              </a>
             </div>
           </div>
 
@@ -755,18 +755,18 @@
                 <span class="home-qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></span>
                 Tambah Produk
               </button>
-              <button class="home-qa-item" onclick="switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
+              <a href="#tab=orders" class="home-qa-item" onclick="event.preventDefault();switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
                 <span class="home-qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/></svg></span>
                 Pesanan
-              </button>
-              <button class="home-qa-item" onclick="switchTab('performance', document.querySelector('.admin-nav-item[data-tab=performance]'))">
+              </a>
+              <a href="#tab=performance" class="home-qa-item" onclick="event.preventDefault();switchTab('performance', document.querySelector('.admin-nav-item[data-tab=performance]'))">
                 <span class="home-qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.1-3-3L5 15.5"/></svg></span>
                 Performa Toko
-              </button>
-              <button class="home-qa-item" onclick="switchTab('vouchers', document.querySelector('.admin-nav-item[data-tab=vouchers]'))">
+              </a>
+              <a href="#tab=vouchers" class="home-qa-item" onclick="event.preventDefault();switchTab('vouchers', document.querySelector('.admin-nav-item[data-tab=vouchers]'))">
                 <span class="home-qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></span>
                 Voucher
-              </button>
+              </a>
               <button class="home-qa-item" onclick="visitStore()">
                 <span class="home-qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></span>
                 Kunjungi Toko
@@ -1124,13 +1124,13 @@
         <!-- TAB: PERFORMA TOKO -->
         <div class="admin-section" id="tab-performance">
           <div id="perf-sub-tabs" style="display:flex;gap:2px;flex-wrap:wrap;margin-bottom:10px">
-            <button class="orders-tab active" data-perf="tinjauan" onclick="switchPerfTab('tinjauan',this)">Tinjauan</button>
-            <button class="orders-tab" data-perf="produk" onclick="switchPerfTab('produk',this)">Produk</button>
-            <button class="orders-tab" data-perf="penjualan" onclick="switchPerfTab('penjualan',this)">Penjualan</button>
-            <button class="orders-tab" data-perf="layanan" onclick="switchPerfTab('layanan',this)">Layanan</button>
-            <button class="orders-tab" data-perf="kunjungan" onclick="switchPerfTab('kunjungan',this)">Tingkat Kunjungan</button>
-            <button class="orders-tab" data-perf="promosi" onclick="switchPerfTab('promosi',this)">Promosi</button>
-            <button class="orders-tab" data-perf="panduan" onclick="switchPerfTab('panduan',this)">Panduan Penjualan</button>
+            <a href="#tab=performance&sub=tinjauan" class="orders-tab active" data-perf="tinjauan" onclick="event.preventDefault();switchPerfTab('tinjauan',this)">Tinjauan</a>
+            <a href="#tab=performance&sub=produk" class="orders-tab" data-perf="produk" onclick="event.preventDefault();switchPerfTab('produk',this)">Produk</a>
+            <a href="#tab=performance&sub=penjualan" class="orders-tab" data-perf="penjualan" onclick="event.preventDefault();switchPerfTab('penjualan',this)">Penjualan</a>
+            <a href="#tab=performance&sub=layanan" class="orders-tab" data-perf="layanan" onclick="event.preventDefault();switchPerfTab('layanan',this)">Layanan</a>
+            <a href="#tab=performance&sub=kunjungan" class="orders-tab" data-perf="kunjungan" onclick="event.preventDefault();switchPerfTab('kunjungan',this)">Tingkat Kunjungan</a>
+            <a href="#tab=performance&sub=promosi" class="orders-tab" data-perf="promosi" onclick="event.preventDefault();switchPerfTab('promosi',this)">Promosi</a>
+            <a href="#tab=performance&sub=panduan" class="orders-tab" data-perf="panduan" onclick="event.preventDefault();switchPerfTab('panduan',this)">Panduan Penjualan</a>
           </div>
 
           <div id="perf-period-controls">
@@ -1189,8 +1189,8 @@
               <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
                 <h3 class="admin-card-title" style="margin:0">Analisis Produk</h3>
                 <div style="display:flex;gap:2px">
-                  <button class="orders-tab active" data-panview="performa" onclick="switchProdAnalysisView('performa',this)">Performa Terbaik</button>
-                  <button class="orders-tab" data-panview="baru" onclick="switchProdAnalysisView('baru',this)">Baru Ditambahkan</button>
+                  <a href="#tab=performance&sub=produk&view=performa" class="orders-tab active" data-panview="performa" onclick="event.preventDefault();switchProdAnalysisView('performa',this)">Performa Terbaik</a>
+                  <a href="#tab=performance&sub=produk&view=baru" class="orders-tab" data-panview="baru" onclick="event.preventDefault();switchProdAnalysisView('baru',this)">Baru Ditambahkan</a>
                 </div>
               </div>
               <p style="font-size:11.5px;color:var(--muted);margin:8px 0 4px">Klik judul kolom buat urutin (misal CTR atau Conversion Rate tertinggi).</p>
@@ -1322,12 +1322,12 @@
               <input type="text" id="orders-search" placeholder="Cari No. Pesanan / nama / no. HP pembeli..." oninput="renderOrdersAdminTable()" style="width:100%;max-width:340px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:12.5px">
             </div>
             <div id="orders-status-tabs" style="display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap">
-              <button class="orders-tab active" data-status="" onclick="filterOrdersTab('', this)">Semua</button>
-              <button class="orders-tab" data-status="menunggu_pembayaran" onclick="filterOrdersTab('menunggu_pembayaran', this)">Menunggu Pembayaran</button>
-              <button class="orders-tab" data-status="diproses" onclick="filterOrdersTab('diproses', this)">Perlu Dikirim</button>
-              <button class="orders-tab" data-status="dikirim" onclick="filterOrdersTab('dikirim', this)">Dikirim</button>
-              <button class="orders-tab" data-status="selesai" onclick="filterOrdersTab('selesai', this)">Selesai</button>
-              <button class="orders-tab" data-status="dibatalkan" onclick="filterOrdersTab('dibatalkan', this)">Dibatalkan</button>
+              <a href="#tab=orders&status=" class="orders-tab active" data-status="" onclick="event.preventDefault();filterOrdersTab('', this)">Semua</a>
+              <a href="#tab=orders&status=menunggu_pembayaran" class="orders-tab" data-status="menunggu_pembayaran" onclick="event.preventDefault();filterOrdersTab('menunggu_pembayaran', this)">Menunggu Pembayaran</a>
+              <a href="#tab=orders&status=diproses" class="orders-tab" data-status="diproses" onclick="event.preventDefault();filterOrdersTab('diproses', this)">Perlu Dikirim</a>
+              <a href="#tab=orders&status=dikirim" class="orders-tab" data-status="dikirim" onclick="event.preventDefault();filterOrdersTab('dikirim', this)">Dikirim</a>
+              <a href="#tab=orders&status=selesai" class="orders-tab" data-status="selesai" onclick="event.preventDefault();filterOrdersTab('selesai', this)">Selesai</a>
+              <a href="#tab=orders&status=dibatalkan" class="orders-tab" data-status="dibatalkan" onclick="event.preventDefault();filterOrdersTab('dibatalkan', this)">Dibatalkan</a>
             </div>
             <div id="orders-admin-render"><div style="font-size:13px;color:var(--muted)">Memuat...</div></div>
           </div>
@@ -1340,31 +1340,31 @@
             <h3 class="admin-card-title">Fitur Promosi</h3>
             <p style="font-size:12.5px;color:var(--muted);margin:-8px 0 16px">Pilih fitur promosi buat tingkatkan kunjungan dan penjualan toko kamu.</p>
             <div class="promo-hub-grid">
-              <button class="promo-hub-card" onclick="switchTab('promotions', document.querySelector('.admin-nav-item[data-tab=promotions]'))">
+              <a href="#tab=promotions" class="promo-hub-card" onclick="event.preventDefault();switchTab('promotions', document.querySelector('.admin-nav-item[data-tab=promotions]'))">
                 <span class="promo-hub-icon">🏷️</span>
                 <span class="promo-hub-title">Diskon Produk</span>
                 <span class="promo-hub-desc">Atur diskon % produk & tingkatkan penjualan</span>
-              </button>
-              <button class="promo-hub-card" onclick="switchTab('vouchers', document.querySelector('.admin-nav-item[data-tab=vouchers]'))">
+              </a>
+              <a href="#tab=vouchers" class="promo-hub-card" onclick="event.preventDefault();switchTab('vouchers', document.querySelector('.admin-nav-item[data-tab=vouchers]'))">
                 <span class="promo-hub-icon">🎟️</span>
                 <span class="promo-hub-title">Voucher Toko</span>
                 <span class="promo-hub-desc">Berikan voucher diskon untuk pembeli</span>
-              </button>
-              <button class="promo-hub-card" onclick="switchTab('bundling', document.querySelector('.admin-nav-item[data-tab=bundling]'))">
+              </a>
+              <a href="#tab=bundling" class="promo-hub-card" onclick="event.preventDefault();switchTab('bundling', document.querySelector('.admin-nav-item[data-tab=bundling]'))">
                 <span class="promo-hub-icon">📦</span>
                 <span class="promo-hub-title">Bundling</span>
                 <span class="promo-hub-desc">Gabungkan produk jadi satu paket harga</span>
-              </button>
-              <button class="promo-hub-card" onclick="switchTab('reseller', document.querySelector('.admin-nav-item[data-tab=reseller]'))">
+              </a>
+              <a href="#tab=reseller" class="promo-hub-card" onclick="event.preventDefault();switchTab('reseller', document.querySelector('.admin-nav-item[data-tab=reseller]'))">
                 <span class="promo-hub-icon">🤝</span>
                 <span class="promo-hub-title">Program Reseller</span>
                 <span class="promo-hub-desc">Ajak reseller jual produkmu, atur komisi</span>
-              </button>
-              <button class="promo-hub-card" onclick="switchTab('dropshipper', document.querySelector('.admin-nav-item[data-tab=dropshipper]'))">
+              </a>
+              <a href="#tab=dropshipper" class="promo-hub-card" onclick="event.preventDefault();switchTab('dropshipper', document.querySelector('.admin-nav-item[data-tab=dropshipper]'))">
                 <span class="promo-hub-icon">🚚</span>
                 <span class="promo-hub-title">Program Dropshipper</span>
                 <span class="promo-hub-desc">Buka toko tanpa stok lewat dropshipper</span>
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -1514,8 +1514,8 @@
         <!-- TAB: DATA MASTER (Kategori, Supplier, dst) -->
         <div class="admin-section" id="tab-categories">
           <div class="dm-subtabs">
-            <button class="dm-subtab-btn active" id="dm-tab-btn-categories" onclick="switchDataMasterTab('categories')">Kategori</button>
-            <button class="dm-subtab-btn" id="dm-tab-btn-suppliers" onclick="switchDataMasterTab('suppliers')">Supplier</button>
+            <a href="#tab=categories&sub=categories" class="dm-subtab-btn active" id="dm-tab-btn-categories" onclick="event.preventDefault();switchDataMasterTab('categories')">Kategori</a>
+            <a href="#tab=categories&sub=suppliers" class="dm-subtab-btn" id="dm-tab-btn-suppliers" onclick="event.preventDefault();switchDataMasterTab('suppliers')">Supplier</a>
           </div>
 
           <div class="admin-card" id="dm-panel-categories">
@@ -1883,7 +1883,7 @@ function renderTab(tab, el) {
 
 function switchTab(tab, el) {
   renderTab(tab, el);
-  history.pushState(null, '', '#tab=' + tab);
+  pushHashParams({ tab, sub: '', order: '', status: '', view: '' });
 }
 
 function parseHash() {
@@ -1896,12 +1896,26 @@ function parseHash() {
   return params;
 }
 
+function pushHashParams(updates) {
+  const params = parseHash();
+  Object.entries(updates).forEach(([k, v]) => {
+    if (v === null || v === undefined || v === '') delete params[k];
+    else params[k] = v;
+  });
+  const hash = '#' + Object.entries(params).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+  history.pushState(null, '', hash);
+}
+
 function applyHashRoute() {
   const params = parseHash();
   const tab = params.tab || 'home';
   const navEl = document.querySelector(`.admin-nav-item[data-tab="${tab}"]`) || document.querySelector('.admin-nav-item[data-tab="home"]');
   renderTab(tab, navEl);
+
   if (tab === 'orders') {
+    const status = params.status || '';
+    const statusBtn = document.querySelector(`#orders-status-tabs .orders-tab[data-status="${status}"]`);
+    if (statusBtn) renderOrdersFilterTab(status, statusBtn);
     if (params.order) {
       const tryOpen = (attempts = 0) => {
         const o = ordersAdminData.find(x => x.order_number === params.order);
@@ -1915,6 +1929,20 @@ function applyHashRoute() {
       if (detailEl) detailEl.style.display = 'none';
       if (listEl) listEl.style.display = '';
     }
+  }
+
+  if (tab === 'performance') {
+    const sub = params.sub || 'tinjauan';
+    const perfBtn = document.querySelector(`#perf-sub-tabs .orders-tab[data-perf="${sub}"]`);
+    if (perfBtn) renderPerfTab(sub, perfBtn);
+    if (params.view) {
+      const viewBtn = document.querySelector(`[data-panview="${params.view}"]`);
+      if (viewBtn) renderProdAnalysisView(params.view, viewBtn);
+    }
+  }
+
+  if (tab === 'categories') {
+    renderDataMasterTab(params.sub || 'categories');
   }
 }
 
@@ -1956,12 +1984,16 @@ function perfDeltaHTML(current, previous, elId) {
 }
 
 const PERF_TAB_TITLES_ID = ['tinjauan','produk','penjualan','layanan','kunjungan','promosi','panduan'];
-function switchPerfTab(tab, el) {
+function renderPerfTab(tab, el) {
   document.querySelectorAll('#perf-sub-tabs .orders-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   PERF_TAB_TITLES_ID.forEach(t => { const p = document.getElementById(`perf-panel-${t}`); if (p) p.style.display = (t===tab?'':'none'); });
   document.getElementById('perf-period-controls').style.display = (tab === 'promosi' || tab === 'panduan') ? 'none' : '';
   loadPerfTabData(tab);
+}
+function switchPerfTab(tab, el) {
+  renderPerfTab(tab, el);
+  pushHashParams({ sub: tab });
 }
 function setPerfPeriod(period) {
   document.getElementById('perf-period').value = period;
@@ -2067,10 +2099,14 @@ let perfProductSortKey = 'views';
 let perfProductSortDir = 'desc';
 let perfProductAnalysisView = 'performa'; // 'performa' | 'baru'
 
-function switchProdAnalysisView(view, el) {
+function renderProdAnalysisView(view, el) {
   perfProductAnalysisView = view;
   document.querySelectorAll('[data-panview]').forEach(b => b.classList.toggle('active', b === el));
   renderPerfProductAnalysis();
+}
+function switchProdAnalysisView(view, el) {
+  renderProdAnalysisView(view, el);
+  pushHashParams({ view });
 }
 
 function sortPerfProduct(key) {
@@ -2499,11 +2535,20 @@ let orderResiOpenId = null;
 let orderEditAlamatId = null;
 let orderEditItemId = null;
 
-function filterOrdersTab(status, btn) {
+function renderOrdersFilterTab(status, btn) {
   ordersAdminFilter = status;
   document.querySelectorAll('.orders-tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   renderOrdersAdminTable();
+}
+function filterOrdersTab(status, btn) {
+  renderOrdersFilterTab(status, btn);
+  pushHashParams({ status, order: '' });
+}
+function goToOrdersStatus(status) {
+  switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'));
+  const btn = document.querySelector(`#orders-status-tabs .orders-tab[data-status="${status}"]`);
+  filterOrdersTab(status, btn);
 }
 
 async function loadHomeStats() {
@@ -3271,12 +3316,16 @@ function confirmCategoryPicker() {
 function supplierName(id) { const s = allSuppliers.find(x=>x.id===id); return s ? s.name : ''; }
 
 // ===================== DATA MASTER: SUB-TABS =====================
-function switchDataMasterTab(name) {
+function renderDataMasterTab(name) {
   ['categories','suppliers'].forEach(t => {
     document.getElementById(`dm-tab-btn-${t}`).classList.toggle('active', t===name);
     document.getElementById(`dm-panel-${t}`).classList.toggle('hidden', t!==name);
   });
   if (name === 'suppliers') loadAdminSuppliers();
+}
+function switchDataMasterTab(name) {
+  renderDataMasterTab(name);
+  pushHashParams({ sub: name });
 }
 
 // ===================== SUPPLIERS =====================
