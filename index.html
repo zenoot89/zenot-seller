@@ -657,6 +657,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51L8.59 10.49"/></svg>
         Bagikan Toko
       </button>
+      <a href="#tab=bio-link" class="admin-nav-item" data-tab="bio-link" onclick="event.preventDefault();switchTab('bio-link',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Link Toko
+      </a>
     </nav>
     <div class="admin-sidebar-footer">
       <div class="admin-user-chip">
@@ -1555,6 +1559,52 @@
           </div>
         </div>
 
+        <div class="admin-section" id="tab-bio-link">
+          <div class="admin-card">
+            <h3 class="admin-card-title">Link Toko (halaman /bio)</h3>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:14px">Link ini yang muncul di halaman zenoot.web.id/bio — pasang link ini di bio Instagram/TikTok.</p>
+            <div style="display:flex;flex-direction:column;gap:14px;max-width:480px">
+              <div>
+                <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Link Website (zenoot.web.id)</label>
+                <input class="form-input" id="bl-web" placeholder="https://zenoot.web.id"/>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Link Toko Shopee</label>
+                <input class="form-input" id="bl-shopee" placeholder="https://shopee.co.id/..."/>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Link TikTok Shop</label>
+                <input class="form-input" id="bl-tiktokshop" placeholder="https://shop-id.tokopedia.com/..."/>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Link Tokopedia</label>
+                <input class="form-input" id="bl-tokopedia" placeholder="https://tokopedia.com/..."/>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Nomor WhatsApp (format: 628xxxxxxxxxx)</label>
+                <input class="form-input" id="bl-wa" placeholder="6281234567890"/>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Alamat Toko (teks)</label>
+                <input class="form-input" id="bl-alamat" placeholder="Jln. Binong Jati No. 63, Bandung"/>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Link Google Maps</label>
+                <input class="form-input" id="bl-maps" placeholder="https://maps.google.com/?q=..."/>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Link Instagram</label>
+                <input class="form-input" id="bl-ig" placeholder="https://instagram.com/zenoot.id"/>
+              </div>
+              <div>
+                <label style="font-size:12px;color:var(--sec);display:block;margin-bottom:4px">Link TikTok</label>
+                <input class="form-input" id="bl-tiktok" placeholder="https://tiktok.com/@zenoot.id"/>
+              </div>
+              <button class="btn-primary" style="width:auto;padding:10px 20px" onclick="saveBioLinks()">Simpan</button>
+              <p id="bl-status" style="font-size:12px;color:var(--muted)"></p>
+            </div>
+          </div>
+        </div>
         <div class="admin-section" id="tab-reseller">
           <div class="admin-card">
             <h3 class="admin-card-title">Program Reseller</h3>
@@ -1824,7 +1874,7 @@ function toggleSidebar(open) {
   document.getElementById('admin-scrim').classList.toggle('open', open);
 }
 
-const TAB_TITLES = { home: 'Beranda', products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', 'promo-hub': 'Pusat Promosi', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan' };
+const TAB_TITLES = { home: 'Beranda', products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', 'promo-hub': 'Pusat Promosi', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan', 'bio-link': 'Link Toko' };
 
 // Bottom nav (mobile) cuma punya 4 tab langsung; sisanya (vouchers/categories/reviews/dst) dianggap "Saya"/lainnya, dibuka lewat drawer sidebar yang sama
 const BOTTOM_NAV_TABS = ['home', 'products', 'performance', 'orders'];
@@ -1858,6 +1908,40 @@ function toggleProdFilterPanel(btn) {
   document.getElementById('prod-filter-panel').classList.toggle('show');
   btn.classList.toggle('active');
 }
+async function loadBioLinks(){
+  const { data } = await sb.from('bio_links').select('*').eq('id', 1).maybeSingle();
+  if (!data) return;
+  document.getElementById('bl-web').value = data.web_url || '';
+  document.getElementById('bl-shopee').value = data.shopee_url || '';
+  document.getElementById('bl-tiktokshop').value = data.tiktokshop_url || '';
+  document.getElementById('bl-tokopedia').value = data.tokopedia_url || '';
+  document.getElementById('bl-wa').value = data.wa_number || '';
+  document.getElementById('bl-alamat').value = data.alamat_text || '';
+  document.getElementById('bl-maps').value = data.maps_url || '';
+  document.getElementById('bl-ig').value = data.ig_url || '';
+  document.getElementById('bl-tiktok').value = data.tiktok_url || '';
+}
+
+async function saveBioLinks(){
+  const payload = {
+    id: 1,
+    web_url: document.getElementById('bl-web').value.trim(),
+    shopee_url: document.getElementById('bl-shopee').value.trim(),
+    tiktokshop_url: document.getElementById('bl-tiktokshop').value.trim(),
+    tokopedia_url: document.getElementById('bl-tokopedia').value.trim(),
+    wa_number: document.getElementById('bl-wa').value.trim(),
+    alamat_text: document.getElementById('bl-alamat').value.trim(),
+    maps_url: document.getElementById('bl-maps').value.trim(),
+    ig_url: document.getElementById('bl-ig').value.trim(),
+    tiktok_url: document.getElementById('bl-tiktok').value.trim(),
+    updated_at: new Date().toISOString()
+  };
+  const status = document.getElementById('bl-status');
+  status.textContent = 'Menyimpan...';
+  const { error } = await sb.from('bio_links').upsert(payload);
+  status.textContent = error ? ('Gagal: ' + error.message) : 'Tersimpan ✓';
+}
+
 function renderTab(tab, el) {
   document.querySelectorAll('.admin-nav-item[data-tab]').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
@@ -1872,6 +1956,7 @@ function renderTab(tab, el) {
   if (tab === 'customers') loadAdminCustomers();
   if (tab === 'orders') loadOrdersAdmin();
   if (tab === 'home') loadHomeStats();
+  if (tab === 'bio-link') loadBioLinks();
   if (tab === 'performance') loadPerfActiveTab();
   if (tab === 'promotions') {
     loadCategories();
