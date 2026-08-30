@@ -2746,57 +2746,61 @@ function openOrderDetail(orderId) {
 
   const el = document.getElementById('order-detail-view');
   el.innerHTML = `
-    <div style="margin-bottom:16px">
-      <button onclick="closeOrderDetail()" style="padding:6px 12px;font-size:12.5px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer">← Kembali ke Pesanan</button>
-    </div>
-
-    <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px;background:#f6f5f2;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-      <div>
-        <span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${s.color};background:${s.bg}">${s.label}</span>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px">Dibuat: ${date}</div>
+    <div style="max-width:760px;margin:0 auto">
+      <div style="margin-bottom:16px">
+        <button onclick="closeOrderDetail()" style="padding:6px 12px;font-size:12.5px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer">← Kembali ke Pesanan</button>
       </div>
-      <div style="font-family:monospace;font-weight:600;font-size:13px">No. Pesanan: ${orderNum}</div>
-    </div>
 
-    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px">
-      <div style="flex:1 1 280px;border:1px solid var(--border);border-radius:8px;padding:14px 16px">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:8px">📦 Alamat Pengiriman</div>
-        <div style="font-size:13px;font-weight:600">${addr.recipient_name||'-'}</div>
-        <div style="font-size:12.5px;color:var(--sec);margin-top:2px">${addr.phone||''}</div>
-        <div style="font-size:12.5px;color:var(--sec);margin-top:6px">${addr.address_detail||''}</div>
-        ${addr.address_note ? `<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:2px">${addr.address_note}</div>` : ''}
-        <div style="font-size:12.5px;color:var(--sec);margin-top:4px">${[addr.village,addr.district,addr.city,addr.province].filter(Boolean).join(', ')}</div>
-        <div style="font-size:12.5px;font-weight:600;margin-top:2px">${addr.postal_code||''}</div>
+      <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px;background:#f6f5f2;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <div>
+          <span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${s.color};background:${s.bg}">${s.label}</span>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">Dibuat: ${date}</div>
+        </div>
+        <div style="font-family:monospace;font-weight:600;font-size:13px">No. Pesanan: ${orderNum}</div>
       </div>
-      <div style="flex:1 1 280px;border:1px solid var(--border);border-radius:8px;padding:14px 16px">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:8px">🚚 Informasi Jasa Kirim</div>
-        ${o.resi ? `
-          <div style="font-size:13px;font-weight:600">${o.courier||'Kurir'}</div>
-          <div style="font-size:12.5px;color:var(--sec);margin-top:2px">No. Resi: ${o.resi}</div>
-        ` : `<div style="font-size:12.5px;color:var(--muted)">Resi belum diinput</div>`}
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin:14px 0 8px">💳 Pembayaran</div>
-        <div style="font-size:12.5px">${payMethod} <span style="color:var(--muted)">— ${payStatus}</span></div>
+
+      <div style="border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px">
+        <div style="padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px">📦 Alamat Pengiriman</div>
+          <div style="font-size:13px;font-weight:600">${addr.recipient_name||'-'}</div>
+          <div style="font-size:12.5px;color:var(--sec);margin-top:2px">${addr.phone||''}</div>
+          <div style="font-size:12.5px;color:var(--sec);margin-top:6px">${addr.address_detail||''}</div>
+          ${addr.address_note ? `<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:2px">${addr.address_note}</div>` : ''}
+          <div style="font-size:12.5px;color:var(--sec);margin-top:4px">${[addr.village,addr.district,addr.city,addr.province].filter(Boolean).join(', ')}</div>
+          <div style="font-size:12.5px;font-weight:600;margin-top:2px">${addr.postal_code||''}</div>
+        </div>
+        <div style="padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px">🚚 Informasi Jasa Kirim</div>
+          ${o.resi ? `
+            <div style="font-size:13px;font-weight:600">${o.courier||'Kurir'}</div>
+            <div style="font-size:12.5px;color:var(--sec);margin-top:2px">No. Resi: ${o.resi}</div>
+          ` : `<div style="font-size:12.5px;color:var(--muted)">Resi belum diinput</div>`}
+        </div>
+        <div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px">💳 Pembayaran</div>
+          <div style="font-size:12.5px">${payMethod} <span style="color:var(--muted)">— ${payStatus}</span></div>
+        </div>
       </div>
-    </div>
 
-    <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px">
-      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:8px">🛍️ Daftar Produk</div>
-      <table style="width:100%;border-collapse:collapse;font-size:12.5px">
-        <thead><tr style="text-align:left;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px">
-          <th style="padding:6px">Produk</th>
-          <th style="padding:6px;text-align:right">Harga Satuan</th>
-          <th style="padding:6px;text-align:center">Qty</th>
-          <th style="padding:6px;text-align:right">Subtotal</th>
-        </tr></thead>
-        <tbody>${itemRows}</tbody>
-      </table>
-    </div>
+      <div style="border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:10px">🛍️ Daftar Produk</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+          <thead><tr style="text-align:left;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px">
+            <th style="padding:6px 6px 8px">Produk</th>
+            <th style="padding:6px 6px 8px;text-align:right">Harga Satuan</th>
+            <th style="padding:6px 6px 8px;text-align:center">Qty</th>
+            <th style="padding:6px 6px 8px;text-align:right">Subtotal</th>
+          </tr></thead>
+          <tbody>${itemRows}</tbody>
+        </table>
+      </div>
 
-    <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;max-width:360px;margin-left:auto">
-      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:8px">Ringkasan Pembayaran</div>
-      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="color:var(--sec)">Subtotal Pesanan</span><span>Rp ${subtotal.toLocaleString('id-ID')}</span></div>
-      ${discount > 0 ? `<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="color:var(--sec)">Diskon Voucher</span><span style="color:#2a7a3d">- Rp ${discount.toLocaleString('id-ID')}</span></div>` : ''}
-      <div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><span>Total Dibayar Pembeli</span><span>Rp ${(o.total||0).toLocaleString('id-ID')}</span></div>
+      <div style="border:1px solid var(--border);border-radius:8px;padding:16px">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:10px">Ringkasan Pembayaran</div>
+        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="color:var(--sec)">Subtotal Pesanan</span><span>Rp ${subtotal.toLocaleString('id-ID')}</span></div>
+        ${discount > 0 ? `<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="color:var(--sec)">Diskon Voucher</span><span style="color:#2a7a3d">- Rp ${discount.toLocaleString('id-ID')}</span></div>` : ''}
+        <div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><span>Total Dibayar Pembeli</span><span>Rp ${(o.total||0).toLocaleString('id-ID')}</span></div>
+      </div>
     </div>
   `;
 
