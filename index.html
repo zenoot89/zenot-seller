@@ -571,6 +571,7 @@
     .ptr-spinner{width:22px;height:22px;border:2.5px solid var(--border);border-top-color:var(--ink);border-radius:50%;display:inline-block}
     .ptr-spinner.spin{animation:pf-spin .6s linear infinite}
     /* ===== BAGIKAN TOKO (tab Link web + Kode QR) ===== */
+    #share-modal{z-index:410} /* di atas .admin-page (400); di bawah toast (600) */
     .share-tabs{display:flex;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--border)}
     .share-tab{background:none;border:none;padding:10px 16px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'Inter',sans-serif}
     .share-tab.active{color:var(--text);border-bottom-color:var(--accent)}
