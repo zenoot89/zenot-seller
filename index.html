@@ -1100,14 +1100,19 @@
         <div class="modal-overlay" id="voucher-modal">
           <div class="modal">
             <h3 class="admin-card-title">Buat Voucher</h3>
+            <div class="form-group">
+              <label class="form-label">Nama Voucher <span style="font-weight:400;color:var(--muted)">(hanya untuk admin, tidak tampil ke pembeli)</span></label>
+              <input class="form-input" id="v-name" maxlength="100" placeholder="Voucher pelanggan baru"/>
+            </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Kode</label>
-                <input class="form-input" id="v-code" placeholder="ZENOOT10" style="text-transform:uppercase"/>
+                <label class="form-label">Kode Voucher</label>
+                <input class="form-input" id="v-code" maxlength="12" placeholder="ZENOOT10" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
+                <p style="font-size:11px;color:var(--muted);margin-top:4px">Huruf A-Z dan angka 0-9, maksimal 12 karakter</p>
               </div>
               <div class="form-group">
-                <label class="form-label">Tipe</label>
-                <select class="form-input" id="v-type">
+                <label class="form-label">Tipe Diskon</label>
+                <select class="form-input" id="v-type" onchange="voucherFormSync()">
                   <option value="percent">Persen (%)</option>
                   <option value="fixed">Nominal (Rp)</option>
                 </select>
@@ -1115,22 +1120,53 @@
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Nilai Diskon</label>
-                <input class="form-input" id="v-value" type="number" placeholder="10"/>
+                <label class="form-label" id="v-value-label">Nilai Diskon (%)</label>
+                <input class="form-input" id="v-value" type="number" min="1" placeholder="10"/>
               </div>
               <div class="form-group">
-                <label class="form-label">Min. Order (Rp)</label>
-                <input class="form-input" id="v-min" type="number" placeholder="0"/>
+                <label class="form-label">Minimum Pembelian (Rp)</label>
+                <input class="form-input" id="v-min" type="number" min="0" placeholder="0"/>
+              </div>
+            </div>
+            <div class="form-group" id="v-maxdisc-wrap">
+              <label class="form-label">Batas Diskon Maksimum</label>
+              <div style="display:flex;gap:8px">
+                <select class="form-input" id="v-maxdisc-mode" style="flex:0 0 150px" onchange="voucherFormSync()">
+                  <option value="none">Tanpa batas</option>
+                  <option value="limit">Ada batas</option>
+                </select>
+                <input class="form-input" id="v-maxdisc" type="number" min="1" placeholder="Rp, mis. 50000" style="flex:1"/>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">Max. Pakai</label>
-                <input class="form-input" id="v-maxuse" type="number" placeholder="100"/>
+                <label class="form-label">Mulai</label>
+                <input class="form-input" id="v-start" type="datetime-local"/>
               </div>
               <div class="form-group">
-                <label class="form-label">Berlaku Sampai</label>
-                <input class="form-input" id="v-expires" type="date"/>
+                <label class="form-label">Berakhir</label>
+                <input class="form-input" id="v-end" type="datetime-local"/>
+                <p style="font-size:11px;color:var(--muted);margin-top:4px">Kosongkan jika tanpa batas waktu</p>
+              </div>
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:-4px 0 14px;cursor:pointer">
+              <input type="checkbox" id="v-show-early"/> Tampilkan voucher lebih awal (terlihat di toko sebelum waktu mulai, belum bisa dipakai)
+            </label>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Kuota Pemakaian</label>
+                <input class="form-input" id="v-maxuse" type="number" min="1" placeholder="100"/>
+                <p style="font-size:11px;color:var(--muted);margin-top:4px">Total pemakaian voucher oleh semua pembeli</p>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Jumlah Maks. per Pembeli</label>
+                <div style="display:flex;gap:8px">
+                  <select class="form-input" id="v-peruser-mode" style="flex:0 0 120px" onchange="voucherFormSync()">
+                    <option value="limit">Ada batas</option>
+                    <option value="none">Tanpa batas</option>
+                  </select>
+                  <input class="form-input" id="v-peruser" type="number" min="1" value="1" style="flex:1"/>
+                </div>
               </div>
             </div>
             <div style="display:flex;gap:8px">
@@ -3352,7 +3388,31 @@ async function saveEditItem(orderId) {
 }
 
 // ===================== VOUCHER ADMIN =====================
+function pad2(n) { return String(n).padStart(2, '0'); }
+function toLocalInput(d) {
+  return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate()) + 'T' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+}
+function voucherFormSync() {
+  const isPct = document.getElementById('v-type').value === 'percent';
+  document.getElementById('v-value-label').textContent = isPct ? 'Nilai Diskon (%)' : 'Nilai Diskon (Rp)';
+  document.getElementById('v-value').placeholder = isPct ? '10' : '10000';
+  document.getElementById('v-maxdisc-wrap').style.display = isPct ? '' : 'none';
+  const limitDisc = document.getElementById('v-maxdisc-mode').value === 'limit';
+  document.getElementById('v-maxdisc').disabled = !limitDisc;
+  if (!limitDisc) document.getElementById('v-maxdisc').value = '';
+  const limitUser = document.getElementById('v-peruser-mode').value === 'limit';
+  document.getElementById('v-peruser').disabled = !limitUser;
+  if (limitUser && !document.getElementById('v-peruser').value) document.getElementById('v-peruser').value = '1';
+}
 function openVoucherModal() {
+  ['v-name','v-code','v-value','v-min','v-maxuse','v-maxdisc','v-end'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('v-type').value = 'percent';
+  document.getElementById('v-maxdisc-mode').value = 'none';
+  document.getElementById('v-peruser-mode').value = 'limit';
+  document.getElementById('v-peruser').value = '1';
+  document.getElementById('v-show-early').checked = false;
+  document.getElementById('v-start').value = toLocalInput(new Date());
+  voucherFormSync();
   document.getElementById('voucher-modal').classList.add('open');
 }
 function closeVoucherModal() {
@@ -3360,15 +3420,33 @@ function closeVoucherModal() {
 }
 
 async function saveVoucher() {
+  const name = document.getElementById('v-name').value.trim() || null;
   const code = document.getElementById('v-code').value.trim().toUpperCase();
   const discount_type = document.getElementById('v-type').value;
-  const discount_value = parseInt(document.getElementById('v-value').value)||0;
-  const min_order = parseInt(document.getElementById('v-min').value)||0;
-  const max_uses = parseInt(document.getElementById('v-maxuse').value)||1;
-  const expires_at = document.getElementById('v-expires').value||null;
-  if (!code||!discount_value) { showToast('Isi kode dan nilai diskon'); return; }
-  const { error } = await sb.from('vouchers').insert({code,discount_type,discount_value,min_order,max_uses,expires_at});
-  if (error) { showToast(error.message); return; }
+  const discount_value = parseInt(document.getElementById('v-value').value) || 0;
+  const min_order = parseInt(document.getElementById('v-min').value) || 0;
+  const max_uses = parseInt(document.getElementById('v-maxuse').value) || 0;
+  const startVal = document.getElementById('v-start').value;
+  const endVal = document.getElementById('v-end').value;
+  const show_early = document.getElementById('v-show-early').checked;
+  const limitDisc = discount_type === 'percent' && document.getElementById('v-maxdisc-mode').value === 'limit';
+  const max_discount = limitDisc ? (parseInt(document.getElementById('v-maxdisc').value) || 0) : null;
+  const limitUser = document.getElementById('v-peruser-mode').value === 'limit';
+  const per_user_limit = limitUser ? (parseInt(document.getElementById('v-peruser').value) || 0) : null;
+
+  if (!/^[A-Z0-9]{1,12}$/.test(code)) { showToast('Kode voucher: huruf A-Z dan angka 0-9, maksimal 12 karakter'); return; }
+  if (discount_value < 1) { showToast('Isi nilai diskon'); return; }
+  if (discount_type === 'percent' && discount_value > 100) { showToast('Diskon persen maksimal 100'); return; }
+  if (limitDisc && max_discount < 1) { showToast('Isi batas diskon maksimum (Rp)'); return; }
+  if (max_uses < 1) { showToast('Isi kuota pemakaian (minimal 1)'); return; }
+  if (limitUser && per_user_limit < 1) { showToast('Jumlah maks. per pembeli minimal 1'); return; }
+  const starts_at = startVal ? new Date(startVal).toISOString() : null;
+  const expires_at = endVal ? new Date(endVal).toISOString() : null;
+  if (expires_at && new Date(expires_at) <= new Date()) { showToast('Waktu berakhir sudah lewat'); return; }
+  if (starts_at && expires_at && new Date(starts_at) >= new Date(expires_at)) { showToast('Waktu berakhir harus setelah waktu mulai'); return; }
+
+  const { error } = await sb.from('vouchers').insert({ code, name, discount_type, discount_value, min_order, max_uses, starts_at, expires_at, show_early, max_discount, per_user_limit });
+  if (error) { showToast(error.code === '23505' ? 'Kode voucher sudah dipakai, pilih kode lain' : error.message); return; }
   showToast('Voucher disimpan ✓');
   closeVoucherModal();
   loadAdminVouchers();
@@ -3378,14 +3456,17 @@ async function loadAdminVouchers() {
   const { data } = await sb.from('vouchers').select('*');
   const el = document.getElementById('voucher-list');
   if (!data||!data.length) { el.innerHTML='<p style="color:var(--muted);font-size:13px">Belum ada voucher.</p>'; return; }
+  const fmtDT = t => t ? new Date(t).toLocaleString('id-ID', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) : null;
   el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px">
     <tr style="border-bottom:1px solid var(--border);text-align:left">
-      <th style="padding:8px 4px">Kode</th><th>Diskon</th><th>Pakai</th><th>Aktif</th><th></th>
+      <th style="padding:8px 4px">Kode</th><th>Diskon</th><th>Periode</th><th>Pakai</th><th>Per pembeli</th><th>Aktif</th><th></th>
     </tr>
     ${data.map(v=>`<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:8px 4px;font-family:'IBM Plex Mono',monospace;font-weight:500">${v.code}</td>
-      <td>${v.discount_type==='percent'?v.discount_value+'%':'Rp '+v.discount_value.toLocaleString('id-ID')}</td>
+      <td style="padding:8px 4px;font-family:'IBM Plex Mono',monospace;font-weight:500">${v.code}${v.name ? `<div style="font-family:inherit;font-weight:400;font-size:11px;color:var(--muted)">${v.name}</div>` : ''}</td>
+      <td>${v.discount_type==='percent'?v.discount_value+'%':'Rp '+v.discount_value.toLocaleString('id-ID')}${v.discount_type==='percent' && v.max_discount ? `<div style="font-size:11px;color:var(--muted)">maks. Rp ${v.max_discount.toLocaleString('id-ID')}</div>` : ''}</td>
+      <td style="font-size:12px">${fmtDT(v.starts_at) || 'Langsung'} – ${fmtDT(v.expires_at) || 'Tanpa batas'}${v.show_early ? '<div style="font-size:11px;color:var(--muted)">tampil lebih awal</div>' : ''}</td>
       <td>${v.used_count}/${v.max_uses}</td>
+      <td>${v.per_user_limit ? v.per_user_limit + 'x' : 'Tanpa batas'}</td>
       <td>${v.is_active?'✓':'✗'}</td>
       <td><button class="btn-danger" onclick="deleteVoucher('${v.id}')">Hapus</button></td>
     </tr>`).join('')}
