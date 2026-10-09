@@ -587,6 +587,51 @@
     .share-qr-frame canvas{width:240px;height:240px;max-width:100%;image-rendering:pixelated}
     .share-qr-note{font-size:12px;color:var(--muted);text-align:center;line-height:1.5}
 
+  
+    /* ===== CHAT (inbox) ===== */
+    .chat-shell{display:flex;height:calc(100dvh - 150px);min-height:420px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .chat-list-pane{width:320px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+    .chat-filter{display:flex;gap:2px;padding:0 8px;border-bottom:1px solid var(--border);overflow-x:auto}
+    .chat-list{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+    .chat-item{display:flex;gap:10px;width:100%;padding:12px 14px;background:none;border:none;border-bottom:1px solid var(--border);cursor:pointer;text-align:left;font-family:'Inter',sans-serif;flex-shrink:0}
+    .chat-item:hover,.chat-item.active{background:var(--bg)}
+    .chat-avatar{width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+    .chat-item-main{flex:1;min-width:0;display:block}
+    .chat-item-top{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:600;color:var(--text)}
+    .chat-item-time{font-size:11px;font-weight:400;color:var(--muted);flex-shrink:0}
+    .chat-item-sub{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:3px;font-size:12px;color:var(--sec)}
+    .chat-item-prev{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .chat-item-div{display:block;font-size:10.5px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+    .chat-unread{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#e74c3c;color:#fff;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+    .chat-conv-pane{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+    .chat-empty{margin:auto;color:var(--muted);font-size:13px;padding:20px;text-align:center}
+    .chat-conv{display:none;flex-direction:column;flex:1;min-height:0}
+    .chat-shell.has-active .chat-conv{display:flex}
+    .chat-shell.has-active .chat-empty{display:none}
+    .chat-conv-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)}
+    .chat-back{display:none;background:none;border:none;font-size:20px;cursor:pointer;padding:0 6px 0 0;color:var(--ink)}
+    .chat-conv-name{font-size:14px;font-weight:600}
+    .chat-conv-meta{font-size:12px;color:var(--sec)}
+    .chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+    .chat-msg{max-width:78%;padding:9px 12px;border-radius:12px;font-size:13.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+    .chat-msg.buyer{align-self:flex-start;background:#fff;border:1px solid var(--border)}
+    .chat-msg.staff{align-self:flex-end;background:var(--ink);color:#fff}
+    .chat-msg-time{display:block;font-size:10.5px;opacity:.6;margin-top:3px}
+    .chat-compose{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);align-items:flex-end}
+    .chat-compose textarea{flex:1;resize:none;max-height:120px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'Inter',sans-serif;font-size:14px;outline:none}
+    .chat-compose button{padding:10px 18px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer}
+    .chat-compose button:disabled{opacity:.5;cursor:default}
+    .admin-nav-item .chat-unread{margin-left:auto}
+    .admin-bn-item[data-bn="more"]{position:relative}
+    .admin-bn-item[data-bn="more"].has-unread::after{content:'';position:absolute;top:8px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#e74c3c}
+    @media(max-width:860px){
+      .chat-shell{height:calc(100dvh - 190px)}
+      .chat-list-pane{width:100%;border-right:none}
+      .chat-conv-pane{display:none}
+      .chat-shell.has-active .chat-list-pane{display:none}
+      .chat-shell.has-active .chat-conv-pane{display:flex}
+      .chat-back{display:block}
+    }
   </style>
 </head>
 <body>
@@ -660,6 +705,11 @@
       <a href="#tab=reviews" class="admin-nav-item" data-tab="reviews" onclick="event.preventDefault();switchTab('reviews',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         Ulasan
+      </a>
+      <a href="#tab=chat" class="admin-nav-item" data-tab="chat" onclick="event.preventDefault();switchTab('chat',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Chat
+        <span class="chat-unread" id="nav-chat-badge" style="display:none">0</span>
       </a>
       <a href="#tab=customers" class="admin-nav-item" data-tab="customers" onclick="event.preventDefault();switchTab('customers',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -1346,6 +1396,36 @@
 
         </div>
 
+        <div class="admin-section" id="tab-chat">
+          <div class="chat-shell" id="chat-shell">
+            <aside class="chat-list-pane">
+              <div class="chat-filter" id="chat-filter">
+                <button class="orders-tab active" onclick="chatSetFilter('',this)">Semua</button>
+                <button class="orders-tab" onclick="chatSetFilter('admin',this)">Chat Admin</button>
+                <button class="orders-tab" onclick="chatSetFilter('support',this)">Support</button>
+              </div>
+              <div class="chat-list" id="chat-list"></div>
+            </aside>
+            <section class="chat-conv-pane">
+              <div class="chat-empty" id="chat-empty">Pilih percakapan di sebelah kiri</div>
+              <div class="chat-conv" id="chat-conv">
+                <div class="chat-conv-head">
+                  <button class="chat-back" onclick="chatBack()" aria-label="Kembali">&#8592;</button>
+                  <div>
+                    <div class="chat-conv-name" id="chat-conv-name"></div>
+                    <div class="chat-conv-meta" id="chat-conv-meta"></div>
+                  </div>
+                </div>
+                <div class="chat-msgs" id="chat-msgs"></div>
+                <div class="chat-compose">
+                  <textarea id="chat-input" rows="1" maxlength="1000" placeholder="Tulis balasan..." onkeydown="chatKey(event)" oninput="chatAutoGrow(this)"></textarea>
+                  <button id="chat-send-btn" onclick="chatSend()">Kirim</button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
         <div class="admin-section" id="tab-reviews">
           <div class="admin-card">
             <h3 class="admin-card-title">Ulasan Masuk</h3>
@@ -1857,6 +1937,7 @@ async function checkIsAdmin(userId) {
 async function doLogout() {
   await sb.auth.signOut();
   adminUser = null;
+  chatStop();
   showLoginScreen();
   showToast('Berhasil logout');
 }
@@ -1876,6 +1957,7 @@ function showDashboard() {
   loadAdminProducts().then(() => { loadCategories(); loadSuppliers(); });
   loadAdminVouchers();
   loadAdminReviews();
+  chatStart();
 
   // Landing default: Beranda, kecuali ada hash URL yang minta tab/pesanan spesifik (deep link)
   if (location.hash && location.hash !== '#') {
@@ -2047,7 +2129,7 @@ function toggleSidebar(open) {
   document.getElementById('admin-scrim').classList.toggle('open', open);
 }
 
-const TAB_TITLES = { home: 'Beranda', products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', 'promo-hub': 'Pusat Promosi', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan', 'bio-link': 'Link Toko' };
+const TAB_TITLES = { home: 'Beranda', products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', 'promo-hub': 'Pusat Promosi', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan', 'bio-link': 'Link Toko', chat: 'Chat' };
 
 // Bottom nav (mobile) cuma punya 4 tab langsung; sisanya (vouchers/categories/reviews/dst) dianggap "Saya"/lainnya, dibuka lewat drawer sidebar yang sama
 const BOTTOM_NAV_TABS = ['home', 'products', 'performance', 'orders'];
@@ -2153,6 +2235,7 @@ function renderTab(tab, el) {
   if (tab === 'promotions') loadPromotions();
   if (tab === 'customers') loadAdminCustomers();
   if (tab === 'orders') loadOrdersAdmin();
+  if (tab === 'chat') chatOnShow();
   if (tab === 'home') loadHomeStats();
   if (tab === 'bio-link') loadBioLinks();
   if (tab === 'performance') loadPerfActiveTab();
@@ -4122,6 +4205,213 @@ async function deleteReview(id) {
   loadAdminReviews();
 }
 
+// ===================== CHAT (inbox admin) =====================
+let chatThreads = [];
+let chatActiveId = null;
+let chatMsgs = [];
+let chatDivFilter = '';
+let chatChannel = null;
+let chatPollTimer = null;
+let chatSending = false;
+let chatStarted = false;
+const chatBaseTitle = document.title.replace(/^\(\d+\)\s*/, '');
+const CHAT_DIV_LABEL = { admin: 'Chat Admin', support: 'Support' };
+
+function chatEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function chatTimeLabel(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const sameDay = d.toDateString() === new Date().toDateString();
+  return sameDay
+    ? d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+}
+function chatIsTabActive() {
+  const el = document.getElementById('tab-chat');
+  return !!(el && el.classList.contains('active'));
+}
+function chatTotalUnread() {
+  return chatThreads.reduce((n, t) => n + (t.staff_unread || 0), 0);
+}
+function chatUpdateBadges() {
+  const n = chatTotalUnread();
+  const b = document.getElementById('nav-chat-badge');
+  if (b) { b.textContent = n > 99 ? '99+' : String(n); b.style.display = n > 0 ? 'inline-flex' : 'none'; }
+  const more = document.querySelector('#admin-bottom-nav .admin-bn-item[data-bn="more"]');
+  if (more) more.classList.toggle('has-unread', n > 0);
+  document.title = (n > 0 ? '(' + n + ') ' : '') + chatBaseTitle;
+}
+function chatUpsertThread(t) {
+  if (!t || !t.id) return;
+  const i = chatThreads.findIndex(x => x.id === t.id);
+  if (i >= 0) chatThreads[i] = Object.assign({}, chatThreads[i], t);
+  else chatThreads.push(t);
+  chatThreads.sort((a, b) => new Date(b.last_message_at) - new Date(a.last_message_at));
+}
+async function chatLoadThreads() {
+  const { data, error } = await sb.from('chat_threads').select('*').order('last_message_at', { ascending: false }).limit(200);
+  if (error) { console.error('chat threads', error); return; }
+  chatThreads = data || [];
+  chatUpdateBadges();
+  chatRenderList();
+}
+function chatRenderList() {
+  const el = document.getElementById('chat-list');
+  if (!el) return;
+  const rows = chatThreads.filter(t => !chatDivFilter || t.division === chatDivFilter);
+  if (!rows.length) { el.innerHTML = '<div class="chat-empty">Belum ada percakapan</div>'; return; }
+  el.innerHTML = rows.map(t => {
+    const name = t.buyer_name || 'Pembeli';
+    const unread = t.staff_unread > 0 ? `<span class="chat-unread">${t.staff_unread}</span>` : '';
+    return `<button class="chat-item${t.id === chatActiveId ? ' active' : ''}" onclick="chatOpenThread('${chatEsc(t.id)}')">
+      <span class="chat-avatar">${chatEsc((name.trim()[0] || '?').toUpperCase())}</span>
+      <span class="chat-item-main">
+        <span class="chat-item-top"><span>${chatEsc(name)}</span><span class="chat-item-time">${chatTimeLabel(t.last_message_at)}</span></span>
+        <span class="chat-item-sub"><span class="chat-item-prev">${chatEsc(t.last_message_preview || 'Belum ada pesan')}</span>${unread}</span>
+        <span class="chat-item-div">${chatEsc(CHAT_DIV_LABEL[t.division] || t.division)}</span>
+      </span>
+    </button>`;
+  }).join('');
+}
+function chatSetFilter(div, btn) {
+  chatDivFilter = div;
+  document.querySelectorAll('#chat-filter .orders-tab').forEach(b => b.classList.toggle('active', b === btn));
+  chatRenderList();
+}
+async function chatOpenThread(id) {
+  const t = chatThreads.find(x => x.id === id);
+  if (!t) return;
+  chatActiveId = id;
+  document.getElementById('chat-shell').classList.add('has-active');
+  document.getElementById('chat-conv-name').textContent = t.buyer_name || 'Pembeli';
+  document.getElementById('chat-conv-meta').textContent =
+    (CHAT_DIV_LABEL[t.division] || t.division) + (t.buyer_whatsapp ? ' \u00b7 WA ' + t.buyer_whatsapp : '');
+  chatMsgs = [];
+  chatRenderMsgs(true);
+  chatRenderList();
+  await chatLoadMessages();
+  chatMarkRead();
+  const inp = document.getElementById('chat-input');
+  if (inp && window.innerWidth > 860) inp.focus();
+}
+function chatBack() {
+  chatActiveId = null;
+  document.getElementById('chat-shell').classList.remove('has-active');
+  chatRenderList();
+}
+async function chatLoadMessages() {
+  if (!chatActiveId) return;
+  const id = chatActiveId;
+  const { data, error } = await sb.from('chat_messages').select('*').eq('thread_id', id).order('created_at', { ascending: true }).limit(300);
+  if (error) { console.error('chat msgs', error); showToast('Gagal memuat pesan'); return; }
+  if (id !== chatActiveId) return;
+  chatMsgs = data || [];
+  chatRenderMsgs(true);
+}
+function chatRenderMsgs(forceBottom) {
+  const el = document.getElementById('chat-msgs');
+  if (!el) return;
+  const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  el.innerHTML = chatMsgs.map(m =>
+    `<div class="chat-msg ${m.sender_role === 'staff' ? 'staff' : 'buyer'}">${chatEsc(m.body)}<span class="chat-msg-time">${chatTimeLabel(m.created_at)}</span></div>`
+  ).join('');
+  if (forceBottom || nearBottom) el.scrollTop = el.scrollHeight;
+}
+function chatAddMsg(m) {
+  if (!m || m.thread_id !== chatActiveId) return;
+  if (chatMsgs.some(x => x.id === m.id)) return;
+  chatMsgs.push(m);
+  chatRenderMsgs(m.sender_role === 'staff');
+}
+function chatMarkRead() {
+  const t = chatThreads.find(x => x.id === chatActiveId);
+  if (!t || !(t.staff_unread > 0)) return;
+  t.staff_unread = 0;
+  chatUpdateBadges();
+  chatRenderList();
+  sb.rpc('chat_mark_read', { p_thread: t.id, p_as: 'staff' }).then(({ error }) => {
+    if (error) console.error('chat mark read', error);
+  });
+}
+async function chatSend() {
+  if (chatSending || !chatActiveId) return;
+  const inp = document.getElementById('chat-input');
+  const body = inp.value.trim();
+  if (!body) return;
+  chatSending = true;
+  const btn = document.getElementById('chat-send-btn');
+  btn.disabled = true;
+  const { data, error } = await sb.from('chat_messages')
+    .insert({ thread_id: chatActiveId, sender_role: 'staff', body })
+    .select().single();
+  chatSending = false;
+  btn.disabled = false;
+  if (error) { showToast('Gagal kirim: ' + error.message); return; }
+  inp.value = '';
+  inp.style.height = 'auto';
+  chatAddMsg(data);
+  chatUpsertThread({ id: data.thread_id, last_message_at: data.created_at, last_message_preview: data.body.slice(0, 80) });
+  chatRenderList();
+  inp.focus();
+}
+function chatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey && window.innerWidth > 860) { e.preventDefault(); chatSend(); }
+}
+function chatAutoGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+function chatStartPoll() {
+  if (chatPollTimer) return;
+  chatPollTimer = setInterval(() => { chatLoadThreads(); chatLoadMessages(); }, 15000);
+}
+function chatStopPoll() {
+  if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
+}
+function chatStart() {
+  if (chatStarted) return;
+  chatStarted = true;
+  chatLoadThreads();
+  chatChannel = sb.channel('chat-staff')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_threads' }, p => {
+      if (p.eventType === 'DELETE') {
+        chatThreads = chatThreads.filter(t => t.id !== (p.old && p.old.id));
+      } else {
+        chatUpsertThread(p.new);
+      }
+      chatUpdateBadges();
+      chatRenderList();
+      if (p.new && p.new.id && p.new.id === chatActiveId && p.new.staff_unread > 0 &&
+          document.visibilityState === 'visible' && chatIsTabActive()) chatMarkRead();
+    })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, p => chatAddMsg(p.new))
+    .subscribe(status => {
+      if (status === 'SUBSCRIBED') { chatStopPoll(); chatLoadThreads(); chatLoadMessages(); }
+      else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') chatStartPoll();
+    });
+}
+function chatStop() {
+  chatStarted = false;
+  chatStopPoll();
+  if (chatChannel) { sb.removeChannel(chatChannel); chatChannel = null; }
+  chatThreads = [];
+  chatMsgs = [];
+  chatActiveId = null;
+  const shell = document.getElementById('chat-shell');
+  if (shell) shell.classList.remove('has-active');
+  chatUpdateBadges();
+  chatRenderList();
+}
+function chatOnShow() {
+  chatLoadThreads();
+  if (chatActiveId) { chatLoadMessages(); chatMarkRead(); }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && chatActiveId && chatIsTabActive()) chatMarkRead();
+});
+
 // ===================== INIT =====================
 sb.auth.getSession().then(async ({data}) => {
   const user = data.session?.user || null;
@@ -4134,7 +4424,7 @@ sb.auth.getSession().then(async ({data}) => {
   }
 });
 sb.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT') adminUser = null;
+  if (event === 'SIGNED_OUT') { adminUser = null; chatStop(); }
 });
 </script>
 <!-- ===== CROP MODAL ===== -->
