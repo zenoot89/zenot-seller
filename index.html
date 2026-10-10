@@ -622,6 +622,9 @@
     .chat-compose button{padding:10px 18px;background:var(--ink);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer}
     .chat-compose button:disabled{opacity:.5;cursor:default}
     .admin-nav-item .chat-unread{margin-left:auto}
+    .chat-notify{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--border)}
+    .chat-notify-btn{flex:1;padding:7px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;font-size:12px;cursor:pointer;font-family:inherit;color:var(--text)}
+    .chat-notify-btn.on{border-color:#128c4a;color:#128c4a}
     .admin-bn-item[data-bn="more"]{position:relative}
     .admin-bn-item[data-bn="more"].has-unread::after{content:'';position:absolute;top:8px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#e74c3c}
     @media(max-width:860px){
@@ -1399,8 +1402,13 @@
         <div class="admin-section" id="tab-chat">
           <div class="chat-shell" id="chat-shell">
             <aside class="chat-list-pane">
+              <div class="chat-notify">
+                <button class="chat-notify-btn" id="chat-sound-btn" onclick="chatToggleSound()">Suara: aktif</button>
+                <button class="chat-notify-btn" id="chat-notif-btn" onclick="chatEnableNotif()">Aktifkan notifikasi</button>
+              </div>
               <div class="chat-filter" id="chat-filter">
                 <button class="orders-tab active" onclick="chatSetFilter('',this)">Semua</button>
+                <button class="orders-tab" id="chat-filter-unread" onclick="chatSetFilter('unread',this)">Belum dibaca</button>
                 <button class="orders-tab" onclick="chatSetFilter('admin',this)">Chat Admin</button>
                 <button class="orders-tab" onclick="chatSetFilter('support',this)">Support</button>
               </div>
@@ -4242,6 +4250,11 @@ function chatUpdateBadges() {
   const more = document.querySelector('#admin-bottom-nav .admin-bn-item[data-bn="more"]');
   if (more) more.classList.toggle('has-unread', n > 0);
   document.title = (n > 0 ? '(' + n + ') ' : '') + chatBaseTitle;
+  const fu = document.getElementById('chat-filter-unread');
+  if (fu) {
+    const nt = chatThreads.filter(x => x.staff_unread > 0).length;
+    fu.textContent = nt > 0 ? 'Belum dibaca (' + nt + ')' : 'Belum dibaca';
+  }
 }
 function chatUpsertThread(t) {
   if (!t || !t.id) return;
@@ -4260,8 +4273,8 @@ async function chatLoadThreads() {
 function chatRenderList() {
   const el = document.getElementById('chat-list');
   if (!el) return;
-  const rows = chatThreads.filter(t => !chatDivFilter || t.division === chatDivFilter);
-  if (!rows.length) { el.innerHTML = '<div class="chat-empty">Belum ada percakapan</div>'; return; }
+  const rows = chatThreads.filter(t => !chatDivFilter || (chatDivFilter === 'unread' ? t.staff_unread > 0 : t.division === chatDivFilter));
+  if (!rows.length) { el.innerHTML = '<div class="chat-empty">' + (chatDivFilter === 'unread' ? 'Semua pesan sudah dibaca' : 'Belum ada percakapan') + '</div>'; return; }
   el.innerHTML = rows.map(t => {
     const name = t.buyer_name || 'Pembeli';
     const unread = t.staff_unread > 0 ? `<span class="chat-unread">${t.staff_unread}</span>` : '';
@@ -4373,6 +4386,7 @@ function chatStopPoll() {
 function chatStart() {
   if (chatStarted) return;
   chatStarted = true;
+  chatRenderNotify();
   chatLoadThreads();
   chatChannel = sb.channel('chat-staff')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_threads' }, p => {
@@ -4386,7 +4400,7 @@ function chatStart() {
       if (p.new && p.new.id && p.new.id === chatActiveId && p.new.staff_unread > 0 &&
           document.visibilityState === 'visible' && chatIsTabActive()) chatMarkRead();
     })
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, p => chatAddMsg(p.new))
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, p => { chatAddMsg(p.new); chatOnIncoming(p.new); })
     .subscribe(status => {
       if (status === 'SUBSCRIBED') { chatStopPoll(); chatLoadThreads(); chatLoadMessages(); }
       else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') chatStartPoll();
@@ -4395,6 +4409,7 @@ function chatStart() {
 function chatStop() {
   chatStarted = false;
   chatStopPoll();
+  chatStopTitleBlink();
   if (chatChannel) { sb.removeChannel(chatChannel); chatChannel = null; }
   chatThreads = [];
   chatMsgs = [];
@@ -4404,6 +4419,131 @@ function chatStop() {
   chatUpdateBadges();
   chatRenderList();
 }
+// ----- Notifikasi pesan masuk: suara, notifikasi browser, judul berkedip -----
+const CHAT_SOUND_KEY = 'zenot_seller_chat_sound';
+let chatSoundOn = true;
+try { chatSoundOn = localStorage.getItem(CHAT_SOUND_KEY) !== '0'; } catch (e) { /* abaikan */ }
+let chatAudioCtx = null;
+let chatLastSoundAt = 0;
+let chatTitleTimer = null;
+
+function chatAudio() {
+  if (!chatAudioCtx) {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    try { chatAudioCtx = new C(); } catch (e) { return null; }
+  }
+  return chatAudioCtx;
+}
+// Browser hanya mengizinkan suara setelah pengguna mengetuk/klik sesuatu di halaman.
+function chatUnlockAudio() {
+  const c = chatAudio();
+  if (c && c.state === 'suspended') c.resume().catch(() => {});
+}
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, chatUnlockAudio, { passive: true }));
+
+function chatPlaySound() {
+  if (!chatSoundOn) return;
+  const now = Date.now();
+  if (now - chatLastSoundAt < 2500) return;
+  chatLastSoundAt = now;
+  const c = chatAudio();
+  if (!c) return;
+  const go = () => {
+    const t0 = c.currentTime;
+    [[880, 0], [1175, 0.16]].forEach(([f, d]) => {
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = 'sine';
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0 + d);
+      g.gain.exponentialRampToValueAtTime(0.25, t0 + d + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.22);
+      o.connect(g);
+      g.connect(c.destination);
+      o.start(t0 + d);
+      o.stop(t0 + d + 0.25);
+    });
+  };
+  if (c.state === 'running') go();
+  else c.resume().then(() => { if (c.state === 'running') go(); }).catch(() => {});
+}
+function chatRenderNotify() {
+  const s = document.getElementById('chat-sound-btn');
+  if (s) { s.textContent = chatSoundOn ? 'Suara: aktif' : 'Suara: mati'; s.classList.toggle('on', chatSoundOn); }
+  const n = document.getElementById('chat-notif-btn');
+  if (!n) return;
+  let label = 'Aktifkan notifikasi';
+  let on = false;
+  if (!('Notification' in window)) label = 'Notifikasi tidak didukung';
+  else if (Notification.permission === 'granted') { label = 'Notifikasi: aktif'; on = true; }
+  else if (Notification.permission === 'denied') label = 'Notifikasi: diblokir';
+  n.textContent = label;
+  n.classList.toggle('on', on);
+}
+function chatToggleSound() {
+  chatSoundOn = !chatSoundOn;
+  try { localStorage.setItem(CHAT_SOUND_KEY, chatSoundOn ? '1' : '0'); } catch (e) { /* abaikan */ }
+  chatRenderNotify();
+  if (chatSoundOn) { chatUnlockAudio(); chatLastSoundAt = 0; chatPlaySound(); }
+}
+function chatEnableNotif() {
+  if (!('Notification' in window)) { showToast('Browser ini tidak mendukung notifikasi'); return; }
+  if (Notification.permission === 'granted') { showToast('Notifikasi sudah aktif'); return; }
+  if (Notification.permission === 'denied') { showToast('Notifikasi diblokir. Izinkan lewat pengaturan situs di browser.'); return; }
+  Notification.requestPermission().then(() => chatRenderNotify());
+}
+function chatOpenFromNotification(threadId) {
+  try { window.focus(); } catch (e) { /* abaikan */ }
+  switchTab('chat', document.querySelector('.admin-nav-item[data-tab="chat"]'));
+  chatOpenThread(threadId);
+}
+function chatShowNotification(title, body, threadId) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const opts = { body: body, tag: 'zenot-chat-' + threadId, icon: 'icon-192.png', data: { threadId: threadId } };
+  try {
+    const n = new Notification(title, opts);
+    n.onclick = () => { n.close(); chatOpenFromNotification(threadId); };
+  } catch (e) {
+    // Chrome Android hanya mengizinkan lewat service worker; tanpa itu notifikasi dilewati
+    if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+      navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.showNotification(title, opts); }).catch(() => {});
+    }
+  }
+}
+function chatStartTitleBlink() {
+  if (chatTitleTimer) return;
+  let on = false;
+  chatTitleTimer = setInterval(() => {
+    const n = chatTotalUnread();
+    if (document.visibilityState === 'visible' || n === 0) { chatStopTitleBlink(); return; }
+    on = !on;
+    document.title = on ? '\uD83D\uDCAC Pesan baru!' : '(' + n + ') ' + chatBaseTitle;
+  }, 1200);
+}
+function chatStopTitleBlink() {
+  if (chatTitleTimer) { clearInterval(chatTitleTimer); chatTitleTimer = null; }
+  chatUpdateBadges();
+}
+// Dipanggil untuk setiap pesan baru yang masuk lewat realtime
+async function chatOnIncoming(m) {
+  if (!m || m.sender_role !== 'buyer') return;
+  const looking = document.visibilityState === 'visible' && chatIsTabActive() && m.thread_id === chatActiveId;
+  if (looking) return; // sedang membaca percakapan ini: tidak perlu bunyi
+  let t = chatThreads.find(x => x.id === m.thread_id);
+  if (!t) { await chatLoadThreads(); t = chatThreads.find(x => x.id === m.thread_id); }
+  const name = (t && t.buyer_name) || 'Pembeli';
+  const label = (t && (CHAT_DIV_LABEL[t.division] || t.division)) || 'Chat';
+  const preview = String(m.body || '').slice(0, 100);
+  chatPlaySound();
+  if (document.visibilityState === 'visible') {
+    if (!chatIsTabActive()) showToast('Pesan baru dari ' + name + ': ' + preview.slice(0, 60));
+  } else {
+    chatShowNotification(name + ' \u00b7 ' + label, preview, m.thread_id);
+    chatStartTitleBlink();
+  }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') chatStopTitleBlink(); });
 function chatOnShow() {
   chatLoadThreads();
   if (chatActiveId) { chatLoadMessages(); chatMarkRead(); }
