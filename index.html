@@ -625,6 +625,8 @@
     .chat-notify{display:flex;gap:6px;padding:8px;border-bottom:1px solid var(--border)}
     .chat-notify-btn{flex:1;padding:7px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;font-size:12px;cursor:pointer;font-family:inherit;color:var(--text)}
     .chat-notify-btn.on{border-color:#128c4a;color:#128c4a}
+    .push-bell{width:36px;height:36px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;color:var(--sec);display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .push-bell.on{color:#128c4a;border-color:#128c4a}
     .admin-bn-item[data-bn="more"]{position:relative}
     .admin-bn-item[data-bn="more"].has-unread::after{content:'';position:absolute;top:8px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#e74c3c}
     @media(max-width:860px){
@@ -751,6 +753,11 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
         <span class="admin-topbar-title" id="admin-topbar-title">Produk</span>
+      </div>
+      <div class="admin-topbar-actions">
+        <button class="push-bell" id="push-bell" onclick="pushToggle()" aria-label="Notifikasi" title="Notifikasi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
       </div>
     </div>
 
@@ -1404,7 +1411,7 @@
             <aside class="chat-list-pane">
               <div class="chat-notify">
                 <button class="chat-notify-btn" id="chat-sound-btn" onclick="chatToggleSound()">Suara: aktif</button>
-                <button class="chat-notify-btn" id="chat-notif-btn" onclick="chatEnableNotif()">Aktifkan notifikasi</button>
+                <button class="chat-notify-btn" id="chat-notif-btn" onclick="pushToggle()">Aktifkan notifikasi</button>
               </div>
               <div class="chat-filter" id="chat-filter">
                 <button class="orders-tab active" onclick="chatSetFilter('',this)">Semua</button>
@@ -1943,6 +1950,7 @@ async function checkIsAdmin(userId) {
 }
 
 async function doLogout() {
+  await pushDetach();
   await sb.auth.signOut();
   adminUser = null;
   chatStop();
@@ -1966,6 +1974,7 @@ function showDashboard() {
   loadAdminVouchers();
   loadAdminReviews();
   chatStart();
+  pushInit();
 
   // Landing default: Beranda, kecuali ada hash URL yang minta tab/pesanan spesifik (deep link)
   if (location.hash && location.hash !== '#') {
@@ -2303,6 +2312,14 @@ function applyHashRoute() {
       if (detailEl) detailEl.style.display = 'none';
       if (listEl) listEl.style.display = '';
     }
+  }
+
+  if (tab === 'chat' && params.thread) {
+    const tryOpenChat = (attempts = 0) => {
+      if (chatThreads.some(x => x.id === params.thread)) chatOpenThread(params.thread);
+      else if (attempts < 20) setTimeout(() => tryOpenChat(attempts + 1), 300);
+    };
+    tryOpenChat();
   }
 
   if (tab === 'performance') {
@@ -4471,15 +4488,11 @@ function chatPlaySound() {
 function chatRenderNotify() {
   const s = document.getElementById('chat-sound-btn');
   if (s) { s.textContent = chatSoundOn ? 'Suara: aktif' : 'Suara: mati'; s.classList.toggle('on', chatSoundOn); }
+  const st = pushState();
   const n = document.getElementById('chat-notif-btn');
-  if (!n) return;
-  let label = 'Aktifkan notifikasi';
-  let on = false;
-  if (!('Notification' in window)) label = 'Notifikasi tidak didukung';
-  else if (Notification.permission === 'granted') { label = 'Notifikasi: aktif'; on = true; }
-  else if (Notification.permission === 'denied') label = 'Notifikasi: diblokir';
-  n.textContent = label;
-  n.classList.toggle('on', on);
+  if (n) { n.textContent = st.text; n.classList.toggle('on', st.on); }
+  const bell = document.getElementById('push-bell');
+  if (bell) { bell.classList.toggle('on', st.on); bell.title = st.text; bell.setAttribute('aria-label', st.text); }
 }
 function chatToggleSound() {
   chatSoundOn = !chatSoundOn;
@@ -4487,20 +4500,15 @@ function chatToggleSound() {
   chatRenderNotify();
   if (chatSoundOn) { chatUnlockAudio(); chatLastSoundAt = 0; chatPlaySound(); }
 }
-function chatEnableNotif() {
-  if (!('Notification' in window)) { showToast('Browser ini tidak mendukung notifikasi'); return; }
-  if (Notification.permission === 'granted') { showToast('Notifikasi sudah aktif'); return; }
-  if (Notification.permission === 'denied') { showToast('Notifikasi diblokir. Izinkan lewat pengaturan situs di browser.'); return; }
-  Notification.requestPermission().then(() => chatRenderNotify());
-}
 function chatOpenFromNotification(threadId) {
   try { window.focus(); } catch (e) { /* abaikan */ }
   switchTab('chat', document.querySelector('.admin-nav-item[data-tab="chat"]'));
   chatOpenThread(threadId);
 }
 function chatShowNotification(title, body, threadId) {
+  if (pushActive) return; // sudah ditangani Web Push: jangan dobel
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  const opts = { body: body, tag: 'zenot-chat-' + threadId, icon: 'icon-192.png', data: { threadId: threadId } };
+  const opts = { body: body, tag: 'chat-' + threadId, icon: 'icon-192.png', data: { threadId: threadId } };
   try {
     const n = new Notification(title, opts);
     n.onclick = () => { n.close(); chatOpenFromNotification(threadId); };
@@ -4544,6 +4552,158 @@ async function chatOnIncoming(m) {
   }
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') chatStopTitleBlink(); });
+
+// ----- Web Push: notifikasi chat web dan pesanan baru walau aplikasi ditutup -----
+const PUSH_FN_URL = SUPABASE_URL + '/functions/v1/push';
+let pushActive = false;
+let pushBusy = false;
+
+function pushSupported() {
+  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+}
+// iPhone/iPad hanya mendukung notifikasi bila aplikasi dibuka dari ikon Layar Utama
+function pushNeedsInstall() {
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent || '');
+  const standalone = !!navigator.standalone || !!(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  return ios && !standalone;
+}
+function pushState() {
+  if (!pushSupported()) return { text: pushNeedsInstall() ? 'Notifikasi: pasang ke Layar Utama' : 'Notifikasi tidak didukung', on: false };
+  if (Notification.permission === 'denied') return { text: 'Notifikasi: diblokir', on: false };
+  if (pushActive) return { text: 'Notifikasi HP: aktif', on: true };
+  return { text: 'Aktifkan notifikasi', on: false };
+}
+function pushKeyToBytes(b64) {
+  const pad = '='.repeat((4 - b64.length % 4) % 4);
+  const raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+function pushRegisterSW() {
+  return navigator.serviceWorker.register('sw.js', { scope: './' });
+}
+async function pushFetchKey() {
+  const { data } = await sb.auth.getSession();
+  const token = data && data.session && data.session.access_token;
+  if (!token) throw new Error('Belum login');
+  const r = await fetch(PUSH_FN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token, apikey: SUPABASE_KEY },
+    body: JSON.stringify({ action: 'public-key' })
+  });
+  let j = {};
+  try { j = (await r.json()) || {}; } catch (e) { /* bukan JSON */ }
+  if (!r.ok || !j.publicKey) throw new Error(j.error || ('Server notifikasi belum siap (HTTP ' + r.status + ')'));
+  return j.publicKey;
+}
+async function pushSubscribe(reg, key) {
+  const want = pushKeyToBytes(key);
+  let sub = await reg.pushManager.getSubscription();
+  if (sub) {
+    const cur = sub.options && sub.options.applicationServerKey ? new Uint8Array(sub.options.applicationServerKey) : null;
+    const same = cur && cur.length === want.length && cur.every((v, i) => v === want[i]);
+    if (!same) { await sub.unsubscribe(); sub = null; } // kunci server berubah: langganan lama tidak berlaku lagi
+  }
+  return sub || reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: want });
+}
+async function pushSave(sub) {
+  const j = sub.toJSON();
+  const { error } = await sb.rpc('push_save_subscription', {
+    p_endpoint: j.endpoint,
+    p_p256dh: j.keys.p256dh,
+    p_auth: j.keys.auth,
+    p_ua: (navigator.userAgent || '').slice(0, 200)
+  });
+  if (error) throw error;
+}
+async function pushEnable() {
+  if (!pushSupported()) {
+    showToast(pushNeedsInstall() ? 'Di iPhone: buka aplikasi dari ikon Layar Utama, lalu aktifkan lagi' : 'Browser ini tidak mendukung notifikasi');
+    return false;
+  }
+  if (Notification.permission === 'denied') { showToast('Notifikasi diblokir. Izinkan lewat pengaturan situs atau aplikasi.'); return false; }
+  // requestPermission harus dipanggil langsung dari ketukan pengguna (syarat iPhone), jadi sebelum await lain
+  const perm = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+  if (perm !== 'granted') return false;
+  const reg = await pushRegisterSW();
+  await navigator.serviceWorker.ready;
+  const key = await pushFetchKey();
+  const sub = await pushSubscribe(reg, key);
+  await pushSave(sub);
+  pushActive = true;
+  showToast('Notifikasi aktif: chat dan pesanan baru akan masuk walau aplikasi ditutup');
+  return true;
+}
+async function pushDisable() {
+  const reg = await navigator.serviceWorker.getRegistration();
+  const sub = reg && await reg.pushManager.getSubscription();
+  if (sub) {
+    await sb.rpc('push_remove_subscription', { p_endpoint: sub.endpoint });
+    await sub.unsubscribe();
+  }
+  pushActive = false;
+  showToast('Notifikasi dimatikan di perangkat ini');
+}
+async function pushToggle() {
+  if (pushBusy) return;
+  pushBusy = true;
+  try {
+    if (pushActive) {
+      if (confirm('Matikan notifikasi di perangkat ini?')) await pushDisable();
+    } else {
+      await pushEnable();
+    }
+  } catch (e) {
+    console.error('push', e);
+    showToast('Gagal mengatur notifikasi: ' + ((e && e.message) || e));
+  } finally {
+    pushBusy = false;
+    chatRenderNotify();
+  }
+}
+// Dipanggil setiap masuk dashboard: pasang sw.js, dan bila izin sudah diberikan, perbarui langganan perangkat ini
+async function pushInit() {
+  chatRenderNotify();
+  if (!pushSupported()) return;
+  try {
+    const reg = await pushRegisterSW();
+    if (Notification.permission === 'granted') {
+      await navigator.serviceWorker.ready;
+      const key = await pushFetchKey();
+      const sub = await pushSubscribe(reg, key);
+      await pushSave(sub);
+      pushActive = true;
+    }
+  } catch (e) {
+    console.error('push init', e);
+  }
+  chatRenderNotify();
+}
+// Saat logout: lepas perangkat ini dari akun, supaya HP bersama tidak terus menerima notifikasi toko
+async function pushDetach() {
+  try {
+    if (pushSupported()) {
+      const reg = await navigator.serviceWorker.getRegistration();
+      const sub = reg && await reg.pushManager.getSubscription();
+      if (sub) await sb.rpc('push_remove_subscription', { p_endpoint: sub.endpoint });
+    }
+  } catch (e) {
+    console.error('push detach', e);
+  }
+  pushActive = false;
+}
+// Ketukan pada notifikasi saat aplikasi sudah terbuka: sw.js mengirim tautan, halaman berpindah tanpa muat ulang
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', e => {
+    const d = e.data || {};
+    if (d.type === 'push-open' && typeof d.hash === 'string' && /^#tab=[a-z-]+/.test(d.hash)) {
+      history.pushState(null, '', d.hash);
+      applyHashRoute();
+    }
+  });
+}
+
 function chatOnShow() {
   chatLoadThreads();
   if (chatActiveId) { chatLoadMessages(); chatMarkRead(); }
