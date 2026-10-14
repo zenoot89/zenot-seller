@@ -2887,11 +2887,11 @@ function renderCustomerTable(rows, emptyMsg) {
       <tbody>
         ${rows.map(c => `
         <tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:10px 6px">${c.name || '-'}</td>
-          <td style="padding:10px 6px;font-family:'IBM Plex Mono',monospace;font-size:12px">${c.email || '-'}</td>
-          <td style="padding:10px 6px">${c.whatsapp || '-'}</td>
-          <td style="padding:10px 6px">${c.city || '-'}</td>
-          <td style="padding:10px 6px">${c.province || '-'}</td>
+          <td style="padding:10px 6px">${chatEsc(c.name || '-')}</td>
+          <td style="padding:10px 6px;font-family:'IBM Plex Mono',monospace;font-size:12px">${chatEsc(c.email || '-')}</td>
+          <td style="padding:10px 6px">${chatEsc(c.whatsapp || '-')}</td>
+          <td style="padding:10px 6px">${chatEsc(c.city || '-')}</td>
+          <td style="padding:10px 6px">${chatEsc(c.province || '-')}</td>
           <td style="padding:10px 6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)">${new Date(c.created_at).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'})}</td>
         </tr>`).join('')}
       </tbody>
@@ -3091,13 +3091,14 @@ function getItemPhoto(name, color) {
 function renderOrderRow(o) {
   const date = new Date(o.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'short',year:'numeric'});
   const addr = o.shipping_address || {};
-  const itemCount = (o.items||[]).reduce((s,i)=>s+i.qty,0);
+  const itemCount = (o.items||[]).reduce((s,i)=>s+(Number(i.qty)||0),0);
   const itemSummary = (o.items||[]).map(i=>`${i.name} (${i.color}, ${i.size}) x${i.qty}`).join(', ');
   const firstItem = (o.items||[])[0];
   const thumbUrl = firstItem ? getItemPhoto(firstItem.name, firstItem.color) : null;
   const s = ORDER_STATUS_LABEL_ADMIN[o.status] || ORDER_STATUS_LABEL_ADMIN.menunggu_pembayaran;
   const payStatus = PAYMENT_STATUS_LABEL[o.payment_status] || 'Belum Bayar';
   const payMethod = PAYMENT_METHOD_LABEL[o.payment_method] || 'WhatsApp (Manual)';
+  const orderNumEnc = encodeURIComponent(o.order_number || makeOrderNumber(o)).replace(/'/g, '%27');
   const resiRow = orderResiOpenId === o.id ? `
     <div style="margin-top:8px;padding:10px;background:var(--paper2,#f7f6f3);border-radius:6px">
       <div style="display:flex;gap:6px;margin-bottom:6px">
@@ -3151,8 +3152,8 @@ function renderOrderRow(o) {
   return `
     <div class="order-card" data-order-id="${o.id}" style="border:1px solid var(--border);border-radius:8px;margin-bottom:14px;overflow:hidden;background:#fff">
       <div style="background:#f6f5f2;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;border-bottom:1px solid var(--border)">
-        <span style="color:var(--sec)">👤 ${addr.recipient_name||'-'} <span style="color:var(--muted)">· ${date}</span></span>
-        <a href="#tab=orders&order=${encodeURIComponent(o.order_number || makeOrderNumber(o))}" onclick="event.preventDefault();openOrderDetail('${o.id}');history.pushState(null,'','#tab=orders&order='+encodeURIComponent('${o.order_number || makeOrderNumber(o)}'))" style="color:var(--ink);font-weight:600;cursor:pointer;text-decoration:none;font-family:monospace" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">No. Pesanan ${o.order_number || makeOrderNumber(o)}</a>
+        <span style="color:var(--sec)">👤 ${chatEsc(addr.recipient_name||'-')} <span style="color:var(--muted)">· ${date}</span></span>
+        <a href="#tab=orders&order=${orderNumEnc}" onclick="event.preventDefault();openOrderDetail('${o.id}');history.pushState(null,'','#tab=orders&order=${orderNumEnc}')" style="color:var(--ink);font-weight:600;cursor:pointer;text-decoration:none;font-family:monospace" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">No. Pesanan ${chatEsc(o.order_number || makeOrderNumber(o))}</a>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:14px;padding:12px 14px;align-items:flex-start">
         <div style="flex:2 1 220px;display:flex;gap:8px;align-items:center">
@@ -3160,8 +3161,8 @@ function renderOrderRow(o) {
             ${thumbUrl ? `<img src="${thumbUrl}" style="width:100%;height:100%;object-fit:cover">` : ''}
             ${(o.items||[]).length > 1 ? `<span style="position:absolute;bottom:0;right:0;background:rgba(0,0,0,.7);color:#fff;font-size:9px;padding:1px 4px;border-radius:4px 0 0 0">+${(o.items||[]).length-1}</span>` : ''}
           </div>
-          <div title="${itemSummary}" style="font-size:12.5px">
-            ${itemCount} item<br><span style="color:var(--muted);font-size:11px">${itemSummary.length>40?itemSummary.slice(0,40)+'…':itemSummary}</span>
+          <div title="${chatEsc(itemSummary)}" style="font-size:12.5px">
+            ${itemCount} item<br><span style="color:var(--muted);font-size:11px">${chatEsc(itemSummary.length>40?itemSummary.slice(0,40)+'…':itemSummary)}</span>
           </div>
         </div>
         <div style="flex:1 1 110px;font-size:12.5px;white-space:nowrap">Rp ${(o.total||0).toLocaleString('id-ID')}</div>
@@ -3267,12 +3268,12 @@ function openOrderDetail(orderId) {
             ${getItemPhoto(i.name, i.color) ? `<img src="${getItemPhoto(i.name, i.color)}" style="width:100%;height:100%;object-fit:cover">` : ''}
           </div>
           <div style="font-size:12.5px">
-            ${i.name}<br><span style="color:var(--muted);font-size:11px">Variasi: ${i.color||'-'}, ${i.size||'-'}</span>
+            ${chatEsc(i.name)}<br><span style="color:var(--muted);font-size:11px">Variasi: ${chatEsc(i.color||'-')}, ${chatEsc(i.size||'-')}</span>
           </div>
         </div>
       </td>
-      <td style="padding:8px 6px;text-align:right;white-space:nowrap">Rp ${(i.price||0).toLocaleString('id-ID')}</td>
-      <td style="padding:8px 6px;text-align:center">${i.qty||1}</td>
+      <td style="padding:8px 6px;text-align:right;white-space:nowrap">Rp ${(Number(i.price)||0).toLocaleString('id-ID')}</td>
+      <td style="padding:8px 6px;text-align:center">${Number(i.qty)||1}</td>
       <td style="padding:8px 6px;text-align:right;white-space:nowrap">Rp ${((i.price||0)*(i.qty||1)).toLocaleString('id-ID')}</td>
     </tr>`).join('');
 
@@ -3288,18 +3289,18 @@ function openOrderDetail(orderId) {
           <span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${s.color};background:${s.bg}">${s.label}</span>
           <div style="font-size:11px;color:var(--muted);margin-top:6px">Dibuat: ${date}</div>
         </div>
-        <div style="font-family:monospace;font-weight:600;font-size:13px">No. Pesanan: ${orderNum}</div>
+        <div style="font-family:monospace;font-weight:600;font-size:13px">No. Pesanan: ${chatEsc(orderNum)}</div>
       </div>
 
       <div style="border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px">
         <div style="padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)">
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px">📦 Alamat Pengiriman</div>
-          <div style="font-size:13px;font-weight:600">${addr.recipient_name||'-'}</div>
-          <div style="font-size:12.5px;color:var(--sec);margin-top:2px">${addr.phone||''}</div>
-          <div style="font-size:12.5px;color:var(--sec);margin-top:6px">${addr.address_detail||''}</div>
-          ${addr.address_note ? `<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:2px">${addr.address_note}</div>` : ''}
-          <div style="font-size:12.5px;color:var(--sec);margin-top:4px">${[addr.village,addr.district,addr.city,addr.province].filter(Boolean).join(', ')}</div>
-          <div style="font-size:12.5px;font-weight:600;margin-top:2px">${addr.postal_code||''}</div>
+          <div style="font-size:13px;font-weight:600">${chatEsc(addr.recipient_name||'-')}</div>
+          <div style="font-size:12.5px;color:var(--sec);margin-top:2px">${chatEsc(addr.phone||'')}</div>
+          <div style="font-size:12.5px;color:var(--sec);margin-top:6px">${chatEsc(addr.address_detail||'')}</div>
+          ${addr.address_note ? `<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:2px">${chatEsc(addr.address_note)}</div>` : ''}
+          <div style="font-size:12.5px;color:var(--sec);margin-top:4px">${chatEsc([addr.village,addr.district,addr.city,addr.province].filter(Boolean).join(', '))}</div>
+          <div style="font-size:12.5px;font-weight:600;margin-top:2px">${chatEsc(addr.postal_code||'')}</div>
         </div>
         <div style="padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)">
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px">🚚 Informasi Jasa Kirim</div>
@@ -3310,7 +3311,7 @@ function openOrderDetail(orderId) {
         </div>
         <div>
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px">💳 Pembayaran</div>
-          <div style="font-size:12.5px">${payMethod} <span style="color:var(--muted)">— ${payStatus}</span></div>
+          <div style="font-size:12.5px">${chatEsc(payMethod)} <span style="color:var(--muted)">— ${payStatus}</span></div>
         </div>
       </div>
 
@@ -3382,12 +3383,12 @@ function printLabel(orderId) {
   const addr = o.shipping_address || {};
   const date = new Date(o.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
   const orderNum = o.order_number || makeOrderNumber(o);
-  const items = (o.items||[]).map(i => `<tr><td style="padding:3px 6px;border:1px solid #ccc">${i.name}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${i.color}, ${i.size}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${i.qty}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:right">Rp ${(i.price*i.qty).toLocaleString('id-ID')}</td></tr>`).join('');
+  const items = (o.items||[]).map(i => `<tr><td style="padding:3px 6px;border:1px solid #ccc">${chatEsc(i.name)}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${chatEsc(i.color)}, ${chatEsc(i.size)}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${Number(i.qty)||0}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:right">Rp ${(i.price*i.qty).toLocaleString('id-ID')}</td></tr>`).join('');
   const payMethod = {'cod':'COD (Bayar di Tempat)','transfer_bca':'Transfer / QRIS BCA','gopay':'GoPay'}[o.payment_method] || o.payment_method || '-';
   const resiInfo = o.resi ? `${o.courier||'Kurir'}: <strong>${o.resi}</strong>` : '<em style="color:#999">Resi belum diinput</em>';
 
   const labelHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
-  <title>AWB - ${orderNum}</title>
+  <title>AWB - ${chatEsc(orderNum)}</title>
   <style>
     @page { size: A6 portrait; margin: 6mm; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -3420,19 +3421,19 @@ function printLabel(orderId) {
         <div class="store-name">ZENOOT</div>
       </div>
       <div style="text-align:right">
-        <div class="order-num">${orderNum}</div>
+        <div class="order-num">${chatEsc(orderNum)}</div>
         <div style="font-size:9px;color:#888">${date}</div>
       </div>
     </div>
 
     <div class="section">
       <div class="sec-title">Penerima</div>
-      <div class="big-addr">${addr.recipient_name||'-'}</div>
-      <div class="small-info">${addr.phone||''}</div>
-      <div class="small-info">${addr.address_detail||''}</div>
-      ${addr.address_note ? `<div class="small-info" style="font-style:italic">${addr.address_note}</div>` : ''}
-      <div class="small-info">${[addr.village,addr.district,addr.city,addr.province].filter(Boolean).join(', ')}</div>
-      <div class="small-info" style="font-weight:bold">${addr.postal_code||''}</div>
+      <div class="big-addr">${chatEsc(addr.recipient_name||'-')}</div>
+      <div class="small-info">${chatEsc(addr.phone||'')}</div>
+      <div class="small-info">${chatEsc(addr.address_detail||'')}</div>
+      ${addr.address_note ? `<div class="small-info" style="font-style:italic">${chatEsc(addr.address_note)}</div>` : ''}
+      <div class="small-info">${chatEsc([addr.village,addr.district,addr.city,addr.province].filter(Boolean).join(', '))}</div>
+      <div class="small-info" style="font-weight:bold">${chatEsc(addr.postal_code||'')}</div>
     </div>
 
     <div class="section">
@@ -3448,7 +3449,7 @@ function printLabel(orderId) {
     </div>
 
     <div class="footer-row">
-      <span>Pembayaran: <span class="badge ${o.payment_method==='cod'?'badge-cod':o.payment_method==='gopay'?'badge-gopay':'badge-transfer'}">${payMethod}</span></span>
+      <span>Pembayaran: <span class="badge ${o.payment_method==='cod'?'badge-cod':o.payment_method==='gopay'?'badge-gopay':'badge-transfer'}">${chatEsc(payMethod)}</span></span>
       <span>Total: <strong>Rp ${(o.total||0).toLocaleString('id-ID')}</strong></span>
     </div>
     <div class="footer-row">
@@ -4233,13 +4234,13 @@ async function loadAdminReviews() {
   el.innerHTML = data.map(r=>`
     <div class="review-item">
       <div class="review-header">
-        <span class="review-name">${r.buyer_name} — <span style="color:var(--muted);font-size:11px">${r.products?.name||''}</span></span>
+        <span class="review-name">${chatEsc(r.buyer_name)} — <span style="color:var(--muted);font-size:11px">${r.products?.name||''}</span></span>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
           <button class="btn-danger" style="font-size:11px;padding:4px 8px" onclick="deleteReview('${r.id}')">Hapus</button>
         </div>
       </div>
-      <p class="review-comment">${r.comment||''}</p>
+      <p class="review-comment">${chatEsc(r.comment||'')}</p>
     </div>`).join('');
 }
 
