@@ -2991,7 +2991,12 @@ const ORDER_STATUS_LABEL_ADMIN = {
   selesai:             { label: 'Selesai',              color: '#4b4b4b', bg: '#eeeeee' },
   dibatalkan:          { label: 'Dibatalkan',           color: '#a83232', bg: '#fbe4e4' }
 };
-const PAYMENT_METHOD_LABEL = { wa_manual: 'WhatsApp (Manual)', qris: 'QRIS', transfer_va: 'Transfer/VA' };
+const PAYMENT_METHOD_LABEL = { wa_manual: 'WhatsApp (Manual)', qris: 'QRIS', transfer_va: 'Transfer/VA', midtrans: 'Online (Midtrans)' };
+// Jenis pembayaran dari Midtrans (kolom midtrans_payment_type) → teks yang mudah dibaca
+const MIDTRANS_PAYTYPE_LABEL = { qris: 'QRIS', gopay: 'GoPay', shopeepay: 'ShopeePay', bank_transfer: 'Transfer Bank / VA', echannel: 'Mandiri Bill', cstore: 'Minimarket', credit_card: 'Kartu', akulaku: 'Akulaku', kredivo: 'Kredivo', dana: 'DANA' };
+function midtransPayTypeText(t) { return t ? (MIDTRANS_PAYTYPE_LABEL[t] || String(t)) : ''; }
+// Pesanan sudah dibayar tapi dibatalkan → penjual harus refund manual
+function orderNeedsRefund(o) { return o.status === 'dibatalkan' && o.payment_status === 'paid'; }
 const PAYMENT_STATUS_LABEL = { pending: 'Belum Bayar', paid: 'Sudah Bayar', failed: 'Gagal', expired: 'Kedaluwarsa' };
 let ordersAdminData = [];
 let ordersAdminFilter = '';
@@ -3166,11 +3171,18 @@ function renderOrderRow(o) {
     </div>` : '';
 
   let actions = '';
-  const btnBatal = `<button onclick="if(confirm('Batalkan pesanan ini?'))updateOrderStatus('${o.id}','dibatalkan')" style="padding:6px 10px;font-size:11.5px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Batalkan</button>`;
+  const cancelMsg = o.payment_status === 'paid'
+    ? 'Pesanan ini SUDAH DIBAYAR online. Kalau dibatalkan, kamu harus refund manual ke pembeli. Lanjut batalkan?'
+    : 'Batalkan pesanan ini?';
+  const btnBatal = `<button onclick="if(confirm('${cancelMsg}'))updateOrderStatus('${o.id}','dibatalkan')" style="padding:6px 10px;font-size:11.5px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Batalkan</button>`;
   const btnCetak = `<button onclick="printLabel('${o.id}')" style="padding:6px 10px;font-size:11.5px;background:#f0f0f0;color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer">🖨️ Cetak Label</button>`;
+  // Pembeli sedang bayar lewat Midtrans: konfirmasi manual hanya boleh kalau uangnya memang sudah masuk
+  const confirmPay = (o.payment_method === 'midtrans' && o.payment_status === 'pending')
+    ? "if(confirm('Pembeli sedang dalam proses bayar online. Konfirmasi manual hanya kalau uang sudah masuk. Lanjut?'))"
+    : '';
   if (o.status === 'menunggu_pembayaran') {
     actions = `<div style="display:flex;flex-direction:column;gap:5px">
-      <button onclick="updateOrderStatus('${o.id}','diproses')" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Konfirmasi Bayar</button>
+      <button onclick="${confirmPay}updateOrderStatus('${o.id}','diproses')" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Konfirmasi Bayar</button>
       ${btnCetak}
       ${btnBatal}
     </div>`;
@@ -3220,7 +3232,7 @@ function renderOrderRow(o) {
           </div>
         </div>
         <div style="flex:1 1 110px;font-size:12.5px;white-space:nowrap">Rp ${(o.total||0).toLocaleString('id-ID')}</div>
-        <div style="flex:1 1 130px;font-size:12.5px">${payMethod}<br><span style="color:var(--muted)">${payStatus}</span></div>
+        <div style="flex:1 1 130px;font-size:12.5px">${payMethod}<br><span style="color:var(--muted)">${payStatus}</span>${orderNeedsRefund(o) ? '<br><span style="color:#a83232;font-weight:600;font-size:11.5px">⚠️ Sudah dibayar, perlu refund</span>' : ''}</div>
         <div style="flex:1 1 110px"><span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${s.color};background:${s.bg};white-space:nowrap">${s.label}</span></div>
         <div style="flex:1 1 180px;min-width:160px">${actions}${resiRow}</div>
       </div>
@@ -3365,7 +3377,9 @@ function openOrderDetail(orderId) {
         </div>
         <div>
           <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px">💳 Pembayaran</div>
-          <div style="font-size:12.5px">${chatEsc(payMethod)} <span style="color:var(--muted)">— ${payStatus}</span></div>
+          <div style="font-size:12.5px">${chatEsc(payMethod)}${o.midtrans_payment_type ? ' · ' + chatEsc(midtransPayTypeText(o.midtrans_payment_type)) : ''} <span style="color:var(--muted)">— ${payStatus}</span></div>
+          ${o.paid_at ? `<div style="font-size:12px;color:var(--muted);margin-top:3px">Dibayar: ${new Date(o.paid_at).toLocaleString('id-ID', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>` : ''}
+          ${orderNeedsRefund(o) ? `<div style="font-size:12.5px;color:#a83232;font-weight:600;margin-top:6px">⚠️ Sudah dibayar, perlu refund ke pembeli</div>` : ''}
         </div>
       </div>
 
