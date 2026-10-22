@@ -4175,28 +4175,108 @@ function renderPromoManageToolbar() {
     <button onclick="bulkDeletePromotions()" style="padding:6px 12px;font-size:12px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:6px;cursor:pointer">Hapus (${n})</button>`;
 }
 
+// Kembalikan harga varian ke harga asli saat promosi diakhiri atau dihapus.
+// Aturan aman:
+//  - hanya promosi berstatus 'aktif' (promosi yang sudah berakhir tidak diproses lagi)
+//  - hanya varian yang harganya MASIH sama dengan harga promo dan masih punya harga coret
+//    (kalau harga sudah diubah manual, tidak ditimpa)
+//  - dilewati kalau produk itu masih punya promosi aktif lain di luar yang sedang diproses
+async function restorePricesForPromos(ids) {
+  const result = { products: 0, variants: 0, skippedOther: 0, error: null };
+  const idList = Array.from(ids);
+  if (!idList.length) return result;
+
+  const { data: batch, error: e1 } = await sb.from('promotions').select('id,type,product_id,value,status').in('id', idList);
+  if (e1) { result.error = e1.message; return result; }
+  const active = (batch || []).filter(p => p.status === 'aktif' && p.product_id);
+  if (!active.length) return result;
+
+  const productIds = Array.from(new Set(active.map(p => p.product_id)));
+  const { data: others, error: e2 } = await sb.from('promotions').select('id,product_id').eq('status', 'aktif').in('product_id', productIds);
+  if (e2) { result.error = e2.message; return result; }
+  const batchSet = new Set(idList);
+  const blocked = new Set((others || []).filter(o => !batchSet.has(o.id)).map(o => o.product_id));
+
+  for (const pid of productIds) {
+    if (blocked.has(pid)) { result.skippedOther++; continue; }
+    const mine = active.filter(p => p.product_id === pid);
+    const promoPrices = new Set(mine.map(p => parseInt(p.value)));
+    const hasFlash = mine.some(p => p.type === 'flash_sale');
+    const { data: vars, error: e3 } = await sb.from('variants').select('id,price,original_price').eq('product_id', pid);
+    if (e3) { result.error = e3.message; return result; }
+    let touched = 0;
+    for (const v of (vars || [])) {
+      if (v.original_price == null) continue;
+      if (!promoPrices.has(parseInt(v.price))) continue;
+      const patch = { price: v.original_price, original_price: null };
+      if (hasFlash) patch.flash_sale_end = null;
+      const { error: e4 } = await sb.from('variants').update(patch).eq('id', v.id);
+      if (e4) { result.error = e4.message; return result; }
+      touched++;
+    }
+    if (touched) { result.products++; result.variants += touched; }
+  }
+  return result;
+}
+
+function promoRestoreNote(r) {
+  let note = '';
+  if (r.variants) note += `, harga ${r.products} produk dikembalikan`;
+  if (r.skippedOther) note += `. ${r.skippedOther} produk masih punya promo aktif lain, harga belum dikembalikan`;
+  return note;
+}
+
+let promoActionBusy = false;
+
 async function bulkDeletePromotions() {
-  if (!promoSelectedRows.size) return;
-  await sb.from('promotions').delete().in('id', Array.from(promoSelectedRows));
-  showToast(`${promoSelectedRows.size} promosi dihapus`);
-  promoSelectedRows.clear();
-  renderPromoManageToolbar();
-  loadPromotions();
+  if (!promoSelectedRows.size || promoActionBusy) return;
+  promoActionBusy = true;
+  try {
+    const ids = Array.from(promoSelectedRows);
+    const r = await restorePricesForPromos(ids);
+    if (r.error) { showToast('Gagal mengembalikan harga, promosi tidak dihapus'); console.warn(r.error); return; }
+    const { error } = await sb.from('promotions').delete().in('id', ids);
+    if (error) { showToast('Gagal menghapus promosi'); console.warn(error.message); return; }
+    showToast(`${ids.length} promosi dihapus${promoRestoreNote(r)}`);
+    promoSelectedRows.clear();
+    renderPromoManageToolbar();
+    loadPromotions();
+  } finally {
+    promoActionBusy = false;
+  }
 }
 
 async function bulkEndPromotions() {
-  if (!promoSelectedRows.size) return;
-  await sb.from('promotions').update({ end_date: new Date().toISOString(), status: 'berakhir' }).in('id', Array.from(promoSelectedRows));
-  showToast(`${promoSelectedRows.size} promosi diakhiri`);
-  promoSelectedRows.clear();
-  renderPromoManageToolbar();
-  loadPromotions();
+  if (!promoSelectedRows.size || promoActionBusy) return;
+  promoActionBusy = true;
+  try {
+    const ids = Array.from(promoSelectedRows);
+    const r = await restorePricesForPromos(ids);
+    if (r.error) { showToast('Gagal mengembalikan harga, promosi belum diakhiri'); console.warn(r.error); return; }
+    const { error } = await sb.from('promotions').update({ end_date: new Date().toISOString(), status: 'berakhir' }).in('id', ids);
+    if (error) { showToast('Gagal mengakhiri promosi'); console.warn(error.message); return; }
+    showToast(`${ids.length} promosi diakhiri${promoRestoreNote(r)}`);
+    promoSelectedRows.clear();
+    renderPromoManageToolbar();
+    loadPromotions();
+  } finally {
+    promoActionBusy = false;
+  }
 }
 
 async function deletePromotion(id) {
-  await sb.from('promotions').delete().eq('id', id);
-  showToast('Promosi dihapus');
-  loadPromotions();
+  if (promoActionBusy) return;
+  promoActionBusy = true;
+  try {
+    const r = await restorePricesForPromos([id]);
+    if (r.error) { showToast('Gagal mengembalikan harga, promosi tidak dihapus'); console.warn(r.error); return; }
+    const { error } = await sb.from('promotions').delete().eq('id', id);
+    if (error) { showToast('Gagal menghapus promosi'); console.warn(error.message); return; }
+    showToast(`Promosi dihapus${promoRestoreNote(r)}`);
+    loadPromotions();
+  } finally {
+    promoActionBusy = false;
+  }
 }
 
 async function loadPromotions() {
@@ -4290,9 +4370,18 @@ async function loadPromotions() {
 }
 
 async function endPromotion(id) {
-  await sb.from('promotions').update({ end_date: new Date().toISOString(), status: 'berakhir' }).eq('id', id);
-  showToast('Promosi diakhiri');
-  loadPromotions();
+  if (promoActionBusy) return;
+  promoActionBusy = true;
+  try {
+    const r = await restorePricesForPromos([id]);
+    if (r.error) { showToast('Gagal mengembalikan harga, promosi belum diakhiri'); console.warn(r.error); return; }
+    const { error } = await sb.from('promotions').update({ end_date: new Date().toISOString(), status: 'berakhir' }).eq('id', id);
+    if (error) { showToast('Gagal mengakhiri promosi'); console.warn(error.message); return; }
+    showToast(`Promosi diakhiri${promoRestoreNote(r)}`);
+    loadPromotions();
+  } finally {
+    promoActionBusy = false;
+  }
 }
 // ===================== REVIEWS ADMIN =====================
 async function loadAdminReviews() {
