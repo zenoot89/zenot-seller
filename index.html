@@ -654,6 +654,87 @@
       .chat-compose .send-ico{display:block}
       html.chat-conv-open .admin-content{overflow:hidden}
     }
+
+    /* ===== SHOPEE-STYLE MOBILE (Tahap 1) =====
+       Palet Storm Grey: #F1F1F3 (Tint 90) / #292A31 (Shade 64) / #111114 (Shade 85) + putih untuk kartu.
+       Hanya berlaku di HP (<=860px); desktop tidak disentuh. */
+    .perf-prod-list{display:none}
+    @media(max-width:860px){
+      :root{
+        --sc-bg:#F1F1F3;--sc-ink2:#292A31;--sc-ink:#111114;
+        --sc-line:rgba(17,17,20,.08);--sc-mute:rgba(41,42,49,.58);
+        --bg:#F1F1F3;--border:rgba(17,17,20,.10);--ink:#111114;--accent:#111114;
+        --text:#111114;--muted:rgba(41,42,49,.58);--sec:rgba(41,42,49,.78);
+      }
+      body,.admin-page,.admin-content{background:var(--sc-bg)}
+      .admin-main,.admin-content-inner,.admin-section{min-width:0;max-width:100%}
+
+      /* topbar */
+      .admin-topbar{height:52px;background:#fff;border-bottom:1px solid var(--sc-line)}
+      .admin-topbar-title{font-size:18px;font-weight:700;color:var(--sc-ink)}
+      .push-bell{width:40px;height:40px;border:none;background:none;color:var(--sc-ink2)}
+      .push-bell.on{border:none;color:var(--sc-ink)}
+      .admin-content{padding:12px 12px calc(72px + env(safe-area-inset-bottom))}
+
+      /* kartu datar: tanpa garis tepi, pembeda cuma putih vs abu */
+      .admin-card{background:#fff;border:none;border-radius:12px;box-shadow:none;min-width:0;max-width:100%}
+      .admin-card-title{font-family:'Inter',sans-serif;font-size:16px;font-weight:700;color:var(--sc-ink)}
+      .form-input{background:var(--sc-bg);border:1px solid transparent;border-radius:10px}
+      .form-input:focus{background:#fff;border-color:var(--sc-ink)}
+      .btn-primary{background:var(--sc-ink);border-radius:10px}
+      .btn-edit{background:var(--sc-bg);border-radius:8px}
+      .prod-table tr,.orders-table tr{border:none;border-radius:12px}
+
+      /* bottom nav */
+      .admin-bottom-nav{height:56px;background:#fff;border-top:1px solid var(--sc-line)}
+      .admin-bn-item{color:var(--sc-mute);font-size:11px;font-weight:500}
+      .admin-bn-item.active{color:var(--sc-ink);font-weight:700}
+
+      /* tab garis-bawah, melebar sampai tepi layar */
+      #perf-sub-tabs{position:sticky;top:-12px;z-index:5;background:#fff;margin:-12px -12px 12px !important;padding:0 6px;gap:0 !important;border-bottom:1px solid var(--sc-line)}
+      #perf-sub-tabs::-webkit-scrollbar,#perf-period-tabs::-webkit-scrollbar,.pp-sortbar::-webkit-scrollbar{display:none}
+      .orders-tab{padding:13px 12px;font-size:14px;font-weight:500;color:var(--sc-mute)}
+      .orders-tab.active{color:var(--sc-ink);font-weight:700;border-bottom:2px solid var(--sc-ink)}
+
+      /* kartu Periode + chip yang scroll sampai tepi kartu */
+      #perf-period-controls{background:#fff;border-radius:12px;padding:14px 14px 4px;margin-bottom:12px}
+      #perf-period-controls > div:first-child{margin-bottom:12px !important}
+      #perf-period-controls > div:first-child > div:first-child{font-size:15px;font-weight:700;color:var(--sc-ink)}
+      #perf-period-controls > div:first-child > div:first-child span{font-size:13px;font-weight:400;color:var(--sc-mute)}
+      #perf-period-controls #perf-scope{background:var(--sc-bg);border:none;border-radius:8px;padding:7px 10px;font-size:12.5px;font-weight:500;color:var(--sc-ink2)}
+      #perf-period-tabs{margin:0 -14px 10px !important;padding:0 14px 2px;gap:8px !important}
+      .perf-period-btn{background:var(--sc-bg);border:1.5px solid transparent;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:500;color:var(--sc-ink2)}
+      .perf-period-btn.active{background:#fff;border-color:var(--sc-ink);color:var(--sc-ink);font-weight:600}
+
+      /* Kriteria Utama: kartu putih berisi kotak metrik abu */
+      .perf-metric-grid{background:#fff;border-radius:12px;padding:16px 14px 14px;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:8px !important;margin-bottom:12px !important}
+      .perf-metric-grid::before{content:"Kriteria Utama";grid-column:1/-1;font-size:16px;font-weight:700;color:var(--sc-ink);margin-bottom:4px}
+      .perf-metric-grid > .admin-card{display:flex;flex-direction:column;min-height:92px;background:var(--sc-bg) !important;border:none !important;border-radius:12px !important;padding:12px 10px !important}
+      .perf-metric-grid > .admin-card > div:first-child{font-size:12px !important;line-height:1.3;color:var(--sc-mute) !important;margin-bottom:auto !important}
+      .perf-metric-grid > .admin-card > div:nth-child(2){font-size:15px !important;font-weight:700;color:var(--sc-ink);margin-top:10px;overflow-wrap:anywhere}
+      .perf-metric-grid > .admin-card .perf-delta{margin-top:2px;min-height:26px}
+
+      /* status pesanan: kotak abu tanpa garis, angka satu warna */
+      #perf-penjualan-status > div{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px !important}
+      #perf-penjualan-status > div > div{border:none !important;background:var(--sc-bg);border-radius:12px !important;padding:14px 8px !important}
+      #perf-penjualan-status > div > div > div:first-child{color:var(--sc-ink) !important}
+
+      /* Analisis Produk & Performa per Produk: tabel -> daftar baris */
+      .perf-prod-table{display:none !important}
+      .perf-prod-list{display:block}
+      .pp-sortbar{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -16px;padding:2px 16px 12px}
+      .pp-sort{flex:0 0 auto;padding:7px 12px;border-radius:8px;background:var(--sc-bg);border:1.5px solid transparent;font:500 12.5px 'Inter',sans-serif;color:var(--sc-ink2);cursor:pointer}
+      .pp-sort.active{background:#fff;border-color:var(--sc-ink);color:var(--sc-ink);font-weight:600}
+      .pp-item{padding:14px 0;border-top:1px solid var(--sc-line)}
+      .pp-head{display:flex;gap:12px;align-items:flex-start}
+      .pp-thumb{position:relative;flex:0 0 64px;width:64px;height:64px;border-radius:8px;overflow:hidden;background:var(--sc-bg)}
+      .pp-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+      .pp-rank{position:absolute;left:0;top:0;min-width:20px;height:20px;padding:0 6px;border-radius:0 0 8px 0;background:var(--sc-ink);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+      .pp-name{flex:1;min-width:0;font-size:14px;font-weight:500;line-height:1.35;color:var(--sc-ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+      .pp-metrics{display:grid;grid-template-columns:repeat(var(--cols,4),minmax(0,1fr));background:var(--sc-bg);border-radius:10px;padding:10px 4px;margin-top:10px;text-align:center}
+      .pp-metrics span{display:block;font-size:11px;color:var(--sc-mute)}
+      .pp-metrics b{display:block;margin-top:2px;font-size:14px;font-weight:700;color:var(--sc-ink)}
+    }
   </style>
 </head>
 <body>
@@ -2669,7 +2750,7 @@ function renderPerfProductAnalysis() {
     : `<th style="padding:8px 4px;text-align:right;color:var(--muted)">${label}</th>`;
 
   topEl.innerHTML = `
-    <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <div class="perf-prod-table"><table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead><tr style="border-bottom:1px solid var(--border);text-align:left">
         <th style="padding:8px 4px;width:28px"></th>
         <th style="padding:8px 4px">Produk</th>
@@ -2694,7 +2775,23 @@ function renderPerfProductAnalysis() {
         </tr>`;
         }).join('')}
       </tbody>
-    </table>`;
+    </table></div>
+    <div class="perf-prod-list">
+      ${perfProductAnalysisView === 'performa' ? `<div class="pp-sortbar">${[['views','Dilihat'],['ctr','CTR'],['pesanan','Pesanan'],['conv','Conversion Rate']].map(([k,l]) => `<button type="button" class="pp-sort${perfProductSortKey===k?' active':''}" onclick="sortPerfProduct('${k}')">${l}${arrow(k)}</button>`).join('')}</div>` : ''}
+      ${rows.slice(0, 10).map((r, i) => `
+        <div class="pp-item">
+          <div class="pp-head">
+            <div class="pp-thumb">${r.img ? `<img src="${r.img}" alt="" loading="lazy">` : ''}<span class="pp-rank">${i+1}</span></div>
+            <div class="pp-name">${r.name}</div>
+          </div>
+          <div class="pp-metrics">
+            <div><span>Dilihat</span><b>${r.views}</b></div>
+            <div><span>CTR</span><b>${r.ctr.toFixed(1)}%</b></div>
+            <div><span>Pesanan</span><b>${r.productOrders}</b></div>
+            <div><span>Conversion</span><b>${r.conv.toFixed(1)}%</b></div>
+          </div>
+        </div>`).join('')}
+    </div>`;
 }
 
 // ===================== TAB: PRODUK =====================
@@ -2724,6 +2821,7 @@ async function loadPerfProduk() {
 
   const rows = adminProductsData.map(p => ({
     name: p.name,
+    img: p.image_url,
     views: viewCount[p.id] || 0,
     qty: soldQty[p.id] || soldQty[p.name] || 0,
     revenue: soldRevenue[p.id] || soldRevenue[p.name] || 0,
@@ -2731,7 +2829,7 @@ async function loadPerfProduk() {
 
   if (!rows.length) { el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Belum ada produk.</p>'; return; }
   el.innerHTML = `
-    <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <div class="perf-prod-table"><table style="width:100%;border-collapse:collapse;font-size:13px">
       <thead><tr style="border-bottom:1px solid var(--border);text-align:left">
         <th style="padding:8px 4px">Produk</th>
         <th style="padding:8px 4px;text-align:right">Dilihat</th>
@@ -2746,7 +2844,21 @@ async function loadPerfProduk() {
           <td style="padding:8px 4px;text-align:right;font-weight:600">Rp ${r.revenue.toLocaleString('id-ID')}</td>
         </tr>`).join('')}
       </tbody>
-    </table>`;
+    </table></div>
+    <div class="perf-prod-list">
+      ${rows.map((r, i) => `
+        <div class="pp-item">
+          <div class="pp-head">
+            <div class="pp-thumb">${r.img ? `<img src="${r.img}" alt="" loading="lazy">` : ''}<span class="pp-rank">${i+1}</span></div>
+            <div class="pp-name">${r.name}</div>
+          </div>
+          <div class="pp-metrics" style="--cols:3">
+            <div><span>Dilihat</span><b>${r.views}</b></div>
+            <div><span>Terjual</span><b>${r.qty}</b></div>
+            <div><span>Pendapatan</span><b>Rp${r.revenue.toLocaleString('id-ID')}</b></div>
+          </div>
+        </div>`).join('')}
+    </div>`;
 }
 
 // ===================== TAB: PENJUALAN =====================
@@ -2901,7 +3013,41 @@ async function loadPerfPromosi() {
 }
 
 // ===================== HELPER GRAFIK GARIS (dipakai beberapa tab) =====================
+function renderSvgLineChartMobile(values, labels, period, fmt) {
+  const w = 340, h = 200, padL = 54, padR = 14, padT = 14, padB = 26;
+  const rough = Math.max(Math.max(0, ...values), 1) / 4;
+  const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+  const norm = rough / pow;
+  let step = Math.ceil((norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * pow);
+  if (step < 1) step = 1;
+  const top = step * 4, innerW = w - padL - padR, innerH = h - padT - padB, n = values.length;
+  const x = i => padL + (n > 1 ? i * innerW / (n - 1) : innerW / 2);
+  const y = v => padT + innerH - (v / top) * innerH;
+  const grid = [0,1,2,3,4].map(k => {
+    const yy = y(step * k);
+    return `<line x1="${padL}" x2="${w-padR}" y1="${yy}" y2="${yy}" stroke="rgba(17,17,20,.12)" stroke-width="1"${k ? ' stroke-dasharray="4 4"' : ''}/><text x="${padL-8}" y="${yy+3.5}" font-size="10" fill="rgba(41,42,49,.58)" text-anchor="end">${k === 0 ? '0' : fmt(step * k)}</text>`;
+  }).join('');
+  const every = Math.max(1, Math.ceil(n / 6));
+  const xl = labels.map((l, i) => {
+    if (i % every !== 0 && !(i === n - 1 && (n - 1) % every >= 2)) return '';
+    const t = (period === 'today' || period === 'yesterday') ? String(l).padStart(2, '0') + ':00' : String(l).slice(5);
+    return `<text x="${x(i)}" y="${h-6}" font-size="10" fill="rgba(41,42,49,.58)" text-anchor="middle">${t}</text>`;
+  }).join('');
+  const line = values.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+  const gid = 'cg' + Math.random().toString(36).slice(2, 8);
+  const lx = x(n - 1), ly = y(values[n - 1] || 0);
+  return `
+    <svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;overflow:visible" role="img">
+      <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#111114" stop-opacity=".14"/><stop offset="1" stop-color="#111114" stop-opacity="0"/></linearGradient></defs>
+      ${grid}
+      <polygon points="${x(0)},${y(0)} ${line} ${lx},${y(0)}" fill="url(#${gid})"/>
+      <polyline points="${line}" fill="none" stroke="#111114" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="${lx}" cy="${ly}" r="7" fill="#111114" fill-opacity=".14"/><circle cx="${lx}" cy="${ly}" r="3.5" fill="#111114"/>
+      ${xl}
+    </svg>`;
+}
 function renderSvgLineChart(values, labels, period, valueFormatter) {
+  if (window.matchMedia && window.matchMedia('(max-width:860px)').matches) return renderSvgLineChartMobile(values, labels, period, valueFormatter);
   const max = Math.max(1, ...values);
   const w = 700, h = 160, pad = 24;
   const stepX = (w - pad*2) / Math.max(1, values.length - 1);
