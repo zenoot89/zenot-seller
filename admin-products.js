@@ -854,7 +854,7 @@ function renderStatusTabs() {
     ['nonaktif', 'Di Arsipkan'],
   ];
   el.innerHTML = tabs.map(([key,label]) =>
-    `<button class="pstab ${productStatusTab===key?'active':''}" onclick="setProductStatusTab('${key}')">${label} (${counts[key]})</button>`
+    `<button class="pstab ${productStatusTab===key?'active':''}" onclick="setProductStatusTab('${key}')">${label} <span class="pstab-n">(${counts[key]})</span></button>`
   ).join('');
 }
 
@@ -939,10 +939,29 @@ function renderAdminProductList() {
     const netStr = priceRangeStr(vars, 'price') || '-';
     const jualStr = hasDiscount ? priceRangeStr(vars, 'original_price') : null;
     const sold = productSalesMap[p.id] || 0;
+    // Kartu khusus HP (gaya Shopee "Produk Saya"); di desktop disembunyikan CSS, tabel tetap dipakai
+    const pmTags = `${isLow?'<span class="pm-tag">Stok menipis</span>':''}${productHasPromo(p)?'<span class="pm-tag">Promo</span>':''}${productStatus(p)!=='aktif'?'<span class="pm-tag off">Di Arsipkan</span>':''}`;
+    const pmCard = `
+        <div class="pm-card">
+          <div class="pm-top">
+            <div class="pm-img">${p.image_url?`<img src="${p.image_url}" alt="" loading="lazy"/>`:''}</div>
+            <div class="pm-info">
+              <div class="pm-name">${p.name}</div>
+              ${pmTags?`<div class="pm-tags">${pmTags}</div>`:''}
+              <div class="pm-price">${hasDiscount?`<s>${jualStr}</s>`:''}${netStr}</div>
+            </div>
+          </div>
+          <div class="pm-stats"><span>Penjualan<b>${sold}</b></span><span>Stok<b>${productTotalStock(p)}</b></span><span>${vars.length} varian</span></div>
+          <div class="pm-actions">
+            <button type="button" class="pm-btn pm-more" onclick="openProductSheet('${p.id}')" aria-label="Lainnya">&#8943;</button>
+            ${vars.length ? `<button type="button" class="pm-btn" onclick="toggleVariantBreakdown('${p.id}')">${isOpen?'Sembunyikan varian':'Lihat varian'}</button>` : ''}
+            <button type="button" class="pm-btn pri" onclick="editProduct('${p.id}')">Ubah</button>
+          </div>
+        </div>`;
     const row = `
     <tr>
-      ${selectModeOn ? `<td><input type="checkbox" class="prod-check" ${bulkSelected.has(p.id)?'checked':''} onchange="toggleBulkCheck('${p.id}',this.checked)"/></td>` : ''}
-      <td>
+      ${selectModeOn ? `<td class="pt-check"><input type="checkbox" class="prod-check" ${bulkSelected.has(p.id)?'checked':''} onchange="toggleBulkCheck('${p.id}',this.checked)"/></td>` : ''}
+      <td class="pt-main">
         <div class="prod-cell-main">
           <div class="admin-product-img">${p.image_url?`<img src="${p.image_url}"/>`:`<div style="width:100%;height:100%;background:#f0ede8"></div>`}</div>
           <div>
@@ -951,14 +970,15 @@ function renderAdminProductList() {
             ${vars.length ? `<button class="variant-toggle" onclick="toggleVariantBreakdown('${p.id}')">${isOpen?'Sembunyikan varian':'Lihat stok per varian'}</button>` : ''}
           </div>
         </div>
+        ${pmCard}
       </td>
-      <td>${p.category||'-'}</td>
-      <td>${hasDiscount?`<span class="prod-price-old">${jualStr}</span>`:''}<span class="prod-price-net">${netStr}</span></td>
-      <td class="prod-stock-num">${productTotalStock(p)}</td>
-      <td class="prod-sold-num">${sold}</td>
-      <td>${p.supplier_id ? supplierName(p.supplier_id) : (p.supplier || '-')}</td>
-      <td>${(() => { const s = productStatus(p); const cls = s==='aktif'?'on':'off'; const label = s==='aktif'?'Aktif':'Di Arsipkan'; return `<span class="prod-status-badge ${cls}">${label}</span>`; })()}</td>
-      <td>
+      <td class="pt-x">${p.category||'-'}</td>
+      <td class="pt-x">${hasDiscount?`<span class="prod-price-old">${jualStr}</span>`:''}<span class="prod-price-net">${netStr}</span></td>
+      <td class="prod-stock-num pt-x">${productTotalStock(p)}</td>
+      <td class="prod-sold-num pt-x">${sold}</td>
+      <td class="pt-x">${p.supplier_id ? supplierName(p.supplier_id) : (p.supplier || '-')}</td>
+      <td class="pt-x">${(() => { const s = productStatus(p); const cls = s==='aktif'?'on':'off'; const label = s==='aktif'?'Aktif':'Di Arsipkan'; return `<span class="prod-status-badge ${cls}">${label}</span>`; })()}</td>
+      <td class="pt-x">
         <div class="prod-aksi-row">
           <button class="prod-more-btn" onclick="openProductSheet('${p.id}')" aria-label="Lainnya">
             <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>

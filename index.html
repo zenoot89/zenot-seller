@@ -721,6 +721,7 @@
 
       /* Analisis Produk & Performa per Produk: tabel -> daftar baris */
       .perf-prod-table{display:none !important}
+      .perf-hint-cols{display:none}
       .perf-prod-list{display:block}
       .pp-sortbar{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -16px;padding:2px 16px 12px}
       .pp-sort{flex:0 0 auto;padding:7px 12px;border-radius:8px;background:var(--sc-bg);border:1.5px solid transparent;font:500 12.5px 'Inter',sans-serif;color:var(--sc-ink2);cursor:pointer}
@@ -734,6 +735,86 @@
       .pp-metrics{display:grid;grid-template-columns:repeat(var(--cols,4),minmax(0,1fr));background:var(--sc-bg);border-radius:10px;padding:10px 4px;margin-top:10px;text-align:center}
       .pp-metrics span{display:block;font-size:11px;color:var(--sc-mute)}
       .pp-metrics b{display:block;margin-top:2px;font-size:14px;font-weight:700;color:var(--sc-ink)}
+    }
+
+    /* ===== SHOPEE-STYLE MOBILE (Tahap 2): Produk Saya + Kriteria Utama klik ===== */
+    .pf-sheet-head,.pf-sheet-foot,.pf-scrim,.prod-fab-bar,.pm-card{display:none}
+    @media(max-width:860px){
+      /* tile Kriteria Utama yang dipilih */
+      .perf-metric-grid > .admin-card[data-metric]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+      .perf-metric-grid > .admin-card[data-metric].sel{background:#fff !important;box-shadow:inset 0 0 0 1.5px var(--sc-ink)}
+
+      /* strip tab status: Semua / Aktif / Di Arsipkan, angka di baris kedua */
+      #tab-products .admin-list-header{display:none}
+      .prod-header-row{position:sticky;top:-12px;z-index:5;background:#fff;margin:-12px -12px 12px;padding:0 6px 0 12px;gap:4px;border-bottom:1px solid var(--sc-line)}
+      .prod-status-row{display:flex;gap:20px;padding-bottom:0}
+      .prod-status-row::-webkit-scrollbar{display:none}
+      .prod-status-row .pstab{padding:11px 2px 9px;min-width:52px;text-align:center;font-size:14px;line-height:1.3;color:var(--sc-mute);border-bottom:2px solid transparent}
+      .prod-status-row .pstab.active{color:var(--sc-ink);font-weight:700;border-bottom-color:var(--sc-ink)}
+      .pstab-n{display:block}
+      .prod-icon-btn{width:40px;height:40px;border:none;background:none}
+      .prod-icon-btn svg{stroke:var(--sc-ink2)}
+      .prod-icon-btn.active{background:var(--sc-bg);border:none}
+      .prod-icon-btn.active svg{stroke:var(--sc-ink)}
+      #prod-search-bar{margin:0 0 12px}
+
+      /* kartu produk gaya Shopee */
+      #product-list-view{padding-bottom:76px}
+      .prod-table td.pt-x,.prod-table .prod-cell-main{display:none !important}
+      .prod-table tr:not(.variant-row){position:relative;background:#fff;border-radius:12px;padding:14px;margin-bottom:8px}
+      .prod-table td.pt-main{padding:0 !important}
+      .prod-table td.pt-check{position:absolute;top:16px;left:16px;z-index:2;padding:0 !important;line-height:0}
+      .prod-table td.pt-check .prod-check{width:20px;height:20px;margin:0}
+      .pm-card{display:block}
+      .pm-top{display:flex;gap:12px}
+      .pm-img{flex:0 0 88px;width:88px;height:88px;border-radius:8px;overflow:hidden;background:var(--sc-bg)}
+      .pm-img img{width:100%;height:100%;object-fit:cover;display:block}
+      .pm-info{flex:1;min-width:0}
+      .pm-name{font-size:14px;font-weight:500;line-height:1.35;color:var(--sc-ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+      .pm-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+      .pm-tag{font-size:11px;line-height:1.3;padding:2px 6px;border:1px solid rgba(17,17,20,.35);border-radius:4px;color:var(--sc-ink2)}
+      .pm-tag.off{background:var(--sc-bg);border-color:transparent}
+      .pm-price{margin-top:6px;font-size:16px;font-weight:700;color:var(--sc-ink)}
+      .pm-price s{margin-right:6px;font-size:12px;font-weight:400;color:var(--sc-mute)}
+      .pm-stats{display:flex;flex-wrap:wrap;gap:4px 18px;margin-top:12px;font-size:13px;color:var(--sc-mute)}
+      .pm-stats b{margin-left:5px;font-weight:700;color:var(--sc-ink)}
+      .pm-actions{display:flex;gap:8px;margin-top:12px}
+      .pm-btn{flex:1;height:38px;border:1px solid rgba(17,17,20,.2);border-radius:8px;background:#fff;font:600 13px 'Inter',sans-serif;color:var(--sc-ink);cursor:pointer}
+      .pm-btn.pm-more{flex:0 0 46px;font-size:18px;line-height:1}
+      .pm-btn.pri{border-color:var(--sc-ink)}
+      .prod-table tr:not(.variant-row):has(+ tr.variant-row){border-radius:12px 12px 0 0;margin-bottom:0}
+      .prod-table tr.variant-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;background:#fff;border-top:1px solid var(--sc-line);border-radius:0;margin:0;padding:10px 14px}
+      .prod-table tr.variant-row:not(:has(+ tr.variant-row)){border-radius:0 0 12px 12px;margin-bottom:8px}
+      .prod-table tr.variant-row td{background:transparent !important;padding:0 !important;font-family:'Inter',sans-serif}
+      .prod-table tr.variant-row td:empty{display:none !important}
+      .prod-table tr.variant-row td:first-child{flex:1 1 100%}
+      .variant-row .variant-sub-img{width:36px;height:36px;border-radius:8px}
+      .variant-row .variant-sub-label{font-size:14px;font-weight:600;color:var(--sc-ink)}
+      .variant-row .prod-price-net{font-family:'Inter',sans-serif;font-size:14px;font-weight:700;color:var(--sc-ink)}
+      .variant-row .prod-price-old{display:inline;margin-right:6px;font-family:'Inter',sans-serif;font-size:12px}
+      .variant-row .prod-stock-num,.variant-row .prod-sold-num{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:var(--sc-ink)}
+      .variant-row td::before{font-weight:400 !important;font-size:12px !important;color:var(--sc-mute) !important}
+      .variant-row .variant-stock-low{color:var(--sc-ink)}
+      .variant-row .badge-lowstock,.variant-row .badge-inactive{margin:0;padding:1px 6px;border:1px solid rgba(17,17,20,.35);border-radius:4px;background:transparent;color:var(--sc-ink2);font-family:'Inter',sans-serif;font-size:11px}
+
+      /* tombol Tambah Produk Baru melayang di atas bottom nav */
+      .prod-fab-bar{display:block;position:fixed;left:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom));z-index:35;background:#fff;border-top:1px solid var(--sc-line);padding:8px 12px}
+      .prod-fab-bar .btn-primary{height:44px;padding:0;font-weight:600}
+
+      /* filter jadi bottom sheet */
+      .pf-scrim.show{display:block;position:fixed;inset:0;z-index:89;background:rgba(17,17,20,.45)}
+      #prod-filter-panel.show{display:block;position:fixed;left:0;right:0;bottom:0;z-index:90;margin:0;background:#fff;border-radius:16px 16px 0 0;padding:0 16px calc(16px + env(safe-area-inset-bottom));max-height:80vh;overflow-y:auto}
+      .pf-sheet-head{display:flex;align-items:center;justify-content:center;position:sticky;top:0;z-index:1;background:#fff;padding:16px 0 12px;font-size:16px;font-weight:700;color:var(--sc-ink)}
+      .pf-sheet-x{position:absolute;right:-8px;top:8px;width:40px;height:40px;border:none;background:none;font-size:18px;color:var(--sc-ink2);cursor:pointer}
+      .pf-sheet-foot{display:block;padding-top:12px}
+      .pf-sheet-foot .btn-primary{height:44px;padding:0;font-weight:600}
+      #prod-filter-panel .prod-tabrow{border:none;margin:0 0 12px;gap:8px}
+      #prod-filter-panel .pstab{padding:8px 14px;border:1.5px solid transparent;border-radius:8px;background:var(--sc-bg);font-size:13px;color:var(--sc-ink2)}
+      #prod-filter-panel .pstab.active{background:#fff;border-color:var(--sc-ink);color:var(--sc-ink);font-weight:600}
+      #prod-filter-panel .prod-tabrow-right{margin:0;padding:0;width:100%;gap:8px}
+      #prod-filter-panel .prod-pill-select{flex:1;min-width:0;border:none;background:var(--sc-bg);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--sc-ink2)}
+      #prod-filter-panel .admin-card{background:none;padding:0;margin:0 !important;border-radius:0}
+      #prod-filter-panel .prod-toolbar-bottom{flex-direction:column;gap:8px}
     }
   </style>
 </head>
@@ -973,7 +1054,7 @@
               <button class="prod-icon-btn" onclick="toggleProdSearch(this)" aria-label="Cari produk">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
               </button>
-              <button class="prod-icon-btn" onclick="toggleProdFilterPanel(this)" aria-label="Filter produk">
+              <button class="prod-icon-btn" id="prod-filter-btn" onclick="toggleProdFilterPanel(this)" aria-label="Filter produk">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
               </button>
             </div>
@@ -983,7 +1064,9 @@
             <input class="form-input" id="pf-search" placeholder="Cari nama produk..." oninput="renderAdminProductList()" style="width:100%"/>
           </div>
 
+          <div class="pf-scrim" id="pf-scrim" onclick="closeProdFilterSheet()"></div>
           <div class="mobile-collapsible" id="prod-filter-panel">
+          <div class="pf-sheet-head"><span>Pilih Filter</span><button type="button" class="pf-sheet-x" onclick="closeProdFilterSheet()" aria-label="Tutup">&#10005;</button></div>
           <div class="prod-tabrow">
             <button class="pstab" id="pf-lowstock-chip" onclick="toggleLowStockFilter()">Stok Menipis</button>
             <button class="pstab" id="pf-nopromo-chip" onclick="toggleNoPromoFilter()">Belum Ada Promo</button>
@@ -1020,6 +1103,7 @@
               <button class="btn-edit" onclick="clearBulkSelection()" style="margin-left:auto">Batal</button>
             </div>
           </div>
+          <div class="pf-sheet-foot"><button type="button" class="btn-primary" onclick="closeProdFilterSheet()">Selesai</button></div>
           </div>
 
           <div class="admin-card admin-product-list" style="padding:0;overflow-x:auto">
@@ -1040,6 +1124,7 @@
               <tbody id="admin-products-render"></tbody>
             </table>
           </div>
+          <div class="prod-fab-bar"><button type="button" class="btn-primary" onclick="openProductForm()">Tambah Produk Baru</button></div>
           </div>
 
           <div class="admin-card hidden" id="product-form-card" style="padding:0;overflow:hidden">
@@ -1373,34 +1458,34 @@
           <!-- PANEL: TINJAUAN -->
           <div id="perf-panel-tinjauan" class="perf-panel">
             <div class="perf-metric-grid">
-              <div class="admin-card" style="margin:0">
+              <div class="admin-card" style="margin:0" data-metric="revenue" onclick="selectPerfMetric('revenue')">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Total Penjualan</div>
                 <div id="perf-revenue" style="font-size:22px;font-weight:700">Rp 0</div>
                 <div id="perf-revenue-delta" class="perf-delta"></div>
               </div>
-              <div class="admin-card" style="margin:0">
+              <div class="admin-card" style="margin:0" data-metric="orders" onclick="selectPerfMetric('orders')">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Pesanan</div>
                 <div id="perf-orders" style="font-size:22px;font-weight:700">0</div>
                 <div id="perf-orders-delta" class="perf-delta"></div>
               </div>
-              <div class="admin-card" style="margin:0">
+              <div class="admin-card" style="margin:0" data-metric="visitors" onclick="selectPerfMetric('visitors')">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Total Pengunjung</div>
                 <div id="perf-visitors" style="font-size:22px;font-weight:700">0</div>
                 <div id="perf-visitors-delta" class="perf-delta"></div>
               </div>
-              <div class="admin-card" style="margin:0">
+              <div class="admin-card" style="margin:0" data-metric="conversion" onclick="selectPerfMetric('conversion')">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Tingkat Konversi Pesanan</div>
                 <div id="perf-conversion" style="font-size:22px;font-weight:700">0,00%</div>
                 <div id="perf-conversion-delta" class="perf-delta"></div>
               </div>
-              <div class="admin-card" style="margin:0">
+              <div class="admin-card" style="margin:0" data-metric="conversionBuyer" onclick="selectPerfMetric('conversionBuyer')">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Tingkat Konversi Pembeli</div>
                 <div id="perf-conversion-buyer" style="font-size:22px;font-weight:700">0,00%</div>
                 <div id="perf-conversion-buyer-delta" class="perf-delta"></div>
               </div>
             </div>
             <div class="admin-card" style="margin-bottom:16px">
-              <h3 class="admin-card-title" style="margin:0">Kunjungan per Jam</h3>
+              <h3 class="admin-card-title" id="perf-chart-title" style="margin:0">Kunjungan per Jam</h3>
                 <span id="perf-live-badge" style="display:none;font-size:11px;color:#1e7a4c;font-weight:600;margin-left:8px">● Live</span>
               <div id="perf-chart" style="margin-top:10px"></div>
             </div>
@@ -1412,7 +1497,7 @@
                   <a href="#tab=performance&sub=produk&view=baru" class="orders-tab" data-panview="baru" onclick="event.preventDefault();switchProdAnalysisView('baru',this)">Baru Ditambahkan</a>
                 </div>
               </div>
-              <p style="font-size:11.5px;color:var(--muted);margin:8px 0 4px">Klik judul kolom buat urutin (misal CTR atau Conversion Rate tertinggi).</p>
+              <p class="perf-hint-cols" style="font-size:11.5px;color:var(--muted);margin:8px 0 4px">Klik judul kolom buat urutin (misal CTR atau Conversion Rate tertinggi).</p>
               <div id="perf-top-products" style="margin-top:10px;font-size:13px;color:var(--muted)">Memuat...</div>
             </div>
           </div>
@@ -2348,8 +2433,12 @@ function toggleProdSearch(btn) {
   btn.classList.toggle('active');
 }
 function toggleProdFilterPanel(btn) {
-  document.getElementById('prod-filter-panel').classList.toggle('show');
-  btn.classList.toggle('active');
+  const on = document.getElementById('prod-filter-panel').classList.toggle('show');
+  btn.classList.toggle('active', on);
+  document.getElementById('pf-scrim')?.classList.toggle('show', on);
+}
+function closeProdFilterSheet() {
+  if (document.getElementById('prod-filter-panel').classList.contains('show')) toggleProdFilterPanel(document.getElementById('prod-filter-btn'));
 }
 async function loadBioLinks(){
   const { data } = await sb.from('bio_links').select('*').eq('id', 1).maybeSingle();
@@ -2639,7 +2728,8 @@ async function loadPerformanceDashboard() {
   perfDeltaHTML(uniqueVisitors, prevVisitors, 'perf-visitors-delta');
   perfDeltaHTML(conversion, prevConversion, 'perf-conversion-delta');
 
-  renderPerfChart(storeEvents, period);
+  perfSeriesData = { orders, storeEvents, period };
+  if (isPerfMobile()) renderPerfMetricChart(); else renderPerfChart(storeEvents, period);
 
   const liveBadge = document.getElementById('perf-live-badge');
   if (liveBadge) liveBadge.style.display = (period === 'today') ? 'inline' : 'none';
@@ -3013,6 +3103,61 @@ async function loadPerfPromosi() {
 }
 
 // ===================== HELPER GRAFIK GARIS (dipakai beberapa tab) =====================
+// ===== Kriteria Utama bisa diklik (HP): grafik ikut metrik yang dipilih =====
+let perfSeriesData = null;
+let perfMetric = 'revenue';
+function isPerfMobile() { return !!(window.matchMedia && window.matchMedia('(max-width:860px)').matches); }
+function perfShortRp(v) {
+  if (v >= 1e6) return 'Rp' + (Math.round(v / 1e5) / 10).toString().replace('.', ',') + 'jt';
+  if (v >= 1000) return 'Rp' + Math.round(v / 1000) + 'rb';
+  return 'Rp' + Math.round(v);
+}
+const PERF_METRICS = {
+  revenue:         { label: 'Total Penjualan',          fmt: perfShortRp },
+  orders:          { label: 'Pesanan',                  fmt: v => String(Math.round(v)) },
+  visitors:        { label: 'Total Pengunjung',         fmt: v => String(Math.round(v)) },
+  conversion:      { label: 'Tingkat Konversi Pesanan', fmt: v => Math.round(v) + '%' },
+  conversionBuyer: { label: 'Tingkat Konversi Pembeli', fmt: v => Math.round(v) + '%' }
+};
+function selectPerfMetric(key) {
+  if (!isPerfMobile() || !PERF_METRICS[key]) return;
+  perfMetric = key;
+  renderPerfMetricChart();
+}
+function renderPerfMetricChart() {
+  const d = perfSeriesData, el = document.getElementById('perf-chart');
+  if (!d || !el) return;
+  const hourly = d.period === 'today' || d.period === 'yesterday';
+  let labels = [];
+  if (hourly) { for (let h = 0; h < 24; h++) labels.push(h); }
+  else {
+    const days = d.period === '7d' ? 7 : 30;
+    for (let i = days - 1; i >= 0; i--) { const x = new Date(); x.setDate(x.getDate() - i); x.setHours(0, 0, 0, 0); labels.push(x.toISOString().slice(0, 10)); }
+  }
+  const keyOf = iso => hourly ? new Date(iso).getHours() : String(iso).slice(0, 10);
+  const b = {};
+  labels.forEach(l => { b[l] = { sess: new Set(), orders: 0, revenue: 0, buyers: new Set() }; });
+  d.storeEvents.forEach(e => { const k = keyOf(e.created_at); if (b[k]) b[k].sess.add(e.session_id); });
+  d.orders.forEach(o => {
+    const k = keyOf(o.created_at); if (!b[k]) return;
+    b[k].orders++; b[k].revenue += (o.total || 0);
+    const a = o.shipping_address || {}; const who = a.phone || a.recipient_name; if (who) b[k].buyers.add(who);
+  });
+  const values = labels.map(l => {
+    const x = b[l], v = x.sess.size;
+    if (perfMetric === 'revenue') return x.revenue;
+    if (perfMetric === 'orders') return x.orders;
+    if (perfMetric === 'visitors') return v;
+    if (perfMetric === 'conversion') return v > 0 ? x.orders / v * 100 : 0;
+    return v > 0 ? x.buyers.size / v * 100 : 0;
+  });
+  const m = PERF_METRICS[perfMetric];
+  const title = document.getElementById('perf-chart-title');
+  if (title) title.textContent = m.label + (hourly ? ' per Jam' : ' per Hari');
+  document.querySelectorAll('#perf-panel-tinjauan [data-metric]').forEach(t => t.classList.toggle('sel', t.dataset.metric === perfMetric));
+  el.innerHTML = renderSvgLineChart(values, labels, d.period, m.fmt);
+}
+
 function renderSvgLineChartMobile(values, labels, period, fmt) {
   const w = 340, h = 200, padL = 54, padR = 14, padT = 14, padB = 26;
   const rough = Math.max(Math.max(0, ...values), 1) / 4;
