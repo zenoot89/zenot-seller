@@ -17,6 +17,7 @@ self.addEventListener('push', event => {
     tag: d.tag || 'zenot-seller',
     renotify: true,
     icon: 'icon-192.png',
+    badge: 'badge-96.png',
     data: { hash: typeof d.hash === 'string' ? d.hash : '' }
   }));
 });

@@ -1,6 +1,6 @@
 {
   "name": "Zenoot Seller Center",
-  "short_name": "Seller",
+  "short_name": "Zenoot Seller",
   "description": "Zenoot Seller Dashboard.",
   "start_url": "/zenot-seller/",
   "scope": "/zenot-seller/",

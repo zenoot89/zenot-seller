@@ -5879,7 +5879,7 @@ function chatOpenFromNotification(threadId) {
 function chatShowNotification(title, body, threadId) {
   if (pushActive) return; // sudah ditangani Web Push: jangan dobel
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  const opts = { body: body, tag: 'chat-' + threadId, icon: 'icon-192.png', data: { threadId: threadId } };
+  const opts = { body: body, tag: 'chat-' + threadId, icon: 'icon-192.png', badge: 'badge-96.png', data: { threadId: threadId } };
   try {
     const n = new Notification(title, opts);
     n.onclick = () => { n.close(); chatOpenFromNotification(threadId); };
