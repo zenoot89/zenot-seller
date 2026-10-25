@@ -4565,6 +4565,7 @@ function openOrderDetail(orderId) {
         <div class="od-sub">${payStatus}</div>
         ${o.paid_at ? `<div class="od-sub">Dibayar: ${new Date(o.paid_at).toLocaleString('id-ID', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>` : ''}
         ${orderNeedsRefund(o) ? `<div class="od-warn">Sudah dibayar, perlu refund ke pembeli</div>` : ''}
+        ${(o.ship_voucher_code && !shipDiscount && o.status !== 'dibatalkan') ? `<div class="od-warn">Pembeli memakai voucher gratis ongkir (${chatEsc(o.ship_voucher_code)}). Potongannya belum masuk total: kalau ongkir dikonfirmasi lewat WhatsApp, potong ongkir pembeli sesuai voucher</div>` : ''}
       </div>
 
       <div class="od-card">
