@@ -2249,7 +2249,7 @@
         <!-- MODAL: Diskon Produk (harga net, ala Shopee Promo Toko) -->
         <div class="modal-overlay" id="promo-modal-discount">
           <div class="modal" style="max-width:640px">
-            <h3 class="admin-card-title">Diskon Produk</h3>
+            <h3 class="admin-card-title" id="promo-modal-title">Diskon Produk</h3>
             <p style="font-size:13px;color:var(--sec);margin-bottom:16px">Set harga promo langsung (bukan persen). Persentase diskon dihitung & ditampilkan otomatis ke pembeli dari harga normal vs harga promo.</p>
 
             <div style="margin-bottom:16px">
@@ -2257,15 +2257,10 @@
                 <label class="form-label">Nama Promo (internal, tidak tampil ke pembeli)</label>
                 <input class="form-input" id="promo-name" placeholder="cth: Promo Akhir Bulan"/>
               </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Mulai</label>
-                  <input class="form-input" id="promo-period-start" type="datetime-local"/>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Berakhir</label>
-                  <input class="form-input" id="promo-period-end" type="datetime-local"/>
-                </div>
+              <p id="promo-start-note" style="font-size:12.5px;color:var(--muted);margin:0 0 10px"></p>
+              <div class="form-group">
+                <label class="form-label">Berakhir (kosongkan kalau tanpa batas)</label>
+                <input class="form-input" id="promo-period-end" type="datetime-local"/>
               </div>
             </div>
 
@@ -2293,9 +2288,44 @@
             </div>
             <input class="form-input" id="promo-pick-search" placeholder="Cari nama produk..." style="margin-bottom:12px" oninput="renderProductPickerList()"/>
             <div id="promo-pick-list" style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:8px"></div>
+            <p id="promo-pick-note" style="font-size:12px;color:var(--muted);margin:8px 2px 0"></p>
             <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">
               <button onclick="closeProductPickerModal()" style="padding:10px 18px;font-size:13px;background:#fff;border:1px solid var(--border);border-radius:8px;cursor:pointer">Batal</button>
               <button class="btn-primary" onclick="confirmProductPicker()">Konfirmasi</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODAL: Rincian Promo -->
+        <div class="modal-overlay" id="promo-detail-modal">
+          <div class="modal" style="max-width:760px">
+            <div id="promo-detail-body"></div>
+          </div>
+        </div>
+
+        <!-- MODAL: Gabungkan Promo -->
+        <div class="modal-overlay" id="promo-merge-modal">
+          <div class="modal" style="max-width:480px">
+            <h3 class="admin-card-title">Gabungkan Promo</h3>
+            <p id="merge-count" style="font-size:13px;color:var(--sec);margin-bottom:14px"></p>
+            <div class="form-group" style="margin-bottom:10px">
+              <label class="form-label">Nama promo baru</label>
+              <input class="form-input" id="merge-name"/>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Mulai</label>
+                <input class="form-input" id="merge-start" type="datetime-local"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Berakhir (kosong = tanpa batas)</label>
+                <input class="form-input" id="merge-end" type="datetime-local"/>
+              </div>
+            </div>
+            <p style="font-size:12px;color:var(--muted);margin:4px 0 14px">Nama dan periode ini berlaku untuk semua produk yang digabung. Harga produk tidak berubah.</p>
+            <div style="display:flex;gap:8px">
+              <button class="btn-primary" onclick="confirmPromoMerge()">Gabungkan</button>
+              <button onclick="closePromoMerge()" style="padding:11px 20px;font-size:13px;background:#fff;border:1px solid var(--border);border-radius:8px;cursor:pointer">Batal</button>
             </div>
           </div>
         </div>
@@ -2318,7 +2348,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Mulai</label>
-                <input class="form-input" id="flash-start" type="datetime-local"/>
+                <p style="font-size:12.5px;color:var(--muted);margin:8px 0 0">Sekarang. Harga flash sale langsung berlaku saat disimpan.</p>
               </div>
               <div class="form-group">
                 <label class="form-label">Berakhir</label>
@@ -3038,9 +3068,7 @@ function renderTab(tab, el) {
   if (tab === 'performance') loadPerfActiveTab();
   if (tab === 'promotions') {
     loadCategories();
-    const elx = document.getElementById('flash-product-id');
-    if (elx) elx.innerHTML = `<option value="">-- Pilih Produk --</option>` +
-      adminProductsData.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+    refreshFlashOptions();
   }
 }
 
@@ -4874,11 +4902,7 @@ async function loadCategories() {
   populateCategoryFilter();
   populateGenderOptions();
   // Update dropdown di promosi (flash sale masih pakai dropdown single-produk)
-  const flashEl = document.getElementById('flash-product-id');
-  if (flashEl && adminProductsData.length) {
-    flashEl.innerHTML = `<option value="">-- Pilih Produk --</option>` +
-      adminProductsData.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-  }
+  if (adminProductsData.length) refreshFlashOptions();
 }
 
 function populateCategoryFilter() {
@@ -5088,20 +5112,65 @@ async function deleteSupplier(id, name) {
 }
 
 // ===================== PROMOTIONS =====================
-let promoSelectedProducts = {}; // productId -> { name, hargaNormal, netPrice }
+let promoSelectedProducts = {}; // productId -> { name, hargaNormal, netPrice, img }
+let promoTargetGroup = null;    // kalau diisi, modal dipakai untuk menambah produk ke promo yang sudah ada
+let promoGroups = new Map();    // key kelompok -> kelompok promo (diisi loadPromotions)
+let promoDetailKey = null;      // kelompok yang sedang dibuka di modal Rincian
+let promoActiveProductIds = new Set(); // produk yang punya promosi berstatus aktif
 
-function openPromoModal(type) {
+function newUuid() {
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : ((r & 0x3) | 0x8)).toString(16);
+  });
+}
+function promoLocalInput(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function fmtPromoDate(iso) {
+  if (!iso) return '–';
+  return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function fmtPromoDateTime(iso) {
+  if (!iso) return '–';
+  const d = new Date(iso);
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' +
+    d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+}
+
+async function openPromoModal(type, target, prefill) {
   if (type === 'discount') {
+    if (!adminProductsData.length) { try { await loadAdminProducts(); } catch (_) {} }
     promoSelectedProducts = {};
-    document.getElementById('promo-name').value = '';
-    document.getElementById('promo-period-start').value = '';
-    document.getElementById('promo-period-end').value = '';
+    promoTargetGroup = target || null;
+    const nameEl = document.getElementById('promo-name');
+    const endEl = document.getElementById('promo-period-end');
+    const titleEl = document.getElementById('promo-modal-title');
+    const noteEl = document.getElementById('promo-start-note');
+    if (target) {
+      titleEl.textContent = 'Tambah Produk ke Promo';
+      nameEl.value = target.name; nameEl.disabled = true;
+      endEl.value = promoLocalInput(target.end); endEl.disabled = true;
+      noteEl.textContent = 'Mulai: ' + fmtPromoDateTime(target.start) + ' (mengikuti promo yang sudah ada)';
+    } else {
+      titleEl.textContent = 'Diskon Produk';
+      nameEl.value = (prefill && prefill.name) || ''; nameEl.disabled = false;
+      endEl.value = ''; endEl.disabled = false;
+      noteEl.textContent = 'Mulai: sekarang. Harga promo langsung berlaku begitu diterapkan.';
+    }
+    if (prefill && prefill.items) prefill.items.forEach(it => { promoSelectedProducts[it.pid] = it.data; });
     renderPromoSelectedProducts();
   }
   document.getElementById(`promo-modal-${type}`).classList.add('open');
 }
 function closePromoModal(type) {
   document.getElementById(`promo-modal-${type}`).classList.remove('open');
+  if (type === 'discount') promoTargetGroup = null;
 }
 
 // harga normal representatif produk = harga asli (original_price kalau lagi promo, kalau nggak ya price) terendah antar varian
@@ -5111,8 +5180,26 @@ function productBasePrice(p) {
   return Math.min(...vars.map(v => v.original_price || v.price || 0));
 }
 
-function openProductPickerModal() {
+
+// Produk yang tidak boleh dipilih lagi: sudah berdiskon (ada harga coret) atau masih punya promosi aktif
+async function refreshPromoBlockedIds() {
+  const { data, error } = await sb.from('promotions').select('product_id').eq('status', 'aktif');
+  if (error) return;
+  promoActiveProductIds = new Set((data || []).map(r => r.product_id).filter(Boolean));
+}
+function productBlockedForPromo(p) {
+  return productHasPromo(p) || promoActiveProductIds.has(p.id);
+}
+function refreshFlashOptions() {
+  const el = document.getElementById('flash-product-id');
+  if (!el) return;
+  el.innerHTML = `<option value="">-- Pilih Produk --</option>` +
+    adminProductsData.filter(p => !productBlockedForPromo(p)).map(p => `<option value="${p.id}">${chatEsc(p.name)}</option>`).join('');
+}
+
+async function openProductPickerModal() {
   document.getElementById('promo-pick-search').value = '';
+  try { await refreshPromoBlockedIds(); } catch (_) {}
   renderProductPickerList();
   document.getElementById('promo-pick-product-modal').classList.add('open');
 }
@@ -5123,7 +5210,10 @@ function closeProductPickerModal() {
 function renderProductPickerList() {
   const q = (document.getElementById('promo-pick-search').value || '').toLowerCase();
   const el = document.getElementById('promo-pick-list');
-  const list = adminProductsData.filter(p => p.name.toLowerCase().includes(q));
+  const noteEl = document.getElementById('promo-pick-note');
+  const blockedCount = adminProductsData.filter(productBlockedForPromo).length;
+  if (noteEl) noteEl.textContent = blockedCount ? `${blockedCount} produk tidak ditampilkan karena sedang berdiskon.` : '';
+  const list = adminProductsData.filter(p => !productBlockedForPromo(p) && p.name.toLowerCase().includes(q));
   if (!list.length) { el.innerHTML = `<p style="padding:14px;font-size:12.5px;color:var(--muted)">Produk tidak ditemukan.</p>`; return; }
 
   el.innerHTML = list.map(p => {
@@ -5206,11 +5296,17 @@ function renderPromoSelectedProducts() {
   ids.forEach(pid => renderPromoPercentPreview(pid));
 }
 
+
+async function refreshAfterPromoChange() {
+  try { await loadAdminProducts(); } catch (_) {}
+  await loadPromotions();
+}
+
 async function applyProductDiscount() {
   const btn = document.getElementById('apply-discount-btn');
   if (btn.disabled) return; // cegah klik dobel
-  const name = document.getElementById('promo-name').value.trim() || 'Diskon Produk';
-  const startVal = document.getElementById('promo-period-start').value;
+  const target = promoTargetGroup;
+  const name = target ? target.name : (document.getElementById('promo-name').value.trim() || 'Diskon Produk');
   const endVal = document.getElementById('promo-period-end').value;
   const ids = Object.keys(promoSelectedProducts);
 
@@ -5218,22 +5314,41 @@ async function applyProductDiscount() {
   const invalid = ids.find(pid => !parseInt(promoSelectedProducts[pid].netPrice));
   if (invalid) { showToast('Isi harga promo buat semua produk yang dipilih'); return; }
 
-  const startIso = startVal ? new Date(startVal).toISOString() : new Date().toISOString();
-  const endIso = endVal ? new Date(endVal).toISOString() : null;
+  // Mulai selalu "sekarang" (harga langsung berubah); produk yang ditambahkan ke promo lama mengikuti periodenya
+  const startIso = target ? target.start : new Date().toISOString();
+  const endIso = target ? target.end : (endVal ? new Date(endVal).toISOString() : null);
+  if (endIso && new Date(endIso).getTime() <= Date.now()) { showToast('Waktu berakhir harus di masa depan'); return; }
 
   btn.disabled = true;
   btn.dataset.originalText = btn.textContent;
   btn.innerHTML = `<span class="pf-spinner" style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;vertical-align:-2px;margin-right:7px;animation:pf-spin .7s linear infinite"></span>Menerapkan...`;
 
+  let applied = 0;
   try {
-    for (const pid of ids) {
+    // Cek ulang di database: produk yang baru berdiskon dari tempat lain tidak boleh ditimpa
+    await refreshPromoBlockedIds();
+    const { data: fresh } = await sb.from('products').select('id,variants(id,original_price)').in('id', ids);
+    const blocked = new Set((fresh || []).filter(productBlockedForPromo).map(p => p.id));
+    const okIds = ids.filter(pid => !blocked.has(pid));
+    if (blocked.size) showToast(`${blocked.size} produk dilewati karena sudah berdiskon`);
+    if (!okIds.length) return;
+
+    let gid = target ? target.groupId : newUuid();
+    if (target && !gid) { // promo lama tanpa kelompok: beri id kelompok dulu
+      gid = newUuid();
+      const { error: gErr } = await sb.from('promotions').update({ group_id: gid }).in('id', target.rowIds);
+      if (gErr) { showToast('Gagal menambah produk ke promo'); return; }
+    }
+
+    for (const pid of okIds) {
       const item = promoSelectedProducts[pid];
       const netPrice = parseInt(item.netPrice);
       const { data: vars } = await sb.from('variants').select('id,price,original_price').eq('product_id', pid);
       if (!vars || !vars.length) continue;
       for (const v of vars) {
         const origPrice = v.original_price || v.price;
-        await sb.from('variants').update({ price: netPrice, original_price: origPrice }).eq('id', v.id);
+        const { error: vErr } = await sb.from('variants').update({ price: netPrice, original_price: origPrice }).eq('id', v.id);
+        if (vErr) console.warn('Gagal mengubah harga varian', v.id, vErr.message);
       }
       const { error: promoErr } = await sb.from('promotions').insert({
         type: 'discount',
@@ -5242,27 +5357,39 @@ async function applyProductDiscount() {
         value: netPrice,
         start_date: startIso,
         end_date: endIso,
-        status: 'aktif'
+        status: 'aktif',
+        group_id: gid
       });
-      if (promoErr) console.warn('Gagal catat tracking promosi (tabel promotions belum ada?):', promoErr.message);
+      if (promoErr) {
+        // Tanpa catatan promo, harga tidak bisa dikembalikan otomatis: batalkan perubahan harga produk ini
+        for (const v of vars) await sb.from('variants').update({ price: v.price, original_price: v.original_price }).eq('id', v.id);
+        showToast('Gagal mencatat promo, harga produk dikembalikan');
+        console.warn('Gagal mencatat promosi:', promoErr.message);
+        continue;
+      }
+      applied++;
     }
-
-    showToast(`Diskon berhasil diterapkan ke ${ids.length} produk ✓`);
-    closePromoModal('discount');
-    loadPromotions();
   } finally {
     btn.disabled = false;
     btn.textContent = btn.dataset.originalText || 'Terapkan Diskon';
   }
+  if (!applied) return;
+  showToast(`Diskon berhasil diterapkan ke ${applied} produk ✓`);
+  closePromoModal('discount');
+  await refreshAfterPromoChange();
+  if (target && document.getElementById('promo-detail-modal').classList.contains('open')) renderPromoDetail();
 }
-
 
 async function saveFlashSale() {
   const productId = document.getElementById('flash-product-id').value;
   const price = parseInt(document.getElementById('flash-price').value);
-  const start = document.getElementById('flash-start').value;
   const end = document.getElementById('flash-end').value;
   if (!productId || !price || !end) { showToast('Isi produk, harga, dan waktu berakhir'); return; }
+  if (new Date(end).getTime() <= Date.now()) { showToast('Waktu berakhir harus di masa depan'); return; }
+
+  try { await refreshPromoBlockedIds(); } catch (_) {}
+  const prod = adminProductsData.find(x => x.id === productId);
+  if (prod && productBlockedForPromo(prod)) { showToast('Produk ini sedang berdiskon, akhiri promonya dulu'); return; }
 
   const { data: vars } = await sb.from('variants').select('id,price').eq('product_id', productId);
   if (!vars || !vars.length) { showToast('Produk tidak punya varian'); return; }
@@ -5282,15 +5409,16 @@ async function saveFlashSale() {
     name: `Flash Sale - ${productName}`,
     product_id: productId,
     value: price,
-    start_date: start ? new Date(start).toISOString() : new Date().toISOString(),
+    start_date: new Date().toISOString(),
     end_date: new Date(end).toISOString(),
-    status: 'aktif'
+    status: 'aktif',
+    group_id: newUuid()
   });
-  if (promoErr) console.warn('Gagal catat tracking promosi (tabel promotions belum ada?):', promoErr.message);
+  if (promoErr) console.warn('Gagal catat tracking promosi:', promoErr.message);
 
   showToast('Flash Sale berhasil disimpan ✓');
   closePromoModal('flash');
-  loadPromotions();
+  await refreshAfterPromoChange();
 }
 
 // Hitung performa 1 promosi dari daftar pesanan (dicocokkan manual di client, bukan pakai view SQL)
@@ -5314,12 +5442,56 @@ function computePromoPerf(promo, orders) {
     if (matched) orderIds.add(o.id);
   });
 
-  return { revenue, orders: orderIds.size, unitsSold };
+  return { revenue, orders: orderIds.size, unitsSold, orderIdList: Array.from(orderIds) };
 }
 
-// ===================== KELOLA PROMOSI (bulk select) =====================
+// ===================== KELOMPOK PROMO =====================
+// Satu kelompok = satu promo. Baris promosi yang punya group_id sama masuk satu kelompok;
+// baris lama tanpa group_id berdiri sendiri. Penggabungan dilakukan manual lewat tombol "Gabungkan".
+function buildPromoGroups(promos, orders) {
+  const now = Date.now();
+  const map = new Map();
+  promos.forEach(p => {
+    const key = p.group_id || p.id;
+    let g = map.get(key);
+    if (!g) { g = { key, groupId: p.group_id || null, name: p.name, type: p.type, rows: [] }; map.set(key, g); }
+    g.rows.push(p);
+  });
+  map.forEach(g => {
+    g.activeRows = g.rows.filter(r => r.status === 'aktif');
+    const basis = g.activeRows.length ? g.activeRows : g.rows;
+    g.rowIds = g.rows.map(r => r.id);
+    g.start = new Date(Math.min(...basis.map(r => new Date(r.start_date).getTime()))).toISOString();
+    g.end = basis.some(r => !r.end_date) ? null : new Date(Math.max(...basis.map(r => new Date(r.end_date).getTime()))).toISOString();
+    if (!g.activeRows.length) g.state = 'berakhir';
+    else if (g.end && new Date(g.end).getTime() < now) g.state = 'lewat';
+    else if (new Date(g.start).getTime() > now) g.state = 'akandatang';
+    else g.state = 'berlangsung';
+    let revenue = 0, units = 0;
+    const oids = new Set();
+    g.rows.forEach(r => {
+      const perf = computePromoPerf(r, orders);
+      revenue += perf.revenue; units += perf.unitsSold;
+      perf.orderIdList.forEach(id => oids.add(id));
+    });
+    g.perf = { revenue, orders: oids.size, unitsSold: units };
+  });
+  return map;
+}
+
+function promoStateBadge(state) {
+  const m = {
+    berlangsung: ['Berlangsung', '#e6f4ec', '#1e7a4c'],
+    akandatang: ['Akan Datang', '#e8f0fb', '#2a5fb0'],
+    berakhir: ['Telah Berakhir', '#eeeeec', '#6b6a66'],
+    lewat: ['Lewat tanggal, harga belum dikembalikan', '#fdecd8', '#b35a00']
+  }[state] || ['', '#eee', '#666'];
+  return `<span style="display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:500;background:${m[1]};color:${m[2]};line-height:1.5">${m[0]}</span>`;
+}
+
+// ===================== KELOLA PROMOSI (pilih per promo) =====================
 let promoManageMode = false;
-let promoSelectedRows = new Set();
+let promoSelectedRows = new Set(); // berisi key kelompok
 
 function togglePromoManage() {
   promoManageMode = !promoManageMode;
@@ -5328,29 +5500,34 @@ function togglePromoManage() {
   loadPromotions();
 }
 
-function togglePromoRowSelect(id, checked) {
-  if (checked) promoSelectedRows.add(id); else promoSelectedRows.delete(id);
+function togglePromoRowSelect(key, checked) {
+  if (checked) promoSelectedRows.add(key); else promoSelectedRows.delete(key);
   renderPromoManageToolbar();
 }
 
 function togglePromoSelectAll(checked) {
   document.querySelectorAll('#promo-list-render tbody input[type=checkbox]').forEach(cb => {
     cb.checked = checked;
-    const id = cb.getAttribute('data-promo-id');
-    if (checked) promoSelectedRows.add(id); else promoSelectedRows.delete(id);
+    const key = cb.getAttribute('data-promo-key');
+    if (checked) promoSelectedRows.add(key); else promoSelectedRows.delete(key);
   });
   renderPromoManageToolbar();
+}
+
+function promoSelectedGroups() {
+  return Array.from(promoSelectedRows).map(k => promoGroups.get(k)).filter(Boolean);
 }
 
 function renderPromoManageToolbar() {
   const el = document.getElementById('promo-manage-toolbar');
   const n = promoSelectedRows.size;
-  const toggleBtn = `<button id="promo-manage-toggle" onclick="togglePromoManage()" style="padding:6px 12px;font-size:12px;background:${promoManageMode ? 'var(--ink)' : '#fff'};color:${promoManageMode ? '#fff' : 'var(--ink)'};border:1px solid var(--border);border-radius:6px;cursor:pointer">${promoManageMode ? 'Selesai' : 'Kelola'}</button>`;
+  const toggleBtn = `<button id="promo-manage-toggle" onclick="togglePromoManage()" style="padding:6px 12px;font-size:12px;background:${promoManageMode ? 'var(--ink)' : '#fff'};color:${promoManageMode ? '#fff' : 'var(--ink)'};border:1px solid var(--border);border-radius:6px;cursor:pointer">Kelola</button>`;
   if (!promoManageMode || n === 0) {
     el.innerHTML = toggleBtn;
     return;
   }
   el.innerHTML = `${toggleBtn}
+    ${n >= 2 ? `<button onclick="openPromoMerge()" style="padding:6px 12px;font-size:12px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer">Gabungkan (${n})</button>` : ''}
     <button onclick="bulkEndPromotions()" style="padding:6px 12px;font-size:12px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer">Akhiri (${n})</button>
     <button onclick="bulkDeletePromotions()" style="padding:6px 12px;font-size:12px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:6px;cursor:pointer">Hapus (${n})</button>`;
 }
@@ -5406,59 +5583,74 @@ function promoRestoreNote(r) {
   return note;
 }
 
+
 let promoActionBusy = false;
 
 async function bulkDeletePromotions() {
-  if (!promoSelectedRows.size || promoActionBusy) return;
+  const groups = promoSelectedGroups();
+  if (!groups.length || promoActionBusy) return;
+  const ids = groups.flatMap(g => g.rowIds);
+  if (!confirm(`Hapus ${groups.length} promo? Harga produk yang masih berdiskon dikembalikan, dan riwayat promo ikut terhapus.`)) return;
   promoActionBusy = true;
   try {
-    const ids = Array.from(promoSelectedRows);
     const r = await restorePricesForPromos(ids);
     if (r.error) { showToast('Gagal mengembalikan harga, promosi tidak dihapus'); console.warn(r.error); return; }
     const { error } = await sb.from('promotions').delete().in('id', ids);
     if (error) { showToast('Gagal menghapus promosi'); console.warn(error.message); return; }
-    showToast(`${ids.length} promosi dihapus${promoRestoreNote(r)}`);
+    showToast(`${groups.length} promo dihapus${promoRestoreNote(r)}`);
     promoSelectedRows.clear();
     renderPromoManageToolbar();
-    loadPromotions();
+    await refreshAfterPromoChange();
   } finally {
     promoActionBusy = false;
   }
+}
+
+async function endGroupsCore(groups) {
+  const ids = groups.flatMap(g => g.activeRows.map(r => r.id));
+  if (!ids.length) return { ids, r: null, ok: true };
+  const r = await restorePricesForPromos(ids);
+  if (r.error) { showToast('Gagal mengembalikan harga, promosi belum diakhiri'); console.warn(r.error); return { ids, r, ok: false }; }
+  const { error } = await sb.from('promotions').update({ end_date: new Date().toISOString(), status: 'berakhir' }).in('id', ids);
+  if (error) { showToast('Gagal mengakhiri promosi'); console.warn(error.message); return { ids, r, ok: false }; }
+  return { ids, r, ok: true };
 }
 
 async function bulkEndPromotions() {
-  if (!promoSelectedRows.size || promoActionBusy) return;
+  const groups = promoSelectedGroups().filter(g => g.activeRows.length);
+  if (promoActionBusy) return;
+  if (!groups.length) { showToast('Promo yang dipilih sudah berakhir'); return; }
+  if (!confirm(`Akhiri ${groups.length} promo? Harga produk dikembalikan ke harga normal.`)) return;
   promoActionBusy = true;
   try {
-    const ids = Array.from(promoSelectedRows);
-    const r = await restorePricesForPromos(ids);
-    if (r.error) { showToast('Gagal mengembalikan harga, promosi belum diakhiri'); console.warn(r.error); return; }
-    const { error } = await sb.from('promotions').update({ end_date: new Date().toISOString(), status: 'berakhir' }).in('id', ids);
-    if (error) { showToast('Gagal mengakhiri promosi'); console.warn(error.message); return; }
-    showToast(`${ids.length} promosi diakhiri${promoRestoreNote(r)}`);
+    const { r, ok } = await endGroupsCore(groups);
+    if (!ok) return;
+    showToast(`${groups.length} promo diakhiri${promoRestoreNote(r)}`);
     promoSelectedRows.clear();
     renderPromoManageToolbar();
-    loadPromotions();
+    await refreshAfterPromoChange();
   } finally {
     promoActionBusy = false;
   }
 }
 
-async function deletePromotion(id) {
-  if (promoActionBusy) return;
+async function endPromoGroup(key) {
+  const g = promoGroups.get(key);
+  if (!g || !g.activeRows.length || promoActionBusy) return;
+  if (!confirm(`Akhiri promo "${g.name}"? Harga ${g.activeRows.length} produk dikembalikan ke harga normal.`)) return;
   promoActionBusy = true;
   try {
-    const r = await restorePricesForPromos([id]);
-    if (r.error) { showToast('Gagal mengembalikan harga, promosi tidak dihapus'); console.warn(r.error); return; }
-    const { error } = await sb.from('promotions').delete().eq('id', id);
-    if (error) { showToast('Gagal menghapus promosi'); console.warn(error.message); return; }
-    showToast(`Promosi dihapus${promoRestoreNote(r)}`);
-    loadPromotions();
+    const { r, ok } = await endGroupsCore([g]);
+    if (!ok) return;
+    showToast(`Promo diakhiri${promoRestoreNote(r)}`);
+    await refreshAfterPromoChange();
+    if (promoDetailKey === key && promoGroups.get(key)) renderPromoDetail();
   } finally {
     promoActionBusy = false;
   }
 }
 
+// ===================== DAFTAR PROMOSI (satu baris per promo) =====================
 async function loadPromotions() {
   const el = document.getElementById('promo-list-render');
   if (!el) return;
@@ -5471,98 +5663,255 @@ async function loadPromotions() {
   ]);
 
   if (promoRes.error) {
-    el.innerHTML = `<p style="font-size:12.5px;color:#a83232">Tabel "promotions" belum ada di database. Jalankan dulu file promotions_migration.sql di Supabase SQL Editor.</p>`;
-    document.getElementById('promo-perf-sales').textContent = '–';
-    document.getElementById('promo-perf-orders').textContent = '–';
-    document.getElementById('promo-perf-units').textContent = '–';
-    document.getElementById('promo-perf-buyers').textContent = '–';
+    el.innerHTML = `<p style="font-size:12.5px;color:#a83232">Gagal memuat promosi: ${chatEsc(promoRes.error.message)}</p>`;
+    ['sales', 'orders', 'units', 'buyers'].forEach(k => { const t = document.getElementById('promo-perf-' + k); if (t) t.textContent = '–'; });
     return;
   }
 
   const promos = promoRes.data || [];
   const orders = ordersRes.data || [];
+  promoActiveProductIds = new Set(promos.filter(p => p.status === 'aktif' && p.product_id).map(p => p.product_id));
+  refreshFlashOptions();
+  promoGroups = buildPromoGroups(promos, orders);
+  // buang pilihan yang kelompoknya sudah tidak ada
+  promoSelectedRows.forEach(k => { if (!promoGroups.has(k)) promoSelectedRows.delete(k); });
+  renderPromoManageToolbar();
 
-  // Ringkasan 7 hari terakhir
-  let totalSales = 0, totalOrders = 0, totalUnits = 0;
+  // Ringkasan 7 hari terakhir (pesanan dihitung unik antar promo)
+  let totalSales = 0, totalUnits = 0;
+  const allOrderIds = new Set();
   const allBuyers = new Set();
-  promos.forEach(p => {
-    const perf = computePromoPerf(p, orders);
-    totalSales += perf.revenue;
-    totalOrders += perf.orders;
-    totalUnits += perf.unitsSold;
+  const orderById = new Map(orders.map(o => [o.id, o]));
+  promoGroups.forEach(g => {
+    totalSales += g.perf.revenue;
+    totalUnits += g.perf.unitsSold;
+    g.rows.forEach(r => computePromoPerf(r, orders).orderIdList.forEach(id => allOrderIds.add(id)));
   });
-  orders.forEach(o => {
-    const items = o.items || [];
-    const inAnyPromo = promos.some(p => {
-      const start = new Date(p.start_date).getTime();
-      const end = p.end_date ? new Date(p.end_date).getTime() : Date.now();
-      const t = new Date(o.created_at).getTime();
-      if (t < start || t > end) return false;
-      return items.some(it => !p.product_id || it.productId === p.product_id);
-    });
-    if (inAnyPromo) {
-      const addr = o.shipping_address || {};
-      allBuyers.add(addr.phone || addr.recipient_name || o.id);
-    }
+  allOrderIds.forEach(id => {
+    const o = orderById.get(id);
+    const addr = (o && o.shipping_address) || {};
+    allBuyers.add(addr.phone || addr.recipient_name || id);
   });
-
   document.getElementById('promo-perf-sales').textContent = `Rp ${totalSales.toLocaleString('id-ID')}`;
-  document.getElementById('promo-perf-orders').textContent = totalOrders.toLocaleString('id-ID');
+  document.getElementById('promo-perf-orders').textContent = allOrderIds.size.toLocaleString('id-ID');
   document.getElementById('promo-perf-units').textContent = totalUnits.toLocaleString('id-ID');
   document.getElementById('promo-perf-buyers').textContent = allBuyers.size.toLocaleString('id-ID');
 
-  if (!promos.length) { el.innerHTML = `<p style="font-size:13px;color:var(--muted)">Belum ada promo dibuat.</p>`; return; }
+  if (!promoGroups.size) { el.innerHTML = `<p style="font-size:13px;color:var(--muted)">Belum ada promo dibuat.</p>`; return; }
 
-  // Performa all-time (bukan cuma 7 hari) buat tiap baris, biar bisa liat histori lengkap
+  const linkStyle = 'display:block;color:#2a5fb0;cursor:pointer;margin-bottom:4px;white-space:nowrap';
   el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">
     <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
       ${promoManageMode ? `<th style="padding:8px 6px"><input type="checkbox" id="promo-select-all" onclick="togglePromoSelectAll(this.checked)" style="width:15px;height:15px"></th>` : ''}
-      <th style="padding:8px 6px"></th>
-      <th style="padding:8px 6px">Nama</th>
+      <th style="padding:8px 6px">Nama Promo</th>
       <th style="padding:8px 6px">Tipe</th>
       <th style="padding:8px 6px">Produk</th>
       <th style="padding:8px 6px">Periode</th>
       <th style="padding:8px 6px">Penjualan</th>
       <th style="padding:8px 6px">Pesanan</th>
       <th style="padding:8px 6px">Terjual</th>
+      <th style="padding:8px 6px">Aksi</th>
     </tr></thead>
-    <tbody>${promos.map(p => {
-      const perf = computePromoPerf(p, orders);
-      const start = new Date(p.start_date).toLocaleDateString('id-ID',{day:'numeric',month:'short'});
-      const end = p.end_date ? new Date(p.end_date).toLocaleDateString('id-ID',{day:'numeric',month:'short'}) : '–';
-      const img = p.products?.image_url
-        ? `<img src="${p.products.image_url}" style="width:36px;height:36px;object-fit:cover;border-radius:6px">`
-        : `<div style="width:36px;height:36px;border-radius:6px;background:#f0ede8"></div>`;
-      const checked = promoSelectedRows.has(p.id) ? 'checked' : '';
-      return `<tr style="border-bottom:1px solid var(--border)">
-        ${promoManageMode ? `<td style="padding:8px 6px"><input type="checkbox" data-promo-id="${p.id}" ${checked} onclick="togglePromoRowSelect('${p.id}', this.checked)" style="width:15px;height:15px"></td>` : ''}
-        <td style="padding:8px 6px">${img}</td>
-        <td style="padding:8px 6px;font-weight:500">${p.name}</td>
-        <td style="padding:8px 6px">${p.type === 'discount' ? 'Diskon %' : 'Flash Sale'}</td>
-        <td style="padding:8px 6px">${p.products?.name || 'Semua Produk'}</td>
-        <td style="padding:8px 6px">${start} - ${end}</td>
-        <td style="padding:8px 6px">Rp ${perf.revenue.toLocaleString('id-ID')}</td>
-        <td style="padding:8px 6px">${perf.orders}</td>
-        <td style="padding:8px 6px">${perf.unitsSold}</td>
+    <tbody>${Array.from(promoGroups.values()).map(g => {
+      const imgs = [];
+      g.rows.forEach(r => { const u = r.products?.image_url; if (u && !imgs.includes(u)) imgs.push(u); });
+      const shown = imgs.slice(0, 5).map(u => `<img src="${u}" style="width:34px;height:34px;object-fit:cover;border-radius:6px;margin-right:4px">`).join('');
+      const more = Math.max(0, g.rows.length - Math.min(imgs.length, 5));
+      const thumbs = `<div style="display:flex;align-items:center;flex-wrap:wrap">${shown}${more ? `<span style="color:var(--muted);font-size:11.5px">+${more}</span>` : ''}</div><div style="color:var(--muted);font-size:11.5px;margin-top:3px">${g.rows.length} produk</div>`;
+      const period = `${fmtPromoDate(g.start)}<br><span style="color:var(--muted)">s/d</span> ${g.end ? fmtPromoDate(g.end) : '–'}`;
+      const checked = promoSelectedRows.has(g.key) ? 'checked' : '';
+      return `<tr style="border-bottom:1px solid var(--border);vertical-align:top">
+        ${promoManageMode ? `<td style="padding:10px 6px"><input type="checkbox" data-promo-key="${g.key}" ${checked} onclick="togglePromoRowSelect('${g.key}', this.checked)" style="width:15px;height:15px"></td>` : ''}
+        <td style="padding:10px 6px;max-width:240px"><div style="margin-bottom:5px">${promoStateBadge(g.state)}</div><div style="font-weight:500">${chatEsc(g.name)}</div></td>
+        <td style="padding:10px 6px">${g.type === 'discount' ? 'Diskon Produk' : 'Flash Sale'}</td>
+        <td style="padding:10px 6px">${thumbs}</td>
+        <td style="padding:10px 6px;line-height:1.5">${period}</td>
+        <td style="padding:10px 6px">Rp ${g.perf.revenue.toLocaleString('id-ID')}</td>
+        <td style="padding:10px 6px">${g.perf.orders}</td>
+        <td style="padding:10px 6px">${g.perf.unitsSold}</td>
+        <td style="padding:10px 6px">
+          <a style="${linkStyle}" onclick="openPromoDetail('${g.key}')">Rincian</a>
+          ${g.state === 'berakhir'
+            ? (g.type === 'discount' ? `<a style="${linkStyle}" onclick="duplicatePromoGroup('${g.key}')">Duplikat</a>` : '')
+            : `<a style="${linkStyle}" onclick="endPromoGroup('${g.key}')">Akhiri</a>`}
+        </td>
       </tr>`;
     }).join('')}</tbody>
   </table></div>`;
+
+  if (promoDetailKey && document.getElementById('promo-detail-modal').classList.contains('open')) renderPromoDetail();
 }
 
-async function endPromotion(id) {
-  if (promoActionBusy) return;
+// ===================== RINCIAN PROMO =====================
+function openPromoDetail(key) {
+  if (!promoGroups.get(key)) return;
+  promoDetailKey = key;
+  renderPromoDetail();
+  document.getElementById('promo-detail-modal').classList.add('open');
+}
+function closePromoDetail() {
+  document.getElementById('promo-detail-modal').classList.remove('open');
+  promoDetailKey = null;
+}
+
+function renderPromoDetail() {
+  const g = promoGroups.get(promoDetailKey);
+  const el = document.getElementById('promo-detail-body');
+  if (!g) { closePromoDetail(); return; }
+  const canAdd = g.type === 'discount' && (g.state === 'berlangsung' || g.state === 'akandatang');
+  const btn = 'padding:8px 14px;font-size:12.5px;background:#fff;border:1px solid var(--border);border-radius:7px;cursor:pointer';
+  const rowsHtml = g.rows.map(r => {
+    const prod = adminProductsData.find(x => x.id === r.product_id);
+    const name = r.products?.name || '(produk sudah dihapus)';
+    const img = r.products?.image_url
+      ? `<img src="${r.products.image_url}" style="width:34px;height:34px;object-fit:cover;border-radius:6px;flex-shrink:0">`
+      : `<div style="width:34px;height:34px;border-radius:6px;background:#f0ede8;flex-shrink:0"></div>`;
+    const normal = prod ? productBasePrice(prod) : 0;
+    const promoPrice = parseInt(r.value) || 0;
+    const pct = normal && promoPrice ? Math.round((1 - promoPrice / normal) * 100) : null;
+    const active = r.status === 'aktif';
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 6px"><div style="display:flex;align-items:center;gap:8px">${img}<span style="max-width:220px">${chatEsc(name)}</span></div></td>
+      <td style="padding:8px 6px;color:var(--muted)">${normal ? 'Rp ' + normal.toLocaleString('id-ID') : '–'}</td>
+      <td style="padding:8px 6px">Rp ${promoPrice.toLocaleString('id-ID')}</td>
+      <td style="padding:8px 6px;font-weight:600;color:${pct > 0 ? '#1e7a4c' : 'var(--muted)'}">${pct == null ? '–' : (pct > 0 ? '-' + pct + '%' : pct + '%')}</td>
+      <td style="padding:8px 6px;color:${active ? '#1e7a4c' : 'var(--muted)'}">${active ? 'Aktif' : 'Berakhir'}</td>
+      <td style="padding:8px 6px;white-space:nowrap">
+        ${active ? `<a style="color:#2a5fb0;cursor:pointer;margin-right:12px" onclick="removeFromPromo('${r.id}')">Keluarkan</a>` : ''}
+        ${active && g.rows.length > 1 ? `<a style="color:#2a5fb0;cursor:pointer" onclick="detachFromPromo('${r.id}')">Jadikan promo sendiri</a>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px">
+      <div>
+        <h3 class="admin-card-title" style="margin:0 0 6px">${chatEsc(g.name)}</h3>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${promoStateBadge(g.state)}<span style="font-size:12px;color:var(--muted)">${g.type === 'discount' ? 'Diskon Produk' : 'Flash Sale'} · ${fmtPromoDateTime(g.start)} s/d ${g.end ? fmtPromoDateTime(g.end) : 'tanpa batas'}</span></div>
+      </div>
+      <span onclick="closePromoDetail()" style="cursor:pointer;font-size:22px;line-height:1;color:var(--muted)">&times;</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      ${canAdd ? `<button onclick="addProductsToPromo()" style="${btn};border-color:var(--ink);font-weight:500">+ Tambah Produk</button>` : ''}
+      ${g.state === 'berakhir' && g.type === 'discount' ? `<button onclick="duplicatePromoGroup('${g.key}')" style="${btn}">Duplikat</button>` : ''}
+      ${g.state !== 'berakhir' ? `<button onclick="endPromoGroup('${g.key}')" style="${btn}">Akhiri Promo</button>` : ''}
+    </div>
+    <div style="overflow-x:auto;max-height:50vh;overflow-y:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">
+      <thead><tr style="text-align:left;border-bottom:1px solid var(--border)">
+        <th style="padding:6px">Produk</th><th style="padding:6px">Harga Normal</th><th style="padding:6px">Harga Promo</th><th style="padding:6px">Diskon</th><th style="padding:6px">Status</th><th style="padding:6px"></th>
+      </tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table></div>`;
+}
+
+function addProductsToPromo() {
+  const g = promoGroups.get(promoDetailKey);
+  if (!g) return;
+  if (g.state !== 'berlangsung' && g.state !== 'akandatang') { showToast('Promo ini sudah tidak bisa ditambah produk'); return; }
+  closePromoDetail();
+  openPromoModal('discount', { key: g.key, groupId: g.groupId, name: g.name, start: g.start, end: g.end, rowIds: g.rowIds });
+}
+
+async function removeFromPromo(rowId) {
+  const key = promoDetailKey;
+  const g = promoGroups.get(key);
+  if (!g || promoActionBusy) return;
+  const isLast = g.rows.length === 1;
+  const msg = isLast
+    ? 'Ini produk terakhir di promo ini. Promo akan dihapus dan harga produk dikembalikan. Lanjutkan?'
+    : 'Keluarkan produk dari promo? Harga produk dikembalikan ke harga normal.';
+  if (!confirm(msg)) return;
   promoActionBusy = true;
   try {
-    const r = await restorePricesForPromos([id]);
-    if (r.error) { showToast('Gagal mengembalikan harga, promosi belum diakhiri'); console.warn(r.error); return; }
-    const { error } = await sb.from('promotions').update({ end_date: new Date().toISOString(), status: 'berakhir' }).eq('id', id);
-    if (error) { showToast('Gagal mengakhiri promosi'); console.warn(error.message); return; }
-    showToast(`Promosi diakhiri${promoRestoreNote(r)}`);
-    loadPromotions();
+    const r = await restorePricesForPromos([rowId]);
+    if (r.error) { showToast('Gagal mengembalikan harga, produk belum dikeluarkan'); console.warn(r.error); return; }
+    const { error } = await sb.from('promotions').delete().eq('id', rowId);
+    if (error) { showToast('Gagal mengeluarkan produk'); console.warn(error.message); return; }
+    showToast(`Produk dikeluarkan dari promo${promoRestoreNote(r)}`);
+    if (isLast) closePromoDetail();
+    await refreshAfterPromoChange();
   } finally {
     promoActionBusy = false;
   }
 }
+
+async function detachFromPromo(rowId) {
+  if (promoActionBusy) return;
+  promoActionBusy = true;
+  try {
+    const { error } = await sb.from('promotions').update({ group_id: newUuid() }).eq('id', rowId);
+    if (error) { showToast('Gagal memisahkan produk'); console.warn(error.message); return; }
+    showToast('Produk dijadikan promo sendiri');
+    await loadPromotions();
+  } finally {
+    promoActionBusy = false;
+  }
+}
+
+async function duplicatePromoGroup(key) {
+  const g = promoGroups.get(key);
+  if (!g || g.state !== 'berakhir' || g.type !== 'discount') return;
+  if (!adminProductsData.length) { try { await loadAdminProducts(); } catch (_) {} }
+  try { await refreshPromoBlockedIds(); } catch (_) {}
+  const items = [];
+  const seen = new Set();
+  let skipped = 0;
+  g.rows.forEach(r => {
+    const p = adminProductsData.find(x => x.id === r.product_id);
+    if (!p || seen.has(p.id) || productBlockedForPromo(p)) { skipped++; return; }
+    seen.add(p.id);
+    items.push({ pid: p.id, data: { name: p.name, hargaNormal: productBasePrice(p), netPrice: String(r.value ?? ''), img: p.image_url || '' } });
+  });
+  if (!items.length) { showToast('Semua produk promo ini sedang berdiskon atau sudah dihapus'); return; }
+  closePromoDetail();
+  await openPromoModal('discount', null, { name: g.name, items });
+  if (skipped) showToast(`${skipped} produk dilewati (sedang berdiskon atau sudah dihapus)`);
+}
+
+// ===================== GABUNGKAN PROMO =====================
+function openPromoMerge() {
+  const groups = promoSelectedGroups();
+  if (groups.length < 2) { showToast('Pilih minimal 2 promo untuk digabung'); return; }
+  if (groups.some(g => g.state === 'berakhir')) { showToast('Promo yang sudah berakhir tidak bisa digabung'); return; }
+  if (groups.some(g => g.state === 'lewat')) { showToast('Ada promo yang sudah lewat tanggal. Akhiri dulu'); return; }
+  if (groups.some(g => g.type !== groups[0].type)) { showToast('Hanya promo bertipe sama yang bisa digabung'); return; }
+  const starts = groups.map(g => new Date(g.start).getTime());
+  const open = groups.some(g => !g.end);
+  const ends = groups.filter(g => g.end).map(g => new Date(g.end).getTime());
+  document.getElementById('merge-name').value = groups[0].name;
+  document.getElementById('merge-start').value = promoLocalInput(new Date(Math.min(...starts)).toISOString());
+  document.getElementById('merge-end').value = open || !ends.length ? '' : promoLocalInput(new Date(Math.max(...ends)).toISOString());
+  document.getElementById('merge-count').textContent = `${groups.length} promo (${groups.reduce((n, g) => n + g.activeRows.length, 0)} produk) akan digabung jadi satu.`;
+  document.getElementById('promo-merge-modal').classList.add('open');
+}
+function closePromoMerge() { document.getElementById('promo-merge-modal').classList.remove('open'); }
+
+async function confirmPromoMerge() {
+  if (promoActionBusy) return;
+  const groups = promoSelectedGroups();
+  if (groups.length < 2 || groups.some(g => !g.activeRows.length)) { showToast('Pilihan promo berubah, buka ulang Gabungkan'); closePromoMerge(); return; }
+  const name = document.getElementById('merge-name').value.trim();
+  const startVal = document.getElementById('merge-start').value;
+  const endVal = document.getElementById('merge-end').value;
+  if (!name) { showToast('Isi nama promo'); return; }
+  if (!startVal) { showToast('Isi waktu mulai'); return; }
+  const startIso = new Date(startVal).toISOString();
+  const endIso = endVal ? new Date(endVal).toISOString() : null;
+  if (endIso && new Date(endIso).getTime() <= Date.now()) { showToast('Waktu berakhir harus di masa depan'); return; }
+  if (endIso && new Date(endIso).getTime() <= new Date(startIso).getTime()) { showToast('Waktu berakhir harus setelah waktu mulai'); return; }
+  const ids = groups.flatMap(g => g.activeRows.map(r => r.id));
+  promoActionBusy = true;
+  try {
+    const { error } = await sb.from('promotions').update({ group_id: newUuid(), name, start_date: startIso, end_date: endIso }).in('id', ids);
+    if (error) { showToast('Gagal menggabungkan promo'); console.warn(error.message); return; }
+    showToast(`${groups.length} promo digabung ✓`);
+    closePromoMerge();
+    promoSelectedRows.clear();
+    await loadPromotions();
+  } finally {
+    promoActionBusy = false;
+  }
+}
+
 // ===================== REVIEWS ADMIN =====================
 async function loadAdminReviews() {
   const { data } = await sb.from('reviews').select('*,products(name)');
