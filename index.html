@@ -1034,6 +1034,173 @@
       #perf-penjualan-status > div > div > div:first-child{color:var(--sc-ink) !important}
     }
 
+    /* ===== DESKTOP: dropdown periode, Metrik Real-time, chat dock, tabel Performa Produk =====
+       Semua blok di bawah desktop-only (>=861px); di HP elemen-elemen ini disembunyikan, tampilan HP tidak berubah. */
+    .perf-dd,.perf-rt-card,.chat-dock{display:none}
+    .perf-scope-field{display:contents}
+    .perf-scope-field > span{display:none}
+    .perf-main-row{display:block}
+
+    /* tabel Performa per Produk (tab Produk): foto + nama + ID, header bisa diurutkan 3 status */
+    .pp-tbl{width:100%;border-collapse:collapse;font-size:13px}
+    .pp-tbl thead tr{border-bottom:1px solid var(--border);text-align:left}
+    .pp-tbl th{padding:10px 8px;font-weight:600;color:var(--muted);white-space:nowrap}
+    .pp-tbl th.num,.pp-tbl td.num{text-align:right}
+    .pp-tbl th.srt{cursor:pointer;user-select:none}
+    .pp-tbl th.srt:hover{color:var(--text)}
+    .pp-tbl th.srt.on{color:var(--text)}
+    .pp-tbl tbody tr{border-bottom:1px solid var(--border)}
+    .pp-tbl td{padding:12px 8px;vertical-align:middle}
+    .pp-tbl td.num{font-variant-numeric:tabular-nums}
+    .pp-prodcell{display:flex;align-items:center;gap:12px;min-width:0}
+    .pp-pimg{flex:0 0 56px;width:56px;height:56px;border-radius:6px;overflow:hidden;background:#f0ede8}
+    .pp-pimg img{width:100%;height:100%;object-fit:cover;display:block}
+    .pp-ptxt{min-width:0}
+    .pp-pname{font-size:13.5px;font-weight:600;line-height:1.35;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .pp-pid{margin-top:3px;font-size:11.5px;color:var(--muted)}
+    .sort-ic{display:inline-flex;flex-direction:column;gap:2px;margin-left:6px;vertical-align:middle}
+    .sort-ic i{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent}
+    .sort-ic i.u{border-bottom:5px solid rgba(17,17,20,.22)}
+    .sort-ic i.d{border-top:5px solid rgba(17,17,20,.22)}
+    .sort-ic.up i.u,.sort-ic.dn i.d{border-bottom-color:#111114;border-top-color:#111114}
+
+    @media(min-width:861px){
+      /* chat pindah jadi dock melayang -> hilang dari sidebar */
+      .admin-sidebar .admin-nav-item[data-tab="chat"]{display:none}
+
+      /* ---- Periode: dropdown ala Shopee ---- */
+      #perf-period-controls{padding:14px 20px}
+      .perf-ctl-row{justify-content:flex-start !important;flex-wrap:wrap;gap:12px !important;margin-bottom:0 !important}
+      #perf-period-controls > div:first-child > div:first-child{display:none}
+      #perf-period-tabs{display:none !important}
+      .perf-scope-field{display:flex;align-items:center;gap:10px;height:38px;padding:0 6px 0 14px;border:1px solid rgba(17,17,20,.18);border-radius:6px;background:#fff;cursor:pointer}
+      .perf-scope-field:hover{border-color:var(--sc-ink)}
+      .perf-scope-field > span{display:block;font-size:13px;color:var(--sc-mute);white-space:nowrap}
+      #perf-period-controls .perf-scope-field #perf-scope{background:transparent;border:none;padding:0 6px;font-size:13px;font-weight:600;color:var(--sc-ink);outline:none;cursor:pointer}
+      .perf-dd{display:block;position:relative}
+      .perf-dd-field{display:flex;align-items:center;gap:10px;height:38px;padding:0 14px;border:1px solid rgba(17,17,20,.18);border-radius:6px;background:#fff;font:400 13px 'Inter',sans-serif;color:var(--sc-mute);cursor:pointer;white-space:nowrap}
+      .perf-dd-field b{font-weight:600;color:var(--sc-ink)}
+      .perf-dd-field .pdd-range{color:var(--sc-ink)}
+      .perf-dd-field .pdd-cal{width:17px;height:17px;margin-left:8px;color:var(--sc-ink2)}
+      .perf-dd-field:hover,.perf-dd.open .perf-dd-field{border-color:var(--sc-ink)}
+      .perf-dd-pop{position:absolute;left:0;top:calc(100% + 6px);z-index:60;display:flex;min-width:456px;min-height:306px;background:#fff;border-radius:8px;box-shadow:0 6px 28px rgba(17,17,20,.18);overflow:hidden}
+      .perf-dd-pop[hidden]{display:none}
+      .pdd-left{flex:0 0 180px;padding:8px 0;border-right:1px solid var(--sc-line)}
+      .pdd-item{display:flex;align-items:center;justify-content:space-between;width:100%;padding:10px 18px;border:none;background:none;font:400 13.5px 'Inter',sans-serif;color:var(--sc-ink);cursor:pointer;text-align:left}
+      .pdd-item.hov{background:var(--sc-bg)}
+      .pdd-item.sel{font-weight:700}
+      .pdd-item svg{width:12px;height:12px;color:var(--sc-mute)}
+      .pdd-sep{height:1px;margin:8px 18px;background:var(--sc-line)}
+      .pdd-right{flex:1;min-width:0;padding:14px 16px}
+      .pdd-info{display:inline-block;padding:3px 0;font-size:13.5px;font-weight:600;color:var(--sc-ink);cursor:pointer}
+      .pdd-calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:13.5px;font-weight:600;color:var(--sc-ink)}
+      .pdd-nav{width:28px;height:28px;border:none;background:none;border-radius:6px;font-size:18px;line-height:1;color:var(--sc-ink2);cursor:pointer}
+      .pdd-nav:hover:not(:disabled){background:var(--sc-bg)}
+      .pdd-nav:disabled{opacity:.3;cursor:not-allowed}
+      .pdd-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+      .pdd-dow{padding:4px 0;font-size:11px;text-align:center;color:var(--sc-mute)}
+      .pdd-day{height:32px;border:none;background:none;border-radius:6px;font:400 13px 'Inter',sans-serif;color:var(--sc-ink);cursor:pointer}
+      .pdd-day:hover:not(:disabled){background:var(--sc-bg)}
+      .pdd-day.out{color:rgba(17,17,20,.3)}
+      .pdd-day:disabled{color:rgba(17,17,20,.2);cursor:not-allowed}
+      .pdd-day.sel{background:var(--sc-ink);color:#fff}
+      .pdd-day.now{box-shadow:inset 0 0 0 1px rgba(17,17,20,.35)}
+      .pdd-wk{display:grid;grid-template-columns:repeat(7,1fr);border-radius:6px;cursor:pointer}
+      .pdd-wk:hover:not(.dis){background:var(--sc-bg)}
+      .pdd-wk.sel,.pdd-wk.sel:hover{background:var(--sc-ink);color:#fff}
+      .pdd-wk.dis{cursor:not-allowed;opacity:.3}
+      .pdd-wk span{display:flex;align-items:center;justify-content:center;height:32px;font-size:13px}
+      .pdd-wk span.out{opacity:.45}
+      .pdd-cells{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+      .pdd-cell{height:42px;border:none;background:none;border-radius:6px;font:400 13.5px 'Inter',sans-serif;color:var(--sc-ink);cursor:pointer}
+      .pdd-cell:hover:not(:disabled){background:var(--sc-bg)}
+      .pdd-cell:disabled{color:rgba(17,17,20,.2);cursor:not-allowed}
+      .pdd-cell.sel{background:var(--sc-ink);color:#fff}
+
+      /* ---- Tinjauan: Kriteria Utama (kiri) + Metrik Real-time (kanan) ---- */
+      .perf-main-row{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start;margin-bottom:16px}
+      .perf-main-left{min-width:0}
+      .perf-main-left > .admin-card:last-child{margin-bottom:0 !important}
+      .perf-metric-grid > .admin-card{padding:14px 12px !important}
+      .perf-metric-grid > .admin-card > div:nth-child(2){font-size:clamp(15px,1.2vw,20px) !important}
+      .perf-rt-card{display:block;background:#fff;border-radius:12px;padding:20px 22px 18px}
+      .rt-title{font-size:18px;font-weight:700;color:var(--sc-ink)}
+      .rt-live{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11.5px;color:var(--sc-mute)}
+      .rt-live i{width:7px;height:7px;border-radius:50%;background:#1e9e5a}
+      .rt-sales-label{margin-top:16px;font-size:13px;color:var(--sc-mute)}
+      .rt-sales{margin-top:2px;font-size:22px;font-weight:700;color:var(--sc-ink)}
+      .rt-spark{margin-top:8px}
+      .rt-spark svg{display:block;width:100%;height:68px;overflow:visible}
+      .rt-axis{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--sc-mute)}
+      .rt-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:16px;border-top:1px solid var(--sc-line)}
+      .rt-grid > div{padding:14px 14px 0;border-right:1px solid var(--sc-line)}
+      .rt-grid > div:first-child{padding-left:0}
+      .rt-grid > div:last-child{border-right:none}
+      .rt-grid span{display:block;min-height:32px;font-size:12.5px;line-height:1.3;color:var(--sc-mute)}
+      .rt-grid b{display:block;margin-top:6px;font-size:20px;font-weight:700;color:var(--sc-ink)}
+    }
+    @media(min-width:1360px){
+      .perf-main-row{grid-template-columns:minmax(0,1fr) 330px}
+      .rt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .rt-grid > div{padding:14px 0 12px;border-right:none}
+      .rt-grid > div:nth-child(odd){padding-right:14px;border-right:1px solid var(--sc-line)}
+      .rt-grid > div:nth-child(even){padding-left:16px}
+    }
+
+    /* ---- Chat dock (desktop): pill "Pesan" ala DM Instagram web ---- */
+    @media(min-width:861px){
+      .chat-dock{display:block;--cd-bg:#1b1c20;--cd-bg2:#292A31;--cd-line:rgba(255,255,255,.09);--cd-tx:#f3f3f5;--cd-mu:rgba(243,243,245,.58)}
+      .chat-dock [hidden]{display:none !important}
+      .cd-pill{position:fixed;right:28px;bottom:16px;z-index:45;display:flex;align-items:center;gap:10px;height:52px;padding:0 14px 0 18px;border:none;border-radius:26px;background:var(--cd-bg2);color:var(--cd-tx);font:600 14px 'Inter',sans-serif;cursor:pointer;box-shadow:0 4px 18px rgba(17,17,20,.28)}
+      .cd-pill:hover{background:#33353d}
+      .cd-pill svg{width:22px;height:22px;flex-shrink:0}
+      .cd-avs{display:flex;margin-left:4px}
+      .cd-av{display:flex;align-items:center;justify-content:center;width:28px;height:28px;margin-left:-8px;border:2px solid var(--cd-bg2);border-radius:50%;background:#4a4c56;color:#fff;font-size:12px;font-weight:600}
+      .cd-av:first-child{margin-left:0}
+      .cd-badge{position:absolute;top:-6px;right:-2px;display:flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#e74c3c;color:#fff;font-size:11px;font-weight:700}
+      .cd-panel{position:fixed;right:28px;bottom:0;z-index:45;display:flex;flex-direction:column;width:360px;height:min(560px,calc(100vh - 72px));background:var(--cd-bg);color:var(--cd-tx);border-radius:14px 14px 0 0;box-shadow:0 8px 32px rgba(17,17,20,.35);overflow:hidden}
+      .cd-panel.expanded{width:min(860px,calc(100vw - 300px));height:min(640px,calc(100vh - 72px))}
+      .cd-head{position:static;display:flex;align-items:center;gap:2px;flex-shrink:0;padding:10px 10px 10px 18px;border-bottom:1px solid var(--cd-line);background:var(--cd-bg);color:var(--cd-tx)}
+      .cd-title{flex:1;min-width:0;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .cd-ico{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:34px;height:34px;border:none;border-radius:50%;background:none;color:var(--cd-tx);cursor:pointer}
+      .cd-ico:hover{background:rgba(255,255,255,.09)}
+      .cd-ico svg{width:18px;height:18px}
+      .cd-back{margin-left:-10px}
+      .cd-body{display:flex;flex:1;min-height:0}
+      .cd-body .chat-shell{flex:1;min-width:0;height:auto;min-height:0;border:none;border-radius:0;background:transparent}
+      .cd-body .chat-list-pane{border-right:1px solid var(--cd-line)}
+      .cd-panel:not(.expanded) .chat-list-pane{width:100%;border-right:none}
+      .cd-panel:not(.expanded) .chat-conv-pane{display:none}
+      .cd-panel:not(.expanded) .chat-shell.has-active .chat-list-pane{display:none}
+      .cd-panel:not(.expanded) .chat-shell.has-active .chat-conv-pane{display:flex}
+      .cd-panel:not(.expanded) .chat-conv-head{display:none}
+      .cd-body .chat-notify{padding:8px 12px;border-color:var(--cd-line)}
+      .cd-body .chat-notify-btn{padding:6px 8px;border:none;border-radius:14px;background:var(--cd-bg2);color:var(--cd-mu);font-size:11.5px}
+      .cd-body .chat-notify-btn.on{border:none;color:#5fd49a;font-weight:500}
+      .cd-body .chat-filter{padding:0 8px;border-color:var(--cd-line)}
+      .cd-body .chat-filter .orders-tab{padding:10px;border-bottom:2px solid transparent;font-size:13px;font-weight:500;color:var(--cd-mu);white-space:nowrap}
+      .cd-body .chat-filter .orders-tab.active{border-bottom-color:var(--cd-tx);color:var(--cd-tx);font-weight:600}
+      .cd-body .chat-item{align-items:center;gap:12px;padding:10px 16px;border-bottom:none;color:var(--cd-tx)}
+      .cd-body .chat-item:hover,.cd-body .chat-item.active{background:rgba(255,255,255,.06)}
+      .cd-body .chat-avatar{width:44px;height:44px;background:#4a4c56;font-size:16px}
+      .cd-body .chat-item-top{font-size:13.5px;color:var(--cd-tx)}
+      .cd-body .chat-item-time,.cd-body .chat-item-sub,.cd-body .chat-item-div{color:var(--cd-mu)}
+      .cd-body .chat-unread{background:#e74c3c}
+      .cd-body .chat-empty{color:var(--cd-mu)}
+      .cd-body .chat-conv-head{border-color:var(--cd-line)}
+      .cd-body .chat-conv-name{color:var(--cd-tx)}
+      .cd-body .chat-conv-meta{color:var(--cd-mu)}
+      .cd-body .chat-msgs{background:transparent}
+      .cd-body .chat-msg.buyer{border:none;background:var(--cd-bg2);color:var(--cd-tx)}
+      .cd-body .chat-msg.staff{background:#f3f3f5;color:#111114}
+      .cd-body .chat-compose{border-color:var(--cd-line)}
+      .cd-body .chat-compose textarea{padding:9px 14px;border:none;border-radius:20px;background:var(--cd-bg2);color:var(--cd-tx)}
+      .cd-body .chat-compose textarea::placeholder{color:var(--cd-mu)}
+      .cd-body .chat-compose button{display:flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border-radius:50%;background:#f3f3f5;color:#111114}
+      .cd-body .chat-compose .send-label{display:none}
+      .cd-body .chat-compose .send-ico{display:block}
+    }
+
     /* ---------- HP ---------- */
     @media(max-width:860px){
       .promo-hub-grid{grid-template-columns:1fr;gap:8px}
@@ -1690,12 +1857,24 @@
           </div>
 
           <div id="perf-period-controls">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+            <div class="perf-ctl-row" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
               <div style="font-size:13px;color:var(--text)">Periode <span id="perf-clock" style="color:var(--muted)"></span></div>
-              <select id="perf-scope" class="form-input" style="width:auto" onchange="loadPerfActiveTab()">
-                <option value="dibuat">Pesanan Dibuat</option>
-                <option value="siap_kirim">Pesanan Siap Dikirim</option>
-              </select>
+              <!-- Dropdown periode (desktop saja, ala Shopee). HP tetap pakai pill di bawah -->
+              <div class="perf-dd" id="perf-dd">
+                <button type="button" class="perf-dd-field" id="perf-dd-field" onclick="perfDdToggle(event)" aria-haspopup="true" aria-expanded="false">
+                  <span class="pdd-lbl">Periode Data</span>
+                  <b id="perf-dd-name">Real-time</b>
+                  <span class="pdd-range" id="perf-dd-range"></span>
+                  <svg class="pdd-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+                </button>
+                <div class="perf-dd-pop" id="perf-dd-pop" hidden></div>
+              </div>
+              <label class="perf-scope-field"><span>Status Pesanan</span>
+                <select id="perf-scope" class="form-input" style="width:auto" onchange="loadPerfActiveTab()">
+                  <option value="dibuat">Pesanan Dibuat</option>
+                  <option value="siap_kirim">Pesanan Siap Dikirim</option>
+                </select>
+              </label>
             </div>
             <div id="perf-period-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
               <button class="perf-period-btn active" data-period="today" onclick="setPerfPeriod('today')">Real-time</button>
@@ -1709,6 +1888,8 @@
 
           <!-- PANEL: TINJAUAN -->
           <div id="perf-panel-tinjauan" class="perf-panel">
+            <div class="perf-main-row">
+            <div class="perf-main-left">
             <div class="perf-metric-grid">
               <div class="admin-card" style="margin:0" data-metric="revenue" onclick="selectPerfMetric('revenue')">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Total Penjualan</div>
@@ -1740,6 +1921,23 @@
               <h3 class="admin-card-title" id="perf-chart-title" style="margin:0">Kunjungan per Jam</h3>
                 <span id="perf-live-badge" style="display:none;font-size:11px;color:#1e7a4c;font-weight:600;margin-left:8px">● Live</span>
               <div id="perf-chart" style="margin-top:10px"></div>
+            </div>
+            </div>
+            <!-- Blok Metrik Real-time (desktop saja): selalu data HARI INI, tidak ikut pilihan periode -->
+            <aside class="perf-rt-card" id="perf-rt">
+              <div class="rt-title">Metrik Real-time</div>
+              <div class="rt-live"><i></i>Update secara real-time</div>
+              <div class="rt-sales-label">Penjualan Hari Ini</div>
+              <div class="rt-sales" id="rt-sales">Rp0</div>
+              <div class="rt-spark" id="rt-spark"></div>
+              <div class="rt-axis"><span>00:00</span><span>12:00</span><span>24:00</span></div>
+              <div class="rt-grid">
+                <div><span>Total Pengunjung</span><b id="rt-visitors">0</b></div>
+                <div><span>Produk Diklik</span><b id="rt-clicks">0</b></div>
+                <div><span>Pesanan</span><b id="rt-orders">0</b></div>
+                <div><span>Tingkat Konversi Pesanan</span><b id="rt-conv">0,00%</b></div>
+              </div>
+            </aside>
             </div>
             <div class="admin-card">
               <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
@@ -2274,6 +2472,25 @@
       Saya
     </button>
   </nav>
+
+  <!-- Chat dock (desktop saja, ala DM Instagram web): pill "Pesan" melayang di kanan bawah, klik -> panel percakapan -->
+  <div class="chat-dock" id="chat-dock">
+    <button type="button" class="cd-pill" id="cd-pill" onclick="chatDockOpen()" aria-label="Buka pesan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3L9.2 11.2"/><path d="M22 3l-7 18-5.8-9.8L2 8.4 22 3z"/></svg>
+      <span class="cd-pill-t">Pesan</span>
+      <span class="cd-avs" id="cd-avs"></span>
+      <span class="cd-badge" id="cd-badge" hidden>0</span>
+    </button>
+    <section class="cd-panel" id="cd-panel" hidden aria-label="Pesan">
+      <header class="cd-head">
+        <button type="button" class="cd-ico cd-back" id="cd-back" onclick="chatBack()" aria-label="Kembali" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="cd-title" id="cd-title">Pesan</div>
+        <button type="button" class="cd-ico" id="cd-expand" onclick="chatDockToggleExpand()" aria-label="Perbesar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button>
+        <button type="button" class="cd-ico" onclick="chatDockClose()" aria-label="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </header>
+      <div class="cd-body" id="cd-body"></div>
+    </section>
+  </div>
 </div>
 
 <!-- CONFIRM DIALOG (generic, dipakai buat aksi hapus dkk) -->
@@ -2755,7 +2972,15 @@ async function saveBioLinks(){
   setTimeout(() => lockBioFields(), 600);
 }
 
+let lastNonChatTab = 'home';
 function renderTab(tab, el) {
+  if (tab === 'chat' && chatDeskMQ.matches) {
+    // Desktop: Chat bukan halaman lagi, tapi dock melayang. Buka dock, halaman di belakangnya tetap yang terakhir dibuka.
+    chatDockOpen();
+    tab = lastNonChatTab || 'home';
+    el = document.querySelector(`.admin-nav-item[data-tab="${tab}"]`);
+  }
+  lastNonChatTab = tab;
   document.querySelectorAll('.admin-nav-item[data-tab]').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -2787,6 +3012,7 @@ function renderTab(tab, el) {
 }
 
 function switchTab(tab, el) {
+  if (tab === 'chat' && chatDeskMQ.matches) { chatDockOpen(); return; } // desktop: cukup buka dock, URL & halaman tidak berubah
   renderTab(tab, el);
   pushHashParams({ tab, sub: '', order: '', status: '', view: '' });
 }
@@ -2861,7 +3087,10 @@ function applyHashRoute() {
 
 window.addEventListener('popstate', applyHashRoute);
 // ===================== PERFORMA TOKO =====================
+// Periode kustom dari dropdown desktop (Per Hari / Per Minggu / Per Bulan / Berdasarkan Tahun). end = batas atas eksklusif.
+let perfCustom = null; // { type: 'day'|'week'|'month'|'year', start: Date, end: Date }
 function perfRangeStart(period) {
+  if (period === 'custom' && perfCustom) return new Date(perfCustom.start);
   const now = new Date();
   if (period === 'yesterday') { const d = new Date(now); d.setDate(d.getDate()-1); d.setHours(0,0,0,0); return d; }
   if (period === '7d') { const d = new Date(now); d.setDate(d.getDate()-6); d.setHours(0,0,0,0); return d; }
@@ -2871,6 +3100,7 @@ function perfRangeStart(period) {
 // Batas akhir periode — cuma "Kemarin" yang punya batas atas (biar data hari ini nggak ikut kehitung); sisanya sampai sekarang
 function perfRangeEnd(period) {
   if (period === 'yesterday') { const d = new Date(); d.setHours(0,0,0,0); return d; }
+  if (period === 'custom' && perfCustom) return new Date(perfCustom.end);
   return null;
 }
 function perfRangeBounds(period) {
@@ -2880,6 +3110,16 @@ function perfRangeBounds(period) {
 // Rentang periode sebelumnya (durasi sama, persis sebelum periode saat ini) — buat hitung % perbandingan
 function perfPrevRange(period) {
   const start = perfRangeStart(period);
+  if (period === 'custom' && perfCustom) {
+    let prevStart;
+    if (perfCustom.type === 'month') prevStart = new Date(start.getFullYear(), start.getMonth() - 1, 1);
+    else if (perfCustom.type === 'year') prevStart = new Date(start.getFullYear() - 1, 0, 1);
+    else {
+      const n = Math.round((perfCustom.end - start) / 86400000);
+      prevStart = new Date(start); prevStart.setDate(prevStart.getDate() - n);
+    }
+    return { prevStart, prevEnd: start };
+  }
   const days = period === '7d' ? 7 : (period === '30d' ? 30 : 1);
   const prevStart = new Date(start); prevStart.setDate(prevStart.getDate() - days);
   return { prevStart, prevEnd: start };
@@ -2896,6 +3136,203 @@ function perfDeltaHTML(current, previous, elId) {
   el.className = 'perf-delta ' + (pct > 0 ? 'up' : 'down');
 }
 
+// ---- Grafik: 1 hari (Real-time/Kemarin/Per Hari) = per jam; Per Tahun = per bulan; selain itu per hari (tanggal lokal) ----
+function perfIsHourly(period) {
+  return period === 'today' || period === 'yesterday' || (period === 'custom' && !!perfCustom && perfCustom.type === 'day');
+}
+function perfDayKey(d) {
+  const x = new Date(d);
+  return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+}
+function perfBucketSpec(period) {
+  if (perfIsHourly(period)) {
+    const labels = []; for (let h = 0; h < 24; h++) labels.push(h);
+    return { mode: 'hour', labels, keyOf: iso => new Date(iso).getHours() };
+  }
+  const now = new Date();
+  if (period === 'custom' && perfCustom && perfCustom.type === 'year') {
+    const y = perfCustom.start.getFullYear(), last = (y === now.getFullYear()) ? now.getMonth() : 11, labels = [];
+    for (let m = 0; m <= last; m++) labels.push(y + '-' + String(m + 1).padStart(2, '0'));
+    return { mode: 'month', labels, keyOf: iso => perfDayKey(iso).slice(0, 7) };
+  }
+  const start = perfRangeStart(period);
+  const tomorrow = new Date(now); tomorrow.setHours(0, 0, 0, 0); tomorrow.setDate(tomorrow.getDate() + 1);
+  const endX = (period === 'custom' && perfCustom && perfCustom.end < tomorrow) ? perfCustom.end : tomorrow;
+  const labels = [];
+  for (let d = new Date(start); d < endX; d.setDate(d.getDate() + 1)) labels.push(perfDayKey(d));
+  return { mode: 'day', labels, keyOf: iso => perfDayKey(iso) };
+}
+
+// ===================== DROPDOWN PERIODE (desktop, ala Shopee) =====================
+const PDD_MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const PDD_MONTHS_S = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const PDD_ITEMS = [
+  { k: 'today', label: 'Real-time' }, { k: 'yesterday', label: 'Kemarin' },
+  { k: '7d', label: '7 hari sebelumnya' }, { k: '30d', label: '30 hari sebelumnya' }, 'sep',
+  { k: 'day', label: 'Per Hari', sub: true }, { k: 'week', label: 'Per Minggu', sub: true },
+  { k: 'month', label: 'Per Bulan', sub: true }, { k: 'year', label: 'Berdasarkan Tahun', sub: true }
+];
+let pddHover = 'today';
+let pddCalY = 0, pddCalM = 0, pddYearBase = 0;
+
+function pddFmt(d) { return String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear(); }
+function pddToday() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+function pddAddDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+function pddMonday(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+// teks untuk tiap pilihan periode: { name, range }
+function pddText(key) {
+  const t = pddToday();
+  if (key === 'today') {
+    const hm = new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+    return { name: 'Real-time', range: 'Hari Ini - Pk ' + hm + ' (GMT+07)' };
+  }
+  if (key === 'yesterday') return { name: 'Kemarin', range: pddFmt(pddAddDays(t, -1)) };
+  if (key === '7d') return { name: '7 hari sebelumnya', range: pddFmt(pddAddDays(t, -6)) + ' - ' + pddFmt(t) };
+  if (key === '30d') return { name: '30 hari sebelumnya', range: pddFmt(pddAddDays(t, -29)) + ' - ' + pddFmt(t) };
+  return { name: '', range: '' };
+}
+function pddCustomText() {
+  const c = perfCustom; if (!c) return { name: '', range: '' };
+  const last = pddAddDays(c.end, -1);
+  if (c.type === 'day') return { name: 'Per Hari', range: pddFmt(c.start) };
+  if (c.type === 'week') return { name: 'Per Minggu', range: pddFmt(c.start) + ' - ' + pddFmt(last) };
+  if (c.type === 'month') return { name: 'Per Bulan', range: PDD_MONTHS[c.start.getMonth()] + ' ' + c.start.getFullYear() };
+  return { name: 'Berdasarkan Tahun', range: String(c.start.getFullYear()) };
+}
+function perfDdSelectedKey() {
+  const cur = document.getElementById('perf-period')?.value || 'today';
+  return cur === 'custom' && perfCustom ? perfCustom.type : cur;
+}
+function renderPerfPeriodField() {
+  const cur = document.getElementById('perf-period')?.value || 'today';
+  const tx = cur === 'custom' ? pddCustomText() : pddText(cur);
+  const n = document.getElementById('perf-dd-name'), r = document.getElementById('perf-dd-range');
+  if (n) n.textContent = tx.name;
+  if (r) r.textContent = tx.range;
+}
+function perfDdIsOpen() { const p = document.getElementById('perf-dd-pop'); return !!p && !p.hidden; }
+function perfDdToggle(e) {
+  if (e) e.stopPropagation();
+  if (perfDdIsOpen()) { perfDdClose(); return; }
+  const k = perfDdSelectedKey();
+  pddHover = k;
+  const now = new Date();
+  const base = (perfCustom && perfCustom.type !== 'year') ? perfCustom.start : now;
+  pddCalY = base.getFullYear(); pddCalM = base.getMonth();
+  pddYearBase = (perfCustom ? perfCustom.start : now).getFullYear();
+  document.getElementById('perf-dd-pop').hidden = false;
+  document.getElementById('perf-dd').classList.add('open');
+  document.getElementById('perf-dd-field').setAttribute('aria-expanded', 'true');
+  perfDdRender();
+}
+function perfDdClose() {
+  const pop = document.getElementById('perf-dd-pop');
+  if (pop) pop.hidden = true;
+  const dd = document.getElementById('perf-dd'); if (dd) dd.classList.remove('open');
+  const f = document.getElementById('perf-dd-field'); if (f) f.setAttribute('aria-expanded', 'false');
+}
+document.addEventListener('click', e => {
+  // composedPath dipakai karena isi popup di-render ulang saat diklik (target bisa sudah lepas dari DOM)
+  if (perfDdIsOpen() && !e.composedPath().includes(document.getElementById('perf-dd'))) perfDdClose();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && perfDdIsOpen()) perfDdClose(); });
+
+function perfDdHover(k) {
+  if (pddHover === k) return;
+  pddHover = k;
+  perfDdRender();
+}
+function perfDdPickPreset(k) {
+  perfDdClose();
+  setPerfPeriod(k);
+}
+function perfDdApplyCustom(type, start, end) {
+  perfCustom = { type, start, end };
+  perfDdClose();
+  document.getElementById('perf-period').value = 'custom';
+  document.querySelectorAll('.perf-period-btn').forEach(b => b.classList.remove('active'));
+  renderPerfPeriodField();
+  loadPerfActiveTab();
+}
+function perfDdPickDay(y, m, d) {
+  const st = new Date(y, m, d); st.setHours(0, 0, 0, 0);
+  perfDdApplyCustom('day', st, pddAddDays(st, 1));
+}
+function perfDdPickWeek(y, m, d) {
+  const st = pddMonday(new Date(y, m, d));
+  perfDdApplyCustom('week', st, pddAddDays(st, 7));
+}
+function perfDdPickMonth(y, m) { perfDdApplyCustom('month', new Date(y, m, 1), new Date(y, m + 1, 1)); }
+function perfDdPickYear(y) { perfDdApplyCustom('year', new Date(y, 0, 1), new Date(y + 1, 0, 1)); }
+function perfDdNavMonth(n) {
+  const d = new Date(pddCalY, pddCalM + n, 1);
+  pddCalY = d.getFullYear(); pddCalM = d.getMonth();
+  perfDdRender();
+}
+function perfDdNavYear(n) { pddYearBase += n; perfDdRender(); }
+
+function perfDdRender() {
+  const pop = document.getElementById('perf-dd-pop');
+  if (!pop || pop.hidden) return;
+  const sel = perfDdSelectedKey();
+  const chev = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+  const left = PDD_ITEMS.map(it => {
+    if (it === 'sep') return '<div class="pdd-sep"></div>';
+    return `<button type="button" class="pdd-item${it.k === pddHover ? ' hov' : ''}${it.k === sel ? ' sel' : ''}" onmouseenter="perfDdHover('${it.k}')" onclick="${it.sub ? `perfDdHover('${it.k}')` : `perfDdPickPreset('${it.k}')`}">${it.label}${it.sub ? chev : ''}</button>`;
+  }).join('');
+  pop.innerHTML = `<div class="pdd-left">${left}</div><div class="pdd-right">${perfDdRightHTML()}</div>`;
+}
+function perfDdRightHTML() {
+  const k = pddHover, t = pddToday();
+  if (k === 'today' || k === 'yesterday' || k === '7d' || k === '30d') {
+    return `<span class="pdd-info" onclick="perfDdPickPreset('${k}')">${pddText(k).range}</span>`;
+  }
+  const selC = perfCustom && perfCustom.type === k ? perfCustom : null;
+  if (k === 'day' || k === 'week') {
+    const first = new Date(pddCalY, pddCalM, 1);
+    const off = (first.getDay() + 6) % 7;
+    const dim = new Date(pddCalY, pddCalM + 1, 0).getDate();
+    const nextDisabled = new Date(pddCalY, pddCalM + 1, 1) > t;
+    const dow = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map(x => `<div class="pdd-dow">${x}</div>`).join('');
+    const cells = [];
+    for (let i = 0; i < off; i++) cells.push(new Date(pddCalY, pddCalM, 1 - off + i));
+    for (let d = 1; d <= dim; d++) cells.push(new Date(pddCalY, pddCalM, d));
+    while (cells.length % 7) cells.push(new Date(pddCalY, pddCalM, dim + (cells.length - off - dim) + 1));
+    let body = '';
+    if (k === 'day') {
+      body = `<div class="pdd-grid">${dow}${cells.map(c => {
+        const out = c.getMonth() !== pddCalM, dis = c > t;
+        const isSel = selC && selC.start.getTime() === c.getTime();
+        const cls = 'pdd-day' + (out ? ' out' : '') + (isSel ? ' sel' : '') + (c.getTime() === t.getTime() ? ' now' : '');
+        return `<button type="button" class="${cls}"${dis ? ' disabled' : ''} onclick="perfDdPickDay(${c.getFullYear()},${c.getMonth()},${c.getDate()})">${c.getDate()}</button>`;
+      }).join('')}</div>`;
+    } else {
+      let rows = '';
+      for (let r = 0; r < cells.length; r += 7) {
+        const wk = cells.slice(r, r + 7);
+        const dis = wk[0] > t;
+        const isSel = selC && selC.start.getTime() === wk[0].getTime();
+        rows += `<div class="pdd-wk${dis ? ' dis' : ''}${isSel ? ' sel' : ''}"${dis ? '' : ` onclick="perfDdPickWeek(${wk[0].getFullYear()},${wk[0].getMonth()},${wk[0].getDate()})"`}>${wk.map(c => `<span${c.getMonth() !== pddCalM ? ' class="out"' : ''}>${c.getDate()}</span>`).join('')}</div>`;
+      }
+      body = `<div class="pdd-grid">${dow}</div>${rows}`;
+    }
+    return `<div class="pdd-calhead"><button type="button" class="pdd-nav" onclick="perfDdNavMonth(-1)" aria-label="Bulan sebelumnya">&#8249;</button><span>${PDD_MONTHS[pddCalM]} ${pddCalY}</span><button type="button" class="pdd-nav"${nextDisabled ? ' disabled' : ''} onclick="perfDdNavMonth(1)" aria-label="Bulan berikutnya">&#8250;</button></div>${body}`;
+  }
+  if (k === 'month') {
+    const cells = PDD_MONTHS_S.map((n, m) => {
+      const dis = new Date(pddYearBase, m, 1) > t;
+      const isSel = selC && selC.start.getFullYear() === pddYearBase && selC.start.getMonth() === m;
+      return `<button type="button" class="pdd-cell${isSel ? ' sel' : ''}"${dis ? ' disabled' : ''} onclick="perfDdPickMonth(${pddYearBase},${m})">${n}</button>`;
+    }).join('');
+    return `<div class="pdd-calhead"><button type="button" class="pdd-nav" onclick="perfDdNavYear(-1)" aria-label="Tahun sebelumnya">&#8249;</button><span>${pddYearBase}</span><button type="button" class="pdd-nav"${pddYearBase >= t.getFullYear() ? ' disabled' : ''} onclick="perfDdNavYear(1)" aria-label="Tahun berikutnya">&#8250;</button></div><div class="pdd-cells">${cells}</div>`;
+  }
+  // year
+  const cy = t.getFullYear(), ys = [];
+  for (let y = cy - 8; y <= cy; y++) ys.push(y);
+  return `<div class="pdd-calhead"><span>Pilih tahun</span></div><div class="pdd-cells">${ys.map(y => `<button type="button" class="pdd-cell${selC && selC.start.getFullYear() === y ? ' sel' : ''}" onclick="perfDdPickYear(${y})">${y}</button>`).join('')}</div>`;
+}
+
+
 const PERF_TAB_TITLES_ID = ['tinjauan','produk','penjualan','layanan','kunjungan','promosi','panduan'];
 function renderPerfTab(tab, el) {
   document.querySelectorAll('#perf-sub-tabs .orders-tab').forEach(t=>t.classList.remove('active'));
@@ -2909,8 +3346,10 @@ function switchPerfTab(tab, el) {
   pushHashParams({ sub: tab });
 }
 function setPerfPeriod(period) {
+  if (period !== 'custom') perfCustom = null;
   document.getElementById('perf-period').value = period;
   document.querySelectorAll('.perf-period-btn').forEach(b => b.classList.toggle('active', b.dataset.period === period));
+  renderPerfPeriodField();
   loadPerfActiveTab();
 }
 function updatePerfClock() {
@@ -2918,9 +3357,11 @@ function updatePerfClock() {
   if (!el) return;
   const wib = new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit' });
   el.textContent = `${wib} (GMT+7)`;
+  renderPerfPeriodField();
 }
 setInterval(updatePerfClock, 30000);
 updatePerfClock();
+renderPerfPeriodField();
 function loadPerfActiveTab() {
   const active = document.querySelector('#perf-sub-tabs .orders-tab.active');
   loadPerfTabData(active ? active.dataset.perf : 'tinjauan');
@@ -2994,10 +3435,22 @@ async function loadPerformanceDashboard() {
 
   perfProductAnalysisData = { productEvents, orders, uniqueVisitors, allProducts: adminProductsData };
   renderPerfProductAnalysis();
+  loadPerfRealtime();
 }
 
 let perfAutoRefreshTimer = null;
+let perfRtTimer = null;
 function setupPerfAutoRefresh(period) {
+  // Metrik Real-time (desktop) selalu hari ini: tetap segar tiap 20 detik walau periode lain dipilih
+  if (perfRtTimer) { clearInterval(perfRtTimer); perfRtTimer = null; }
+  if (period !== 'today' && !isPerfMobile()) {
+    perfRtTimer = setInterval(() => {
+      const active = document.querySelector('#perf-sub-tabs .orders-tab.active');
+      const onTab = document.getElementById('tab-performance')?.classList.contains('active') && active && active.dataset.perf === 'tinjauan';
+      if (onTab && document.visibilityState === 'visible') loadPerfRealtime();
+      else if (!onTab) { clearInterval(perfRtTimer); perfRtTimer = null; }
+    }, 20000);
+  }
   if (perfAutoRefreshTimer) { clearInterval(perfAutoRefreshTimer); perfAutoRefreshTimer = null; }
   if (period !== 'today') return;
   perfAutoRefreshTimer = setInterval(() => {
@@ -3005,6 +3458,67 @@ function setupPerfAutoRefresh(period) {
     if (active && active.dataset.perf === 'tinjauan') loadPerformanceDashboard();
     else if (perfAutoRefreshTimer) { clearInterval(perfAutoRefreshTimer); perfAutoRefreshTimer = null; }
   }, 20000);
+}
+
+// ===================== METRIK REAL-TIME (blok kanan Tinjauan, desktop) =====================
+function perfSmoothPath(pts, topY, baseY) {
+  if (pts.length < 2) return '';
+  const clamp = v => Math.min(Math.max(v, topY), baseY);
+  let d = 'M' + pts[0][0].toFixed(1) + ',' + pts[0][1].toFixed(1);
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    const c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = clamp(p1[1] + (p2[1] - p0[1]) / 6);
+    const c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = clamp(p2[1] - (p3[1] - p1[1]) / 6);
+    d += ` C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
+function perfRtSparkHTML(hourly, curHour) {
+  const W = 300, H = 64, topY = 6, baseY = H - 4;
+  const max = Math.max(...hourly, 1);
+  const x = h => (h / 24) * W;
+  const y = v => baseY - (v / max) * (baseY - topY);
+  const pts = []; for (let h = 0; h <= curHour; h++) pts.push([x(h), y(hourly[h])]);
+  const gid = 'rg' + Math.random().toString(36).slice(2, 7);
+  const last = pts[pts.length - 1];
+  const line = pts.length > 1 ? perfSmoothPath(pts, topY, baseY) : `M${last[0]},${last[1]}`;
+  const area = pts.length > 1 ? `${line} L${last[0].toFixed(1)},${baseY} L${pts[0][0]},${baseY} Z` : '';
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Penjualan per jam hari ini">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#111114" stop-opacity=".12"/><stop offset="1" stop-color="#111114" stop-opacity="0"/></linearGradient></defs>
+    <line x1="0" x2="${W}" y1="${baseY}" y2="${baseY}" stroke="rgba(17,17,20,.12)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    ${area ? `<path d="${area}" fill="url(#${gid})"/>` : ''}
+    <path d="${line}" fill="none" stroke="#111114" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3" fill="#e74c3c" vector-effect="non-scaling-stroke"/>
+  </svg>`;
+}
+async function loadPerfRealtime() {
+  if (isPerfMobile() || !document.getElementById('perf-rt')) return; // blok ini cuma tampil di desktop
+  const scope = document.getElementById('perf-scope')?.value || 'dibuat';
+  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const end = new Date(start); end.setDate(end.getDate() + 1);
+  let oq = sb.from('orders').select('total, created_at').gte('created_at', start.toISOString()).lt('created_at', end.toISOString());
+  if (scope === 'siap_kirim') oq = oq.eq('status', 'diproses');
+  const [oRes, vRes, cRes] = await Promise.all([
+    oq,
+    sb.from('analytics_events').select('session_id').eq('event_type', 'view_store').gte('created_at', start.toISOString()).lt('created_at', end.toISOString()),
+    sb.from('analytics_events').select('product_id', { count: 'exact', head: true }).eq('event_type', 'view_product').gte('created_at', start.toISOString()).lt('created_at', end.toISOString()),
+  ]);
+  if (oRes.error || vRes.error) return;
+  const orders = oRes.data || [];
+  const visitors = new Set((vRes.data || []).map(e => e.session_id)).size;
+  const clicks = cRes.count || 0;
+  const revenue = orders.reduce((n, o) => n + (o.total || 0), 0);
+  const conv = visitors > 0 ? orders.length / visitors * 100 : 0;
+  const hourly = new Array(24).fill(0);
+  orders.forEach(o => { hourly[new Date(o.created_at).getHours()] += (o.total || 0); });
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('rt-sales', 'Rp' + revenue.toLocaleString('id-ID'));
+  set('rt-visitors', visitors.toLocaleString('id-ID'));
+  set('rt-clicks', clicks.toLocaleString('id-ID'));
+  set('rt-orders', orders.length.toLocaleString('id-ID'));
+  set('rt-conv', conv.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%');
+  const sp = document.getElementById('rt-spark');
+  if (sp) sp.innerHTML = perfRtSparkHTML(hourly, new Date().getHours());
 }
 
 // ===================== ANALISIS PRODUK (Dilihat, CTR, Conversion Rate) =====================
@@ -3166,29 +3680,57 @@ async function loadPerfProduk() {
     soldRevenue[key] = (soldRevenue[key]||0) + (i.price||0)*(i.qty||0);
   }));
 
-  const rows = adminProductsData.map(p => ({
+  perfProdRows = adminProductsData.map(p => ({
+    id: p.id,
     name: p.name,
     img: p.image_url,
     views: viewCount[p.id] || 0,
     qty: soldQty[p.id] || soldQty[p.name] || 0,
     revenue: soldRevenue[p.id] || soldRevenue[p.name] || 0,
-  })).sort((a,b) => b.revenue - a.revenue || b.views - a.views);
+  })).sort((a,b) => b.revenue - a.revenue || b.views - a.views); // urutan netral
+  renderPerfProduk();
+}
 
-  if (!rows.length) { el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Belum ada produk.</p>'; return; }
+// Urutan kolom 3 status (klik header): netral -> terbanyak (desc) -> terkecil (asc) -> netral
+let perfProdRows = [];
+let perfProdSort = { key: null, dir: null };
+function sortPerfProduk(key) {
+  if (perfProdSort.key !== key) perfProdSort = { key, dir: 'desc' };
+  else if (perfProdSort.dir === 'desc') perfProdSort = { key, dir: 'asc' };
+  else perfProdSort = { key: null, dir: null };
+  renderPerfProduk();
+}
+function renderPerfProduk() {
+  const el = document.getElementById('perf-produk-render');
+  if (!el) return;
+  if (!perfProdRows.length) { el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Belum ada produk.</p>'; return; }
+  let rows = perfProdRows;
+  if (perfProdSort.key) {
+    const k = perfProdSort.key, sgn = perfProdSort.dir === 'desc' ? -1 : 1;
+    rows = [...perfProdRows].sort((a, b) => (a[k] - b[k]) * sgn); // sort stabil: seri tetap di urutan netral
+  }
+  const th = (key, label) => {
+    const on = perfProdSort.key === key;
+    const cls = on ? (perfProdSort.dir === 'desc' ? 'dn' : 'up') : '';
+    return `<th class="num srt${on ? ' on' : ''}" onclick="sortPerfProduk('${key}')" title="Klik untuk urutkan: terbanyak, terkecil, netral">${label}<span class="sort-ic ${cls}"><i class="u"></i><i class="d"></i></span></th>`;
+  };
   el.innerHTML = `
-    <div class="perf-prod-table"><table style="width:100%;border-collapse:collapse;font-size:13px">
-      <thead><tr style="border-bottom:1px solid var(--border);text-align:left">
-        <th style="padding:8px 4px">Produk</th>
-        <th style="padding:8px 4px;text-align:right">Dilihat</th>
-        <th style="padding:8px 4px;text-align:right">Terjual (pcs)</th>
-        <th style="padding:8px 4px;text-align:right">Pendapatan</th>
+    <div class="perf-prod-table"><table class="pp-tbl">
+      <thead><tr>
+        <th>Produk</th>
+        ${th('views','Dilihat')}
+        ${th('qty','Terjual (pcs)')}
+        ${th('revenue','Pendapatan')}
       </tr></thead>
       <tbody>${rows.map(r => `
-        <tr style="border-bottom:1px solid var(--border)">
-          <td style="padding:8px 4px">${r.name}</td>
-          <td style="padding:8px 4px;text-align:right">${r.views}</td>
-          <td style="padding:8px 4px;text-align:right">${r.qty}</td>
-          <td style="padding:8px 4px;text-align:right;font-weight:600">Rp ${r.revenue.toLocaleString('id-ID')}</td>
+        <tr>
+          <td><div class="pp-prodcell">
+            <div class="pp-pimg">${r.img ? `<img src="${chatEsc(r.img)}" alt="" loading="lazy">` : ''}</div>
+            <div class="pp-ptxt"><div class="pp-pname">${chatEsc(r.name)}</div><div class="pp-pid">ID Produk: ${chatEsc(String(r.id || '').slice(0, 8))}</div></div>
+          </div></td>
+          <td class="num">${r.views.toLocaleString('id-ID')}</td>
+          <td class="num">${r.qty.toLocaleString('id-ID')}</td>
+          <td class="num" style="font-weight:600">Rp ${r.revenue.toLocaleString('id-ID')}</td>
         </tr>`).join('')}
       </tbody>
     </table></div>
@@ -3220,17 +3762,11 @@ async function loadPerfPenjualan() {
   if (error) { chartEl.innerHTML = `<p style="color:#c0392b;font-size:13px">${error.message}</p>`; statusEl.innerHTML=''; return; }
   const orders = data || [];
 
-  // Grafik penjualan per hari (atau per jam kalau period=today/yesterday, cuma 1 hari)
-  const buckets = {}; let labels = [];
-  if (period === 'today' || period === 'yesterday') {
-    for (let h=0; h<24; h++) buckets[h]=0;
-    orders.forEach(o => { const h = new Date(o.created_at).getHours(); buckets[h] += (o.total||0); });
-    labels = Object.keys(buckets).map(Number).sort((a,b)=>a-b);
-  } else {
-    const days = period === '7d' ? 7 : 30;
-    for (let i=days-1;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); d.setHours(0,0,0,0); labels.push(d.toISOString().slice(0,10)); buckets[labels[labels.length-1]]=0; }
-    orders.forEach(o => { const key = o.created_at.slice(0,10); if (buckets[key]!==undefined) buckets[key]+=(o.total||0); });
-  }
+  // Grafik penjualan: per jam (1 hari), per hari, atau per bulan (Berdasarkan Tahun)
+  const spec = perfBucketSpec(period);
+  const buckets = {}; const labels = spec.labels;
+  labels.forEach(l => { buckets[l] = 0; });
+  orders.forEach(o => { const k = spec.keyOf(o.created_at); if (buckets[k] !== undefined) buckets[k] += (o.total||0); });
   const values = labels.map(l=>buckets[l]);
   chartEl.innerHTML = renderSvgLineChart(values, labels, period, v => 'Rp'+Math.round(v/1000)+'rb');
 
@@ -3281,16 +3817,10 @@ async function loadPerfKunjungan() {
   document.getElementById('perf-kv-storeviews').textContent = storeEvents.length.toLocaleString('id-ID');
   document.getElementById('perf-kv-productviews').textContent = productEvents.length.toLocaleString('id-ID');
 
-  const buckets = {}; let labels = [];
-  if (period === 'today' || period === 'yesterday') {
-    for (let h=0;h<24;h++) buckets[h]=0;
-    storeEvents.forEach(e => { const h=new Date(e.created_at).getHours(); buckets[h]++; });
-    labels = Object.keys(buckets).map(Number).sort((a,b)=>a-b);
-  } else {
-    const days = period === '7d' ? 7 : 30;
-    for (let i=days-1;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); d.setHours(0,0,0,0); labels.push(d.toISOString().slice(0,10)); buckets[labels[labels.length-1]]=0; }
-    storeEvents.forEach(e => { const key=e.created_at.slice(0,10); if(buckets[key]!==undefined) buckets[key]++; });
-  }
+  const spec = perfBucketSpec(period);
+  const buckets = {}; const labels = spec.labels;
+  labels.forEach(l => { buckets[l] = 0; });
+  storeEvents.forEach(e => { const k = spec.keyOf(e.created_at); if (buckets[k] !== undefined) buckets[k]++; });
   const values = labels.map(l=>buckets[l]);
   document.getElementById('perf-kv-chart').innerHTML = renderSvgLineChart(values, labels, period, v=>String(v));
 
@@ -3384,14 +3914,8 @@ function selectPerfMetric(key) {
 function renderPerfMetricChart() {
   const d = perfSeriesData, el = document.getElementById('perf-chart');
   if (!d || !el) return;
-  const hourly = d.period === 'today' || d.period === 'yesterday';
-  let labels = [];
-  if (hourly) { for (let h = 0; h < 24; h++) labels.push(h); }
-  else {
-    const days = d.period === '7d' ? 7 : 30;
-    for (let i = days - 1; i >= 0; i--) { const x = new Date(); x.setDate(x.getDate() - i); x.setHours(0, 0, 0, 0); labels.push(x.toISOString().slice(0, 10)); }
-  }
-  const keyOf = iso => hourly ? new Date(iso).getHours() : String(iso).slice(0, 10);
+  const spec = perfBucketSpec(d.period);
+  const labels = spec.labels, keyOf = spec.keyOf;
   const b = {};
   labels.forEach(l => { b[l] = { sess: new Set(), orders: 0, revenue: 0, buyers: new Set() }; });
   d.storeEvents.forEach(e => { const k = keyOf(e.created_at); if (b[k]) b[k].sess.add(e.session_id); });
@@ -3410,7 +3934,7 @@ function renderPerfMetricChart() {
   });
   const m = PERF_METRICS[perfMetric];
   const title = document.getElementById('perf-chart-title');
-  if (title) title.textContent = m.label + (hourly ? ' per Jam' : ' per Hari');
+  if (title) title.textContent = m.label + (spec.mode === 'hour' ? ' per Jam' : (spec.mode === 'month' ? ' per Bulan' : ' per Hari'));
   document.querySelectorAll('#perf-panel-tinjauan [data-metric]').forEach(t => t.classList.toggle('sel', t.dataset.metric === perfMetric));
   el.innerHTML = renderSvgLineChart(values, labels, d.period, m.fmt);
 }
@@ -3432,7 +3956,7 @@ function renderSvgLineChartMobile(values, labels, period, fmt, wide) {
   const every = Math.max(1, Math.ceil(n / (wide ? 10 : 6)));
   const xl = labels.map((l, i) => {
     if (i % every !== 0 && !(i === n - 1 && (n - 1) % every >= 2)) return '';
-    const t = (period === 'today' || period === 'yesterday') ? String(l).padStart(2, '0') + ':00' : String(l).slice(5);
+    const t = typeof l === 'number' ? String(l).padStart(2, '0') + ':00' : (String(l).length === 7 ? PDD_MONTHS_S[+String(l).slice(5) - 1] : String(l).slice(5));
     return `<text x="${x(i)}" y="${h-6}" font-size="${fs}" fill="rgba(41,42,49,.58)" text-anchor="middle">${t}</text>`;
   }).join('');
   const line = values.map((v, i) => `${x(i)},${y(v)}`).join(' ');
@@ -5014,6 +5538,8 @@ async function deleteReview(id) {
 }
 
 // ===================== CHAT (inbox admin) =====================
+// Desktop: chat jadi dock melayang (pill "Pesan" kanan bawah, ala DM Instagram web). HP: tetap tab Chat penuh seperti sebelumnya.
+const chatDeskMQ = window.matchMedia('(min-width:861px)');
 let chatThreads = [];
 let chatActiveId = null;
 let chatMsgs = [];
@@ -5037,6 +5563,10 @@ function chatTimeLabel(iso) {
     : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 }
 function chatIsTabActive() {
+  if (chatDeskMQ.matches) { // desktop: "sedang melihat chat" = panel dock terbuka
+    const dk = document.getElementById('chat-dock');
+    return !!(dk && dk.classList.contains('open'));
+  }
   const el = document.getElementById('tab-chat');
   return !!(el && el.classList.contains('active'));
 }
@@ -5050,6 +5580,7 @@ function chatUpdateBadges() {
   const bnb = document.getElementById('bn-chat-badge');
   if (bnb) { bnb.textContent = n > 99 ? '99+' : String(n); bnb.style.display = n > 0 ? 'flex' : 'none'; }
   document.title = (n > 0 ? '(' + n + ') ' : '') + chatBaseTitle;
+  chatDockRenderPill();
   const fu = document.getElementById('chat-filter-unread');
   if (fu) {
     const nt = chatThreads.filter(x => x.staff_unread > 0).length;
@@ -5071,6 +5602,7 @@ async function chatLoadThreads() {
   chatRenderList();
 }
 function chatRenderList() {
+  chatDockRenderPill();
   const el = document.getElementById('chat-list');
   if (!el) return;
   const rows = chatThreads.filter(t => !chatDivFilter || (chatDivFilter === 'unread' ? t.staff_unread > 0 : t.division === chatDivFilter));
@@ -5103,6 +5635,7 @@ async function chatOpenThread(id) {
   document.getElementById('chat-conv-name').textContent = t.buyer_name || 'Pembeli';
   document.getElementById('chat-conv-meta').textContent =
     (CHAT_DIV_LABEL[t.division] || t.division) + (t.buyer_whatsapp ? ' \u00b7 WA ' + t.buyer_whatsapp : '');
+  chatDockSyncHead();
   chatMsgs = [];
   chatRenderMsgs(true);
   chatRenderList();
@@ -5115,6 +5648,7 @@ function chatBack() {
   chatActiveId = null;
   document.getElementById('chat-shell').classList.remove('has-active');
   chatSyncConvClass();
+  chatDockSyncHead();
   chatRenderList();
 }
 async function chatLoadMessages() {
@@ -5219,6 +5753,8 @@ function chatStop() {
   chatActiveId = null;
   const shell = document.getElementById('chat-shell');
   if (shell) shell.classList.remove('has-active');
+  chatDockClose();
+  chatDockSyncHead();
   chatUpdateBadges();
   chatRenderList();
 }
@@ -5521,6 +6057,64 @@ async function pushConsumePending() {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pushConsumePending(); });
 window.addEventListener('focus', pushConsumePending);
 window.addEventListener('pageshow', pushConsumePending);
+
+// ----- Chat dock desktop (ala DM Instagram web) -----
+// #chat-shell cuma ada 1 (semua id dipakai fungsi chat di atas): di desktop dipindah ke dalam dock, di HP dikembalikan ke tab Chat.
+function chatPlaceShell() {
+  const shell = document.getElementById('chat-shell');
+  const host = document.getElementById(chatDeskMQ.matches ? 'cd-body' : 'tab-chat');
+  if (shell && host && shell.parentNode !== host) host.appendChild(shell);
+}
+function chatDockIsOpen() { const d = document.getElementById('chat-dock'); return !!d && d.classList.contains('open'); }
+function chatDockOpen() {
+  if (!chatDeskMQ.matches) return;
+  const dk = document.getElementById('chat-dock');
+  if (!dk || dk.classList.contains('open')) return;
+  dk.classList.add('open');
+  document.getElementById('cd-panel').hidden = false;
+  document.getElementById('cd-pill').hidden = true;
+  chatDockSyncHead();
+  chatLoadThreads();
+  if (chatActiveId) { chatLoadMessages(); chatMarkRead(); }
+}
+function chatDockClose() {
+  const dk = document.getElementById('chat-dock');
+  if (!dk) return;
+  dk.classList.remove('open');
+  const panel = document.getElementById('cd-panel'); if (panel) panel.hidden = true;
+  const pill = document.getElementById('cd-pill'); if (pill) pill.hidden = false;
+  chatDockRenderPill();
+}
+function chatDockToggleExpand() {
+  const panel = document.getElementById('cd-panel');
+  const on = panel.classList.toggle('expanded');
+  const b = document.getElementById('cd-expand');
+  b.setAttribute('aria-label', on ? 'Perkecil' : 'Perbesar');
+  chatDockSyncHead();
+  const m = document.getElementById('chat-msgs'); if (m) m.scrollTop = m.scrollHeight;
+}
+// Judul panel: "Pesan" di daftar; di mode kecil saat percakapan terbuka jadi nama pembeli + tombol kembali
+function chatDockSyncHead() {
+  const panel = document.getElementById('cd-panel'); if (!panel) return;
+  const t = chatActiveId ? chatThreads.find(x => x.id === chatActiveId) : null;
+  const inConv = !!t && !panel.classList.contains('expanded');
+  document.getElementById('cd-back').hidden = !inConv;
+  document.getElementById('cd-title').textContent = inConv ? (t.buyer_name || 'Pembeli') : 'Pesan';
+}
+function chatDockRenderPill() {
+  const av = document.getElementById('cd-avs'), bd = document.getElementById('cd-badge');
+  if (!av || !bd) return;
+  av.innerHTML = chatThreads.slice(0, 3).map(t => `<span class="cd-av">${chatEsc(((t.buyer_name || 'P').trim()[0] || '?').toUpperCase())}</span>`).join('');
+  const n = chatTotalUnread();
+  bd.textContent = n > 99 ? '99+' : String(n);
+  bd.hidden = n === 0;
+}
+chatPlaceShell();
+(chatDeskMQ.addEventListener ? chatDeskMQ.addEventListener.bind(chatDeskMQ, 'change') : chatDeskMQ.addListener.bind(chatDeskMQ))(() => {
+  chatPlaceShell();
+  if (!chatDeskMQ.matches) chatDockClose();
+  chatSyncConvClass();
+});
 
 // ----- Percakapan penuh layar di HP: kolom balasan selalu di atas keyboard seperti WhatsApp -----
 function chatIsMobile() { return window.innerWidth <= 860; }
