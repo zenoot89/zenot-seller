@@ -1199,42 +1199,157 @@ async function openProductSheet(id) {
   `;
 
   // Performa: fetch async, render belakangan biar sheet-nya langsung kebuka gak nunggu network
-  const now = new Date();
-  const d30 = new Date(now - 30 * 86400000).toISOString();
-  const d60 = new Date(now - 60 * 86400000).toISOString();
+  psCurId = id;
+  const dayKey = (d) => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+  // 30 hari kalender (termasuk hari ini) + 30 hari sebelumnya buat pembanding
+  const start30 = new Date(); start30.setHours(0, 0, 0, 0); start30.setDate(start30.getDate() - 29);
+  const start60 = new Date(start30); start60.setDate(start60.getDate() - 30);
+  const d30 = start30.toISOString(), d60 = start60.toISOString();
+  // Supabase membatasi 1000 baris per query -> ambil bertahap (maks 5000)
+  const fetchAll = async (build) => {
+    const out = [];
+    for (let i = 0; i < 5; i++) {
+      const { data, error } = await build().range(i * 1000, i * 1000 + 999);
+      if (error || !data) break;
+      out.push(...data);
+      if (data.length < 1000) break;
+    }
+    return out;
+  };
 
-  const [viewsAllRes, views30Res, viewsPrev30Res, orders30Res, ordersPrev30Res] = await Promise.all([
+  const [viewsAllRes, viewRows, orderRows] = await Promise.all([
     sb.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'view_product').eq('product_id', id),
-    sb.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'view_product').eq('product_id', id).gte('created_at', d30),
-    sb.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'view_product').eq('product_id', id).gte('created_at', d60).lt('created_at', d30),
-    sb.from('orders').select('items').gte('created_at', d30),
-    sb.from('orders').select('items').gte('created_at', d60).lt('created_at', d30),
+    fetchAll(() => sb.from('analytics_events').select('created_at').eq('event_type', 'view_product').eq('product_id', id).gte('created_at', d60)),
+    fetchAll(() => sb.from('orders').select('items, created_at').gte('created_at', d60)),
   ]);
+  if (psCurId !== id) return; // sheet sudah pindah ke produk lain
 
-  const sumQty = (orders) => (orders || []).reduce((s, o) => s + (o.items || []).filter(i => i.productId === id).reduce((a, i) => a + (i.qty || 0), 0), 0);
-  const qty30 = sumQty(orders30Res.data);
-  const qtyPrev30 = sumQty(ordersPrev30Res.data);
-  const views30 = views30Res.count || 0;
-  const viewsPrev30 = viewsPrev30Res.count || 0;
+  const labels = []; const idxOf = {};
+  for (let i = 0; i < 30; i++) { const d = new Date(start30); d.setDate(d.getDate() + i); labels.push(d); idxOf[dayKey(d)] = i; }
+  const sales = new Array(30).fill(0), visits = new Array(30).fill(0);
+  let qtyPrev30 = 0, viewsPrev30 = 0;
+  viewRows.forEach(e => { const k = idxOf[dayKey(e.created_at)]; if (k !== undefined) visits[k]++; else if (new Date(e.created_at) < start30) viewsPrev30++; });
+  orderRows.forEach(o => {
+    const q = (o.items || []).filter(i => i.productId === id).reduce((a, i) => a + (i.qty || 0), 0);
+    if (!q) return;
+    const k = idxOf[dayKey(o.created_at)];
+    if (k !== undefined) sales[k] += q; else if (new Date(o.created_at) < start30) qtyPrev30 += q;
+  });
+  const sum = (a) => a.reduce((x, y) => x + y, 0);
+  const qty30 = sum(sales), views30 = sum(visits);
+  const conv = sales.map((q, i) => visits[i] ? Math.round(q / visits[i] * 10000) / 100 : 0);
+  const konversi30 = views30 ? Math.round(qty30 / views30 * 10000) / 100 : 0;
+  const konversiPrev = viewsPrev30 ? Math.round(qtyPrev30 / viewsPrev30 * 10000) / 100 : 0;
   const viewsAll = viewsAllRes.count || 0;
 
   const pct = (cur, prev) => prev === 0 ? (cur > 0 ? 100 : 0) : Math.round((cur - prev) / prev * 1000) / 10;
-  const qtyDelta = pct(qty30, qtyPrev30);
-  const viewsDelta = pct(views30, viewsPrev30);
-  const konversi30 = views30 ? Math.round((qty30 / views30) * 10000) / 100 : 0;
-  const deltaHtml = (v) => `<span style="font-size:10px;color:${v >= 0 ? '#1b8a4c' : '#c0392b'}">${v >= 0 ? '▲' : '▼'} ${Math.abs(v)}%</span>`;
+  const deltaHtml = (v) => `<span class="ps-delta" style="color:${v >= 0 ? '#1b8a4c' : '#c0392b'}">${v >= 0 ? '▲' : '▼'} ${Math.abs(v)}%</span>`;
+  const tile = (key, label, val, delta) => `<button type="button" class="ps-tile${key === 'sales' ? ' sel' : ''}" data-k="${key}" onclick="psSelect('${key}')"><span>${label}</span><b>${val}</b>${deltaHtml(delta)}</button>`;
+
+  psData = { labels, series: { sales, visits, conv }, key: 'sales', idx: 29 };
 
   const perfEl = document.getElementById('prod-sheet-body');
   if (!perfEl || !document.getElementById('prod-sheet-overlay').classList.contains('open')) return; // sheet udah ditutup duluan
   const loadingP = perfEl.querySelector('p');
   if (loadingP) {
     loadingP.outerHTML = `
-    <div class="perf-metric-grid" style="margin-bottom:16px">
-      <div class="admin-card"><div style="font-size:11px;color:var(--muted)">Penjualan (semua waktu)</div><div style="font-size:17px;font-weight:600">${soldAllTime}</div></div>
-      <div class="admin-card"><div style="font-size:11px;color:var(--muted)">Jumlah Dilihat</div><div style="font-size:17px;font-weight:600">${viewsAll}</div></div>
-      <div class="admin-card"><div style="font-size:11px;color:var(--muted)">Penjualan 30 Hari</div><div style="font-size:17px;font-weight:600">${qty30}</div>${deltaHtml(qtyDelta)}</div>
-      <div class="admin-card"><div style="font-size:11px;color:var(--muted)">Kunjungan 30 Hari</div><div style="font-size:17px;font-weight:600">${views30}</div>${deltaHtml(viewsDelta)}</div>
-      <div class="admin-card"><div style="font-size:11px;color:var(--muted)">Konversi 30 Hari</div><div style="font-size:17px;font-weight:600">${konversi30}%</div></div>
+    <div class="ps-wrap">
+      <div class="ps-sum">
+        <div><span>Penjualan</span><b>${soldAllTime.toLocaleString('id-ID')}</b></div>
+        <div><span>Jumlah Dilihat</span><b>${viewsAll.toLocaleString('id-ID')}</b></div>
+      </div>
+      <div class="ps-tiles">
+        ${tile('sales', 'Penjualan 30 Hari', qty30.toLocaleString('id-ID'), pct(qty30, qtyPrev30))}
+        ${tile('visits', 'Kunjungan 30 Hari', views30.toLocaleString('id-ID'), pct(views30, viewsPrev30))}
+        ${tile('conv', 'Konversi 30 Hari', konversi30.toLocaleString('id-ID') + '%', pct(konversi30, konversiPrev))}
+      </div>
+      <button type="button" class="ps-toggle" id="ps-toggle" onclick="psToggle()"><span>Tutup Rincian Performa</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button>
+      <div class="ps-chart" id="ps-chart"></div>
     </div>`;
+    psRender();
   }
+}
+
+// ===== Grafik 30 hari di sheet "Lainnya" (ala Shopee Produk Saya): pilih metrik lewat kartu, sentuh/hover grafik buat lihat nilai per hari =====
+let psCurId = null;
+let psData = null;
+const PS_MON = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const PS_W = 340, PS_H = 230, PS_PL = 40, PS_PR = 14, PS_PT = 14, PS_PB = 28;
+function psFmt(key, v) {
+  if (key === 'conv') return (Math.round(v * 100) / 100).toLocaleString('id-ID') + '%';
+  return (Math.round(v * 10) / 10).toLocaleString('id-ID');
+}
+function psSelect(key) {
+  if (!psData || psData.key === key) return;
+  psData.key = key;
+  document.querySelectorAll('.ps-tile').forEach(t => t.classList.toggle('sel', t.dataset.k === key));
+  psRender();
+}
+function psToggle() {
+  const c = document.getElementById('ps-chart'), b = document.getElementById('ps-toggle');
+  if (!c || !b) return;
+  const hide = c.style.display !== 'none';
+  c.style.display = hide ? 'none' : '';
+  b.classList.toggle('closed', hide);
+  b.firstElementChild.textContent = hide ? 'Lihat Rincian Performa' : 'Tutup Rincian Performa';
+}
+function psScale(max, whole) {
+  const rough = Math.max(max, 1e-9) / 4;
+  const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+  const n = rough / pow;
+  let step = (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * pow;
+  if (whole) step = Math.max(1, Math.ceil(step)); // jumlah pcs/kunjungan: sumbu kelipatan bulat
+  else if (max <= 0) step = 0.5;
+  return step;
+}
+function psMarkHTML() {
+  const d = psData, vals = d.series[d.key], n = vals.length;
+  const step = psScale(Math.max(...vals), d.key !== 'conv'), top = step * 4;
+  const iw = PS_W - PS_PL - PS_PR, ih = PS_H - PS_PT - PS_PB;
+  const x = PS_PL + d.idx * iw / (n - 1), y = PS_PT + ih - (vals[d.idx] / top) * ih;
+  const dt = d.labels[d.idx];
+  const t1 = psFmt(d.key, vals[d.idx]), t2 = dt.getDate() + ' ' + PS_MON[dt.getMonth()];
+  const bw = Math.max(62, t1.length * 9 + 24), bh = 44;
+  const bx = Math.min(Math.max(x - bw / 2, 2), PS_W - bw - 2);
+  const by = y - bh - 12 < 2 ? y + 12 : y - bh - 12;
+  return `<line x1="${x}" x2="${x}" y1="${PS_PT}" y2="${PS_PT + ih}" stroke="#111114" stroke-opacity=".35" stroke-dasharray="4 4"/>
+    <circle cx="${x}" cy="${y}" r="7" fill="#111114" fill-opacity=".14"/><circle cx="${x}" cy="${y}" r="3.5" fill="#111114"/>
+    <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="8" fill="#292A31"/>
+    <text x="${bx + bw / 2}" y="${by + 19}" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">${t1}</text>
+    <text x="${bx + bw / 2}" y="${by + 36}" font-size="11.5" fill="#fff" fill-opacity=".8" text-anchor="middle">${t2}</text>`;
+}
+function psRender() {
+  const el = document.getElementById('ps-chart');
+  if (!el || !psData) return;
+  const d = psData, vals = d.series[d.key], n = vals.length;
+  const step = psScale(Math.max(...vals), d.key !== 'conv'), top = step * 4;
+  const iw = PS_W - PS_PL - PS_PR, ih = PS_H - PS_PT - PS_PB;
+  const x = i => PS_PL + i * iw / (n - 1), y = v => PS_PT + ih - (v / top) * ih;
+  const grid = [0, 1, 2, 3, 4].map(k => {
+    const yy = y(step * k), v = step * k;
+    const lbl = d.key === 'conv' ? (Math.round(v * 100) / 100) + '%' : (Number.isInteger(v) ? v : v.toFixed(1));
+    return `<line x1="${PS_PL}" x2="${PS_W - PS_PR}" y1="${yy}" y2="${yy}" stroke="rgba(17,17,20,.12)"${k ? ' stroke-dasharray="4 4"' : ''}/><text x="${PS_PL - 6}" y="${yy + 3.5}" font-size="10" fill="rgba(41,42,49,.58)" text-anchor="end">${lbl}</text>`;
+  }).join('');
+  const xl = d.labels.map((dt, i) => i % 5 === 0 ? `<text x="${x(i)}" y="${PS_H - 8}" font-size="10" fill="rgba(41,42,49,.58)" text-anchor="middle">${dt.getDate()} ${PS_MON[dt.getMonth()]}</text>` : '').join('');
+  const line = vals.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+  const gid = 'psg' + Math.random().toString(36).slice(2, 7);
+  el.innerHTML = `<svg viewBox="0 0 ${PS_W} ${PS_H}" style="width:100%;height:auto;display:block;touch-action:pan-y;user-select:none" role="img" onpointerdown="psPoint(event)" onpointermove="psPoint(event)">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#111114" stop-opacity=".14"/><stop offset="1" stop-color="#111114" stop-opacity="0"/></linearGradient></defs>
+    ${grid}
+    <polygon points="${x(0)},${y(0)} ${line} ${x(n - 1)},${y(0)}" fill="url(#${gid})"/>
+    <polyline points="${line}" fill="none" stroke="#111114" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${xl}
+    <g id="ps-mark">${psMarkHTML()}</g>
+  </svg>`;
+}
+function psPoint(e) {
+  if (!psData) return;
+  if (e.type === 'pointermove' && e.pointerType === 'touch') return; // di HP cukup ketuk; geser jari tetap buat scroll
+  const svg = e.currentTarget, r = svg.getBoundingClientRect();
+  const px = (e.clientX - r.left) / r.width * PS_W;
+  const n = psData.labels.length, iw = PS_W - PS_PL - PS_PR;
+  const idx = Math.min(n - 1, Math.max(0, Math.round((px - PS_PL) / iw * (n - 1))));
+  if (idx === psData.idx) return;
+  psData.idx = idx;
+  const g = document.getElementById('ps-mark'); if (g) g.innerHTML = psMarkHTML();
 }
