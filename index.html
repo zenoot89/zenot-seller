@@ -859,6 +859,194 @@
       .om-no{display:flex;justify-content:space-between;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--sc-line);font-size:13px;color:var(--sc-mute)}
       .om-no a{min-width:0;overflow-wrap:anywhere;text-align:right;color:var(--sc-ink);font-weight:600;text-decoration:none}
     }
+
+    /* =====================================================================
+       FINAL: tampilan datar gaya Shopee Seller Centre (HP + desktop)
+       Palet Storm Grey: #F1F1F3 (Tint 90) / #292A31 (Shade 64) / #111114 (Shade 85) + putih
+       ===================================================================== */
+    :root{
+      --sc-bg:#F1F1F3;--sc-ink2:#292A31;--sc-ink:#111114;
+      --sc-line:rgba(17,17,20,.08);--sc-mute:rgba(41,42,49,.58);--sc-tile:#F1F1F3;
+      --bg:#F1F1F3;--border:rgba(17,17,20,.10);--ink:#111114;--accent:#111114;
+      --text:#111114;--muted:rgba(41,42,49,.58);--sec:rgba(41,42,49,.78);
+    }
+    .admin-page,.admin-page *:not(.logo),.login-overlay *{font-family:'Inter',sans-serif !important}
+    .admin-page{font-variant-numeric:tabular-nums}
+
+    /* shell */
+    .admin-sidebar{background:var(--sc-ink)}
+    .admin-nav-item{border-radius:10px;font-weight:500}
+    .admin-nav-item:hover{background:rgba(255,255,255,.07)}
+    .admin-nav-item.active{background:#fff;color:var(--sc-ink);font-weight:700}
+    .admin-nav-group-label,.admin-sidebar-brand p{letter-spacing:.1em}
+    .admin-user-avatar{background:rgba(255,255,255,.14);color:#fff}
+    .admin-topbar{background:#fff;border-bottom:1px solid var(--sc-line)}
+    .admin-topbar-title{font-size:18px;font-weight:700;color:var(--sc-ink)}
+    .admin-content{background:var(--sc-bg)}
+
+    /* kartu, form, tombol */
+    .admin-card{background:#fff;border:none;border-radius:12px;box-shadow:none}
+    .admin-card-title{font-size:16px;font-weight:700;color:var(--sc-ink)}
+    .form-label{font-size:12.5px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--sc-ink2)}
+    .form-input,select.form-input,textarea.form-input{background:var(--sc-bg);border:1px solid transparent;border-radius:10px}
+    .form-input:focus{background:#fff;border-color:var(--sc-ink);outline:none}
+    .btn-primary{background:var(--sc-ink);color:#fff;border-radius:10px}
+    .btn-edit{background:var(--sc-bg);border:1px solid transparent;border-radius:8px;color:var(--sc-ink)}
+    .btn-danger{background:var(--sc-ink2);border-radius:10px}
+
+    /* badge & status: monokrom */
+    .prod-status-badge,.prod-status-badge.on,.prod-status-badge.off{padding:4px 12px;font-size:12px;font-weight:600}
+    .prod-status-badge.on{background:var(--sc-ink);color:#fff}
+    .prod-status-badge.off{background:var(--sc-bg);color:var(--sc-mute)}
+    .badge-promo,.badge-lowstock,.badge-inactive{background:transparent;border:1px solid rgba(17,17,20,.3);color:var(--sc-ink2);font-size:11px;padding:1px 6px;border-radius:4px}
+    .badge-inactive{border-color:transparent;background:var(--sc-bg);color:var(--sc-mute)}
+    .chat-unread{background:var(--sc-ink)}
+
+    /* tabel produk (desktop) */
+    .prod-table th{font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--sc-mute)}
+    .prod-price-net{color:var(--sc-ink);font-weight:700}
+    .prod-price-old{color:var(--sc-mute)}
+    .prod-stock-num,.prod-sold-num{color:var(--sc-ink);font-weight:600}
+
+    /* pesanan (desktop + kartu lama) */
+    .order-card{border:none !important;border-radius:12px !important;box-shadow:none}
+    .order-card > .oc-desktop:first-child{background:#fff !important;border-bottom:1px solid var(--sc-line) !important}
+    .order-card .oc-desktop button[onclick*="dibatalkan"]{background:#fff !important;color:var(--sc-ink2) !important;border-color:rgba(17,17,20,.25) !important}
+
+    /* Beranda */
+    .home-stat-card{background:var(--sc-bg);border:none;border-radius:12px}
+    .home-stat-num,.home-visit-value{font-weight:700}
+    .home-qa-icon{background:var(--sc-bg);border:none}
+
+    /* Pusat Promosi */
+    .promo-hub-card{border:none;background:var(--sc-bg);border-radius:12px}
+    .promo-hub-card:hover{box-shadow:none;background:#E8E8EB}
+    .promo-hub-icon{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:#fff;font-size:0;line-height:0}
+    .promo-hub-icon svg{width:20px;height:20px;fill:none;stroke:var(--sc-ink);stroke-width:1.8}
+
+    /* Data Master: kolom kategori */
+    .cat-tree{border:none;gap:12px}
+    .cat-col{border:none;background:var(--sc-bg);border-radius:12px;overflow:hidden}
+    .cat-item{border-bottom:1px solid var(--sc-line)}
+    .cat-item:hover{background:#E8E8EB}
+    .cat-item.active{background:#fff;color:var(--sc-ink)}
+    .cat-add-row{background:transparent;border-top:1px solid var(--sc-line)}
+    .cat-add-row input{background:#fff;border:none}
+
+    /* Chat */
+    .chat-shell{border:none;border-radius:12px}
+    .chat-list-pane{border-right:1px solid var(--sc-line)}
+    .chat-filter,.chat-item,.chat-conv-head,.chat-compose,.chat-notify{border-color:var(--sc-line)}
+    .chat-item:hover,.chat-item.active{background:var(--sc-bg)}
+    .chat-msgs{background:var(--sc-bg)}
+    .chat-msg.buyer{background:#fff;border:none}
+    .chat-compose textarea{background:var(--sc-bg);border:1px solid transparent}
+    .chat-notify-btn{border:1px solid rgba(17,17,20,.15);border-radius:8px}
+    .chat-notify-btn.on{border-color:var(--sc-ink);color:var(--sc-ink);font-weight:600}
+
+    /* form produk (5 langkah) */
+    .pf-tabs{background:#fff;border-radius:12px 12px 0 0}
+    .pf-tab{font-weight:500;color:var(--sc-mute)}
+    .pf-tab:hover{color:var(--sc-ink)}
+    .pf-tab.active{color:var(--sc-ink);border-bottom-color:var(--sc-ink);font-weight:700}
+    .pf-tab-num{background:var(--sc-bg);color:var(--sc-mute)}
+    .pf-tab.active .pf-tab-num{background:var(--sc-ink);color:#fff}
+    .pf-tab.done .pf-tab-num{background:var(--sc-ink2);color:#fff}
+
+    /* Kriteria Utama yang dipilih (semua layar) */
+    .perf-metric-grid > .admin-card[data-metric]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+    .perf-metric-grid > .admin-card[data-metric].sel{background:#fff !important;box-shadow:inset 0 0 0 1.5px var(--sc-ink)}
+
+    /* Link Toko: judul grup (class sidebar tadinya putih di atas putih) */
+    #tab-bio-link .admin-nav-group-label{padding:0;font-size:14px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--sc-ink)}
+    #order-detail-view{background:none;padding:0;border-radius:0}
+    .form-row + .form-group,.form-row + .form-row{margin-top:16px}
+
+    /* Halaman Saya */
+    .me-profile{display:flex;align-items:center;gap:14px;background:#fff;border-radius:12px;padding:18px;margin-bottom:12px}
+    .me-avatar{flex:0 0 52px;width:52px;height:52px;border-radius:50%;background:var(--sc-ink);color:#fff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .me-name{font-size:16px;font-weight:700;color:var(--sc-ink)}
+    .me-email{margin-top:2px;font-size:12.5px;color:var(--sc-mute);overflow-wrap:anywhere}
+    .me-group{background:#fff;border-radius:12px;margin-bottom:12px;overflow:hidden}
+    .me-group-title{padding:14px 16px 6px;font-size:13px;font-weight:700;color:var(--sc-mute)}
+    .me-row{display:flex;align-items:center;gap:14px;width:100%;padding:14px 16px;background:none;border:none;border-top:1px solid var(--sc-line);font-size:15px;color:var(--sc-ink);text-align:left;cursor:pointer}
+    .me-group-title + .me-row{border-top:none}
+    .me-row svg{flex:0 0 22px;width:22px;height:22px;fill:none;stroke:var(--sc-ink2);stroke-width:1.7}
+    .me-row .chev{margin-left:auto;font-size:22px;line-height:1;color:var(--sc-mute)}
+
+    /* Detail pesanan */
+    .od-wrap{max-width:760px;margin:0 auto}
+    .od-back{margin-bottom:12px;padding:9px 14px;border:none;border-radius:10px;background:#fff;font-size:13px;font-weight:600;color:var(--sc-ink);cursor:pointer}
+    .od-status{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:12px;padding:16px 18px;border-radius:12px;background:var(--sc-ink);color:#fff}
+    .od-status-label{font-size:18px;font-weight:700}
+    .od-status-date{margin-top:4px;font-size:12.5px;opacity:.7}
+    .od-status-no{text-align:right;font-size:12px;opacity:.85}
+    .od-status-no b{display:block;margin-top:2px;font-size:14px;overflow-wrap:anywhere}
+    .od-card{margin-bottom:12px;padding:16px 18px;border-radius:12px;background:#fff}
+    .od-h{margin-bottom:10px;font-size:14px;font-weight:700;color:var(--sc-ink)}
+    .od-name{font-size:14px;font-weight:600;color:var(--sc-ink)}
+    .od-sub{font-size:13px;line-height:1.5;color:var(--sc-mute)}
+    .od-warn{margin-top:6px;font-size:13px;font-weight:700;color:var(--sc-ink)}
+    .od-item{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--sc-line)}
+    .od-item:first-child{padding-top:0;border-top:none}
+    .od-thumb{flex:0 0 64px;width:64px;height:64px;border-radius:8px;overflow:hidden;background:var(--sc-bg)}
+    .od-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .od-it-info{flex:1;min-width:0}
+    .od-it-name{font-size:14px;font-weight:500;line-height:1.35;color:var(--sc-ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .od-it-var{margin-top:3px;font-size:13px;color:var(--sc-mute)}
+    .od-it-price{flex:0 0 auto;text-align:right;font-size:13px;color:var(--sc-mute);white-space:nowrap}
+    .od-it-price .tot{margin-top:3px;font-weight:700;color:var(--sc-ink)}
+    .od-collapse-head{display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
+    .od-collapse-head .val{font-weight:700;color:var(--sc-ink)}
+    .od-collapse-head .chev{font-size:11px;color:var(--sc-mute)}
+    .od-body{margin-top:12px;padding-top:12px;border-top:1px solid var(--sc-line)}
+    .od-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:6px;font-size:13.5px;color:var(--sc-ink)}
+    .od-row:first-child{margin-top:0}
+    .od-total{display:flex;justify-content:space-between;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--sc-line);font-size:14px;font-weight:700;color:var(--sc-ink)}
+    .od-x{border:none;background:none;padding:0 2px;font-size:13px;color:var(--sc-mute);cursor:pointer}
+    .od-cost-add{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--sc-line)}
+    .od-cost-add input{flex:1 1 140px;min-width:0;height:38px;padding:0 12px;border:none;border-radius:8px;background:var(--sc-bg);font-size:13px;color:var(--sc-ink)}
+    .od-cost-add button{height:38px;padding:0 16px;border:none;border-radius:8px;background:var(--sc-ink);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+
+    /* ---------- DESKTOP ---------- */
+    @media(min-width:861px){
+      .admin-content{padding:24px 28px}
+      .admin-card{padding:22px 24px}
+      .orders-tab{padding:12px 16px;font-size:14px;font-weight:500;color:var(--sc-mute)}
+      .orders-tab.active{color:var(--sc-ink);font-weight:700;border-bottom:2px solid var(--sc-ink)}
+      #perf-sub-tabs,#orders-status-tabs{border-bottom:1px solid var(--sc-line)}
+
+      #perf-period-controls{background:#fff;border-radius:12px;padding:18px 24px 8px;margin-bottom:16px}
+      #perf-period-controls > div:first-child > div:first-child{font-size:15px;font-weight:700;color:var(--sc-ink)}
+      #perf-period-controls > div:first-child > div:first-child span{font-size:13px;font-weight:400;color:var(--sc-mute)}
+      #perf-period-controls #perf-scope{background:var(--sc-bg);border:none;border-radius:8px;padding:8px 12px;font-size:13px;font-weight:500;color:var(--sc-ink2)}
+      .perf-period-btn{background:var(--sc-bg);border:1.5px solid transparent;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;color:var(--sc-ink2)}
+      .perf-period-btn.active{background:#fff;border-color:var(--sc-ink);color:var(--sc-ink);font-weight:600}
+
+      .perf-metric-grid{background:#fff;border-radius:12px;padding:20px 24px 22px;grid-template-columns:repeat(5,minmax(0,1fr)) !important;gap:12px !important;margin-bottom:16px !important}
+      .perf-metric-grid::before{content:"Kriteria Utama";grid-column:1/-1;margin-bottom:4px;font-size:16px;font-weight:700;color:var(--sc-ink)}
+      .perf-metric-grid > .admin-card{display:flex;flex-direction:column;min-height:104px;background:var(--sc-bg) !important;border:none !important;border-radius:12px !important;padding:14px 16px !important}
+      .perf-metric-grid > .admin-card > div:first-child{margin-bottom:auto !important;font-size:12.5px !important;line-height:1.3;color:var(--sc-mute) !important}
+      .perf-metric-grid > .admin-card > div:nth-child(2){margin-top:10px;font-size:20px !important;font-weight:700;color:var(--sc-ink);overflow-wrap:anywhere}
+      .perf-metric-grid > .admin-card .perf-delta{min-height:18px;margin-top:2px}
+
+      #perf-penjualan-status > div > div{border:none !important;background:var(--sc-bg);border-radius:12px !important}
+      #perf-penjualan-status > div > div > div:first-child{color:var(--sc-ink) !important}
+    }
+
+    /* ---------- HP ---------- */
+    @media(max-width:860px){
+      .promo-hub-grid{grid-template-columns:1fr;gap:8px}
+      #tab-promo-hub .promo-hub-card{display:grid;grid-template-columns:40px 1fr;column-gap:12px;row-gap:2px;align-items:center;padding:12px 14px}
+      #tab-promo-hub .promo-hub-card .promo-hub-icon{grid-row:1 / 3}
+      .promo-hub-card .btn-primary{width:100%;align-self:stretch}
+      .od-status-no{flex-basis:100%;text-align:left}
+      .cat-tree{flex-direction:column}
+      .cat-col{max-height:240px}
+      .od-item{flex-wrap:wrap}
+      .od-it-price{flex:1 1 100%;text-align:left;display:flex;justify-content:space-between;margin-left:76px;margin-top:-4px}
+      .od-it-price .tot{margin-top:0}
+    }
   </style>
 </head>
 <body>
@@ -988,6 +1176,27 @@
       <div class="admin-content-inner">
 
         <!-- TAB: BERANDA -->
+        <div class="admin-section" id="tab-me">
+          <div class="me-profile"><div class="me-avatar" id="me-avatar">Z</div><div style="min-width:0"><div class="me-name">ZENOOT Seller Center</div><div class="me-email" id="me-email">admin</div></div></div>
+          <div class="me-group">
+            <div class="me-group-title">Kelola Toko</div>
+          <button type="button" class="me-row" onclick="switchTab('products', document.querySelector('.admin-nav-item[data-tab=products]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><span>Produk</span><span class="chev">&#8250;</span></button>
+          <button type="button" class="me-row" onclick="switchTab('promo-hub', document.querySelector('.admin-nav-item[data-tab=promo-hub]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12l-8 8-9-9V3h8l9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span>Promosi</span><span class="chev">&#8250;</span></button>
+          <button type="button" class="me-row" onclick="switchTab('categories', document.querySelector('.admin-nav-item[data-tab=categories]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Data Master</span><span class="chev">&#8250;</span></button>
+          <button type="button" class="me-row" onclick="switchTab('reviews', document.querySelector('.admin-nav-item[data-tab=reviews]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.3 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.3 9 9"/></svg><span>Ulasan</span><span class="chev">&#8250;</span></button>
+          <button type="button" class="me-row" onclick="switchTab('customers', document.querySelector('.admin-nav-item[data-tab=customers]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M1 21c0-4 3.6-7 8-7s8 3 8 7"/><path d="M17 4a4 4 0 0 1 0 8M23 21c0-3-2-5.5-5-6.5"/></svg><span>Pelanggan</span><span class="chev">&#8250;</span></button>
+          </div>
+          <div class="me-group">
+            <div class="me-group-title">Toko Online</div>
+          <button type="button" class="me-row" onclick="visitStore()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14L21 3"/></svg><span>Kunjungi Toko</span><span class="chev">&#8250;</span></button>
+          <button type="button" class="me-row" onclick="shareStore()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>Bagikan Toko</span><span class="chev">&#8250;</span></button>
+          <button type="button" class="me-row" onclick="switchTab('bio-link', document.querySelector('.admin-nav-item[data-tab=bio-link]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg><span>Link Toko</span><span class="chev">&#8250;</span></button>
+          </div>
+          <div class="me-group">
+          <button type="button" class="me-row" onclick="doLogout()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span>Keluar</span><span class="chev">&#8250;</span></button>
+          </div>
+        </div>
+
         <div class="admin-section active" id="tab-home">
           <div class="admin-card">
             <h3 class="admin-card-title">Pengunjung</h3>
@@ -1373,7 +1582,7 @@
             <h3 class="admin-card-title">Buat Promosi</h3>
             <div class="promo-hub-grid">
               <div class="promo-hub-card" style="cursor:default">
-                <span class="promo-hub-icon">🎟️</span>
+                <span class="promo-hub-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a3 3 0 0 0 0 6v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a3 3 0 0 0 0-6z"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg></span>
                 <span class="promo-hub-title">Voucher Toko</span>
                 <span class="promo-hub-desc">Berikan kode voucher diskon untuk pembeli</span>
                 <button class="btn-primary" style="margin-top:10px;padding:8px 16px;font-size:12.5px" onclick="event.stopPropagation(); openVoucherModal()">Buat</button>
@@ -1723,27 +1932,27 @@
             <p style="font-size:12.5px;color:var(--muted);margin:-8px 0 16px">Pilih fitur promosi buat tingkatkan kunjungan dan penjualan toko kamu.</p>
             <div class="promo-hub-grid">
               <a href="#tab=promotions" class="promo-hub-card" onclick="event.preventDefault();switchTab('promotions', document.querySelector('.admin-nav-item[data-tab=promotions]'))">
-                <span class="promo-hub-icon">🏷️</span>
+                <span class="promo-hub-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12l-8 8-9-9V3h8l9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span>
                 <span class="promo-hub-title">Diskon Produk</span>
                 <span class="promo-hub-desc">Atur diskon % produk & tingkatkan penjualan</span>
               </a>
               <a href="#tab=vouchers" class="promo-hub-card" onclick="event.preventDefault();switchTab('vouchers', document.querySelector('.admin-nav-item[data-tab=vouchers]'))">
-                <span class="promo-hub-icon">🎟️</span>
+                <span class="promo-hub-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a3 3 0 0 0 0 6v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a3 3 0 0 0 0-6z"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg></span>
                 <span class="promo-hub-title">Voucher Toko</span>
                 <span class="promo-hub-desc">Berikan voucher diskon untuk pembeli</span>
               </a>
               <a href="#tab=bundling" class="promo-hub-card" onclick="event.preventDefault();switchTab('bundling', document.querySelector('.admin-nav-item[data-tab=bundling]'))">
-                <span class="promo-hub-icon">📦</span>
+                <span class="promo-hub-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg></span>
                 <span class="promo-hub-title">Bundling</span>
                 <span class="promo-hub-desc">Gabungkan produk jadi satu paket harga</span>
               </a>
               <a href="#tab=reseller" class="promo-hub-card" onclick="event.preventDefault();switchTab('reseller', document.querySelector('.admin-nav-item[data-tab=reseller]'))">
-                <span class="promo-hub-icon">🤝</span>
+                <span class="promo-hub-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M1 21c0-4 3.6-7 8-7s8 3 8 7"/><path d="M17 4a4 4 0 0 1 0 8M23 21c0-3-2-5.5-5-6.5"/></svg></span>
                 <span class="promo-hub-title">Program Reseller</span>
                 <span class="promo-hub-desc">Ajak reseller jual produkmu, atur komisi</span>
               </a>
               <a href="#tab=dropshipper" class="promo-hub-card" onclick="event.preventDefault();switchTab('dropshipper', document.querySelector('.admin-nav-item[data-tab=dropshipper]'))">
-                <span class="promo-hub-icon">🚚</span>
+                <span class="promo-hub-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10"/><path d="M15 9h4l3 3v4h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span>
                 <span class="promo-hub-title">Program Dropshipper</span>
                 <span class="promo-hub-desc">Buka toko tanpa stok lewat dropshipper</span>
               </a>
@@ -1758,13 +1967,13 @@
             <p style="font-size:12.5px;color:var(--muted);margin:-8px 0 16px">Buat diskon atau flash sale buat tingkatkan penjualan produkmu.</p>
             <div class="promo-hub-grid">
               <div class="promo-hub-card" style="cursor:default">
-                <span class="promo-hub-icon">🏷️</span>
+                <span class="promo-hub-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12l-8 8-9-9V3h8l9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span>
                 <span class="promo-hub-title">Diskon Produk</span>
                 <span class="promo-hub-desc">Terapkan diskon % ke satu/semua produk sekaligus</span>
                 <button class="btn-primary" style="margin-top:10px;padding:8px 16px;font-size:12.5px" onclick="event.stopPropagation(); openPromoModal('discount')">Buat</button>
               </div>
               <div class="promo-hub-card" style="cursor:default">
-                <span class="promo-hub-icon">⚡</span>
+                <span class="promo-hub-icon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
                 <span class="promo-hub-title">Flash Sale</span>
                 <span class="promo-hub-desc">Harga spesial + durasi waktu, badge otomatis muncul</span>
                 <button class="btn-primary" style="margin-top:10px;padding:8px 16px;font-size:12.5px" onclick="event.stopPropagation(); openPromoModal('flash')">Buat</button>
@@ -2060,7 +2269,7 @@
       <svg viewBox="0 0 24 24"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
       Pesanan
     </a>
-    <button class="admin-bn-item" data-bn="more" onclick="openMoreMenu()">
+    <button class="admin-bn-item" data-bn="more" onclick="switchTab('me')">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
       Saya
     </button>
@@ -2445,7 +2654,7 @@ function toggleSidebar(open) {
   document.getElementById('admin-scrim').classList.toggle('open', open);
 }
 
-const TAB_TITLES = { home: 'Beranda', products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', 'promo-hub': 'Pusat Promosi', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan', 'bio-link': 'Link Toko', chat: 'Chat' };
+const TAB_TITLES = { me: 'Saya', home: 'Beranda', products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', 'promo-hub': 'Pusat Promosi', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan', 'bio-link': 'Link Toko', chat: 'Chat' };
 
 // Bottom nav (mobile) cuma punya 4 tab langsung; sisanya (vouchers/categories/reviews/dst) dianggap "Saya"/lainnya, dibuka lewat drawer sidebar yang sama
 const BOTTOM_NAV_TABS = ['home', 'chat', 'performance', 'orders'];
@@ -2562,6 +2771,11 @@ function renderTab(tab, el) {
   if (tab === 'orders') loadOrdersAdmin();
   if (tab === 'chat') chatOnShow();
   if (tab === 'home') loadHomeStats();
+  if (tab === 'me') {
+    const ch = document.getElementById('admin-email-chip'), meEl = document.getElementById('me-email'), av = document.getElementById('me-avatar');
+    if (meEl && ch) meEl.textContent = ch.textContent;
+    if (av && ch) av.textContent = (ch.textContent || 'Z').trim().charAt(0).toUpperCase();
+  }
   if (tab === 'bio-link') loadBioLinks();
   if (tab === 'performance') loadPerfActiveTab();
   if (tab === 'promotions') {
@@ -2772,7 +2986,7 @@ async function loadPerformanceDashboard() {
   perfDeltaHTML(conversion, prevConversion, 'perf-conversion-delta');
 
   perfSeriesData = { orders, storeEvents, period };
-  if (isPerfMobile()) renderPerfMetricChart(); else renderPerfChart(storeEvents, period);
+  renderPerfMetricChart();
 
   const liveBadge = document.getElementById('perf-live-badge');
   if (liveBadge) liveBadge.style.display = (period === 'today') ? 'inline' : 'none';
@@ -3163,7 +3377,7 @@ const PERF_METRICS = {
   conversionBuyer: { label: 'Tingkat Konversi Pembeli', fmt: v => Math.round(v) + '%' }
 };
 function selectPerfMetric(key) {
-  if (!isPerfMobile() || !PERF_METRICS[key]) return;
+  if (!PERF_METRICS[key]) return;
   perfMetric = key;
   renderPerfMetricChart();
 }
@@ -3201,8 +3415,8 @@ function renderPerfMetricChart() {
   el.innerHTML = renderSvgLineChart(values, labels, d.period, m.fmt);
 }
 
-function renderSvgLineChartMobile(values, labels, period, fmt) {
-  const w = 340, h = 200, padL = 54, padR = 14, padT = 14, padB = 26;
+function renderSvgLineChartMobile(values, labels, period, fmt, wide) {
+  const w = wide ? 900 : 340, h = wide ? 270 : 200, padL = wide ? 70 : 54, padR = 14, padT = 14, padB = 28, fs = wide ? 11.5 : 10;
   const rough = Math.max(Math.max(0, ...values), 1) / 4;
   const pow = Math.pow(10, Math.floor(Math.log10(rough)));
   const norm = rough / pow;
@@ -3213,13 +3427,13 @@ function renderSvgLineChartMobile(values, labels, period, fmt) {
   const y = v => padT + innerH - (v / top) * innerH;
   const grid = [0,1,2,3,4].map(k => {
     const yy = y(step * k);
-    return `<line x1="${padL}" x2="${w-padR}" y1="${yy}" y2="${yy}" stroke="rgba(17,17,20,.12)" stroke-width="1"${k ? ' stroke-dasharray="4 4"' : ''}/><text x="${padL-8}" y="${yy+3.5}" font-size="10" fill="rgba(41,42,49,.58)" text-anchor="end">${k === 0 ? '0' : fmt(step * k)}</text>`;
+    return `<line x1="${padL}" x2="${w-padR}" y1="${yy}" y2="${yy}" stroke="rgba(17,17,20,.12)" stroke-width="1"${k ? ' stroke-dasharray="4 4"' : ''}/><text x="${padL-8}" y="${yy+3.5}" font-size="${fs}" fill="rgba(41,42,49,.58)" text-anchor="end">${k === 0 ? '0' : fmt(step * k)}</text>`;
   }).join('');
-  const every = Math.max(1, Math.ceil(n / 6));
+  const every = Math.max(1, Math.ceil(n / (wide ? 10 : 6)));
   const xl = labels.map((l, i) => {
     if (i % every !== 0 && !(i === n - 1 && (n - 1) % every >= 2)) return '';
     const t = (period === 'today' || period === 'yesterday') ? String(l).padStart(2, '0') + ':00' : String(l).slice(5);
-    return `<text x="${x(i)}" y="${h-6}" font-size="10" fill="rgba(41,42,49,.58)" text-anchor="middle">${t}</text>`;
+    return `<text x="${x(i)}" y="${h-6}" font-size="${fs}" fill="rgba(41,42,49,.58)" text-anchor="middle">${t}</text>`;
   }).join('');
   const line = values.map((v, i) => `${x(i)},${y(v)}`).join(' ');
   const gid = 'cg' + Math.random().toString(36).slice(2, 8);
@@ -3235,7 +3449,7 @@ function renderSvgLineChartMobile(values, labels, period, fmt) {
     </svg>`;
 }
 function renderSvgLineChart(values, labels, period, valueFormatter) {
-  if (window.matchMedia && window.matchMedia('(max-width:860px)').matches) return renderSvgLineChartMobile(values, labels, period, valueFormatter);
+  return renderSvgLineChartMobile(values, labels, period, valueFormatter, !isPerfMobile());
   const max = Math.max(1, ...values);
   const w = 700, h = 160, pad = 24;
   const stepX = (w - pad*2) / Math.max(1, values.length - 1);
@@ -3341,11 +3555,11 @@ function exportCustomersCSV() {
 
 // ===================== PESANAN ADMIN =====================
 const ORDER_STATUS_LABEL_ADMIN = {
-  menunggu_pembayaran: { label: 'Menunggu Pembayaran', color: '#b8860b', bg: '#fdf3dc' },
-  diproses:            { label: 'Diproses',            color: '#1e6fa8', bg: '#e2f0fa' },
-  dikirim:             { label: 'Dikirim',              color: '#1e7a4c', bg: '#e1f5e9' },
-  selesai:             { label: 'Selesai',              color: '#4b4b4b', bg: '#eeeeee' },
-  dibatalkan:          { label: 'Dibatalkan',           color: '#a83232', bg: '#fbe4e4' }
+  menunggu_pembayaran: { label: 'Menunggu Pembayaran', color: '#292A31', bg: '#F1F1F3' },
+  diproses:            { label: 'Diproses',            color: '#111114', bg: '#F1F1F3' },
+  dikirim:             { label: 'Dikirim',              color: '#111114', bg: '#F1F1F3' },
+  selesai:             { label: 'Selesai',              color: 'rgba(41,42,49,.58)', bg: '#F1F1F3' },
+  dibatalkan:          { label: 'Dibatalkan',           color: 'rgba(41,42,49,.58)', bg: '#F1F1F3' }
 };
 const PAYMENT_METHOD_LABEL = { wa_manual: 'WhatsApp (Manual)', qris: 'QRIS', transfer_va: 'Transfer/VA', midtrans: 'Online (Midtrans)' };
 // Jenis pembayaran dari Midtrans (kolom midtrans_payment_type) → teks yang mudah dibaca
@@ -3742,115 +3956,91 @@ function openOrderDetail(orderId) {
   const totalSellerCosts = sellerCosts.reduce((s,c)=>s+(c.amount||0), 0);
   const finalIncome = (o.total || 0) - totalSellerCosts;
 
+  const fmtRp = n => 'Rp ' + (Number(n) || 0).toLocaleString('id-ID');
   const itemRows = items.map(i => `
-    <tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:8px 6px">
-        <div style="display:flex;gap:8px;align-items:center">
-          <div style="width:44px;height:44px;flex-shrink:0;border-radius:6px;overflow:hidden;background:#f0ede8">
-            ${getItemPhoto(i.name, i.color) ? `<img src="${getItemPhoto(i.name, i.color)}" style="width:100%;height:100%;object-fit:cover">` : ''}
-          </div>
-          <div style="font-size:12.5px">
-            ${chatEsc(i.name)}<br><span style="color:var(--muted);font-size:11px">Variasi: ${chatEsc(i.color||'-')}, ${chatEsc(i.size||'-')}</span>
-          </div>
-        </div>
-      </td>
-      <td style="padding:8px 6px;text-align:right;white-space:nowrap">Rp ${(Number(i.price)||0).toLocaleString('id-ID')}</td>
-      <td style="padding:8px 6px;text-align:center">${Number(i.qty)||1}</td>
-      <td style="padding:8px 6px;text-align:right;white-space:nowrap">Rp ${((i.price||0)*(i.qty||1)).toLocaleString('id-ID')}</td>
-    </tr>`).join('');
+    <div class="od-item">
+      <div class="od-thumb">${getItemPhoto(i.name, i.color) ? `<img src="${getItemPhoto(i.name, i.color)}" alt="">` : ''}</div>
+      <div class="od-it-info">
+        <div class="od-it-name">${chatEsc(i.name)}</div>
+        <div class="od-it-var">${chatEsc([i.color, i.size].filter(Boolean).join(', ') || '-')}</div>
+      </div>
+      <div class="od-it-price"><div>${fmtRp(i.price)} &times; ${Number(i.qty) || 1}</div><div class="tot">${fmtRp((i.price || 0) * (i.qty || 1))}</div></div>
+    </div>`).join('');
+  const toggleJs = id => `const b=document.getElementById('${id}');const c=this.querySelector('.chev');const open=b.style.display!=='none';b.style.display=open?'none':'block';c.textContent=open?'▾':'▴'`;
 
   const el = document.getElementById('order-detail-view');
   el.innerHTML = `
-    <div style="max-width:760px;margin:0 auto">
-      <div style="margin-bottom:16px">
-        <button onclick="closeOrderDetail()" style="padding:6px 12px;font-size:12.5px;background:#fff;border:1px solid var(--border);border-radius:6px;cursor:pointer">← Kembali ke Pesanan</button>
-      </div>
+    <div class="od-wrap">
+      <button type="button" class="od-back" onclick="closeOrderDetail()">&larr; Kembali ke Pesanan</button>
 
-      <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px;background:#f6f5f2;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div class="od-status">
         <div>
-          <span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:${s.color};background:${s.bg}">${s.label}</span>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px">Dibuat: ${date}</div>
+          <div class="od-status-label">${s.label}</div>
+          <div class="od-status-date">Dibuat ${date}</div>
         </div>
-        <div style="font-family:monospace;font-weight:600;font-size:13px">No. Pesanan: ${chatEsc(orderNum)}</div>
+        <div class="od-status-no">No. Pesanan<b>${chatEsc(orderNum)}</b></div>
       </div>
 
-      <div style="border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px">
-        <div style="padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)">
-          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px">📦 Alamat Pengiriman</div>
-          <div style="font-size:13px;font-weight:600">${chatEsc(addr.recipient_name||'-')}</div>
-          <div style="font-size:12.5px;color:var(--sec);margin-top:2px">${chatEsc(addr.phone||'')}</div>
-          <div style="font-size:12.5px;color:var(--sec);margin-top:6px">${chatEsc(addr.address_detail||'')}</div>
-          ${addr.address_note ? `<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:2px">${chatEsc(addr.address_note)}</div>` : ''}
-          <div style="font-size:12.5px;color:var(--sec);margin-top:4px">${chatEsc([addr.village,addr.district,addr.city,addr.province].filter(Boolean).join(', '))}</div>
-          <div style="font-size:12.5px;font-weight:600;margin-top:2px">${chatEsc(addr.postal_code||'')}</div>
-        </div>
-        <div style="padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)">
-          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px">🚚 Informasi Jasa Kirim</div>
-          ${o.resi ? `
-            <div style="font-size:13px;font-weight:600">${o.courier||'Kurir'}</div>
-            <div style="font-size:12.5px;color:var(--sec);margin-top:2px">No. Resi: ${o.resi}</div>
-          ` : `<div style="font-size:12.5px;color:var(--muted)">Resi belum diinput</div>`}
-        </div>
-        <div>
-          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:6px">💳 Pembayaran</div>
-          <div style="font-size:12.5px">${chatEsc(payMethod)}${o.midtrans_payment_type ? ' · ' + chatEsc(midtransPayTypeText(o.midtrans_payment_type)) : ''} <span style="color:var(--muted)">— ${payStatus}</span></div>
-          ${o.paid_at ? `<div style="font-size:12px;color:var(--muted);margin-top:3px">Dibayar: ${new Date(o.paid_at).toLocaleString('id-ID', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>` : ''}
-          ${orderNeedsRefund(o) ? `<div style="font-size:12.5px;color:#a83232;font-weight:600;margin-top:6px">⚠️ Sudah dibayar, perlu refund ke pembeli</div>` : ''}
-        </div>
+      <div class="od-card">
+        <div class="od-h">Alamat Pengiriman</div>
+        <div class="od-name">${chatEsc(addr.recipient_name || '-')}</div>
+        <div class="od-sub">${chatEsc(addr.phone || '')}</div>
+        <div class="od-sub" style="margin-top:6px">${chatEsc(addr.address_detail || '')}</div>
+        ${addr.address_note ? `<div class="od-sub" style="font-style:italic">${chatEsc(addr.address_note)}</div>` : ''}
+        <div class="od-sub">${chatEsc([addr.village, addr.district, addr.city, addr.province].filter(Boolean).join(', '))}</div>
+        <div class="od-sub" style="font-weight:600;color:var(--sc-ink)">${chatEsc(addr.postal_code || '')}</div>
       </div>
 
-      <div style="border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:10px">🛍️ Daftar Produk</div>
-        <table style="width:100%;border-collapse:collapse;font-size:12.5px">
-          <thead><tr style="text-align:left;border-bottom:1px solid var(--border);color:var(--muted);font-size:11px">
-            <th style="padding:6px 6px 8px">Produk</th>
-            <th style="padding:6px 6px 8px;text-align:right">Harga Satuan</th>
-            <th style="padding:6px 6px 8px;text-align:center">Qty</th>
-            <th style="padding:6px 6px 8px;text-align:right">Subtotal</th>
-          </tr></thead>
-          <tbody>${itemRows}</tbody>
-        </table>
+      <div class="od-card">
+        <div class="od-h">Jasa Kirim</div>
+        ${o.resi ? `<div class="od-name">${chatEsc(o.courier || 'Kurir')}</div><div class="od-sub">No. Resi: ${chatEsc(o.resi)}</div>` : `<div class="od-sub">Resi belum diinput</div>`}
       </div>
 
-      <div style="border:1px solid var(--border);border-radius:8px;margin-bottom:14px">
-        <div onclick="const b=document.getElementById('pembeli-breakdown-${o.id}');const c=this.querySelector('.chev');const open=b.style.display!=='none';b.style.display=open?'none':'block';c.textContent=open?'▾':'▴'" style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer">
-          <span style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600">💳 Pembayaran Pembeli</span>
-          <span style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:14px;font-weight:700">Rp ${(o.total||0).toLocaleString('id-ID')}</span>
-            <span class="chev" style="color:var(--muted);font-size:11px">▴</span>
-          </span>
+      <div class="od-card">
+        <div class="od-h">Produk</div>
+        <div class="od-items">${itemRows}</div>
+      </div>
+
+      <div class="od-card">
+        <div class="od-h">Pembayaran</div>
+        <div class="od-name">${chatEsc(payMethod)}${o.midtrans_payment_type ? ' · ' + chatEsc(midtransPayTypeText(o.midtrans_payment_type)) : ''}</div>
+        <div class="od-sub">${payStatus}</div>
+        ${o.paid_at ? `<div class="od-sub">Dibayar: ${new Date(o.paid_at).toLocaleString('id-ID', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>` : ''}
+        ${orderNeedsRefund(o) ? `<div class="od-warn">Sudah dibayar, perlu refund ke pembeli</div>` : ''}
+      </div>
+
+      <div class="od-card">
+        <div class="od-collapse-head" onclick="${toggleJs('pembeli-breakdown-' + o.id)}">
+          <span class="od-h" style="margin:0">Rincian Pembayaran</span>
+          <span style="display:flex;align-items:center;gap:10px"><span class="val">${fmtRp(o.total)}</span><span class="chev">&#9652;</span></span>
         </div>
-        <div id="pembeli-breakdown-${o.id}" style="padding:0 16px 16px">
-          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;padding-top:10px;border-top:1px solid var(--border)"><span style="color:var(--sec)">Subtotal Pesanan</span><span>Rp ${subtotal.toLocaleString('id-ID')}</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="color:var(--sec)">Ongkos Kirim</span><span>Rp ${shipping.toLocaleString('id-ID')}</span></div>
-          ${discount > 0 ? `<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px"><span style="color:var(--sec)">Diskon Voucher</span><span style="color:#2a7a3d">- Rp ${discount.toLocaleString('id-ID')}</span></div>` : ''}
-          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><span>Total Dibayar Pembeli</span><span>Rp ${(o.total||0).toLocaleString('id-ID')}</span></div>
+        <div id="pembeli-breakdown-${o.id}" class="od-body">
+          <div class="od-row"><span class="od-sub">Subtotal Pesanan</span><span>${fmtRp(subtotal)}</span></div>
+          <div class="od-row"><span class="od-sub">Ongkos Kirim</span><span>${fmtRp(shipping)}</span></div>
+          ${discount > 0 ? `<div class="od-row"><span class="od-sub">Diskon Voucher</span><span>- ${fmtRp(discount)}</span></div>` : ''}
+          <div class="od-total"><span>Total Dibayar Pembeli</span><span>${fmtRp(o.total)}</span></div>
         </div>
       </div>
 
-      <div style="border:1px solid var(--border);border-radius:8px">
-        <div onclick="const b=document.getElementById('income-breakdown-${o.id}');const c=this.querySelector('.chev');const open=b.style.display!=='none';b.style.display=open?'none':'block';c.textContent=open?'▾':'▴'" style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer">
-          <span style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600">📄 Penghasilan Akhir</span>
-          <span style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:14px;font-weight:700;color:#c0522a">Rp ${finalIncome.toLocaleString('id-ID')}</span>
-            <span class="chev" style="color:var(--muted);font-size:11px">▴</span>
-          </span>
+      <div class="od-card">
+        <div class="od-collapse-head" onclick="${toggleJs('income-breakdown-' + o.id)}">
+          <span class="od-h" style="margin:0">Penghasilan Akhir</span>
+          <span style="display:flex;align-items:center;gap:10px"><span class="val">${fmtRp(finalIncome)}</span><span class="chev">&#9652;</span></span>
         </div>
-        <div id="income-breakdown-${o.id}" style="padding:0 16px 16px">
-          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;padding-top:10px;border-top:1px solid var(--border)"><span style="color:var(--sec)">Total Dibayar Pembeli</span><span>Rp ${(o.total||0).toLocaleString('id-ID')}</span></div>
-          ${sellerCosts.map((c,idx) => `
-            <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px;align-items:center">
-              <span style="color:var(--sec)">${c.label}</span>
-              <span style="display:flex;align-items:center;gap:8px">
-                <span style="color:#a83232">- Rp ${(c.amount||0).toLocaleString('id-ID')}</span>
-                <button onclick="removeSellerCost('${o.id}',${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0" title="Hapus">✕</button>
+        <div id="income-breakdown-${o.id}" class="od-body">
+          <div class="od-row"><span class="od-sub">Total Dibayar Pembeli</span><span>${fmtRp(o.total)}</span></div>
+          ${sellerCosts.map((c, idx) => `
+            <div class="od-row">
+              <span class="od-sub">${chatEsc(c.label)}</span>
+              <span style="display:flex;align-items:center;gap:8px">- ${fmtRp(c.amount)}
+                <button type="button" class="od-x" onclick="removeSellerCost('${o.id}',${idx})" title="Hapus">&#10005;</button>
               </span>
             </div>`).join('')}
-          <div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><span>Penghasilan Akhir</span><span style="color:#c0522a">Rp ${finalIncome.toLocaleString('id-ID')}</span></div>
-          <div style="display:flex;gap:6px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)">
-            <input type="text" id="cost-label-${o.id}" placeholder="Nama biaya (mis. Ongkir ke kurir)" style="flex:2;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px">
-            <input type="number" id="cost-amount-${o.id}" placeholder="Nominal" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px">
-            <button onclick="addSellerCost('${o.id}')" style="padding:6px 12px;font-size:12px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;white-space:nowrap">+ Tambah</button>
+          <div class="od-total"><span>Penghasilan Akhir</span><span>${fmtRp(finalIncome)}</span></div>
+          <div class="od-cost-add">
+            <input type="text" id="cost-label-${o.id}" placeholder="Nama biaya (mis. Ongkir ke kurir)">
+            <input type="number" id="cost-amount-${o.id}" placeholder="Nominal">
+            <button type="button" onclick="addSellerCost('${o.id}')">+ Tambah</button>
           </div>
         </div>
       </div>
