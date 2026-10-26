@@ -448,9 +448,11 @@
       .admin-bn-item svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8}
       .admin-bn-item.active{color:var(--accent);font-weight:600}
       .home-stat-grid{grid-template-columns:repeat(2,1fr) !important}
-      .home-quick-actions{grid-template-columns:repeat(3,1fr) !important}
-      .home-visit-grid{grid-template-columns:repeat(3,1fr) !important;gap:14px 10px !important}
-      .home-visit-tile:nth-child(1),.home-visit-tile:nth-child(2),.home-visit-tile:nth-child(3),.home-visit-tile:nth-child(6){display:none}
+      .home-quick-actions{grid-template-columns:repeat(4,1fr) !important}
+      /* HP menampilkan 7 angka seperti laptop: baris 2 + 3 + 2 */
+      .home-visit-grid{grid-template-columns:repeat(6,1fr) !important;gap:14px 10px !important}
+      .home-visit-tile:nth-child(1),.home-visit-tile:nth-child(2),.home-visit-tile:nth-child(6),.home-visit-tile:nth-child(7){grid-column:span 3}
+      .home-visit-tile:nth-child(3),.home-visit-tile:nth-child(4),.home-visit-tile:nth-child(5){grid-column:span 2}
 
       /* ===== PRODUK: tabel -> kartu ===== */
       .admin-list-header{flex-wrap:wrap;gap:10px}
@@ -529,6 +531,29 @@
     .home-qa-icon{width:42px;height:42px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
     .home-qa-icon svg{width:19px;height:19px;stroke:var(--accent)}
     @media(max-width:860px){.home-qa-perf{display:none !important}}
+    /* Pesanan sudah ada di menu bawah HP */
+    @media(max-width:860px){.home-qa-orders{display:none !important}}
+    .home-stat-card.alert .home-stat-num{color:#b35a00}
+    .home-card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+    .home-card-head .admin-card-title{margin-bottom:0}
+    .home-card-link{font-size:12px;color:#2a5fb0;cursor:pointer;background:none;border:none;font-family:inherit;padding:0;white-space:nowrap}
+    .home-list-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+    .home-list-row:last-child{border-bottom:none;padding-bottom:0}
+    .home-list-row:first-child{padding-top:0}
+    .home-list-img{width:40px;height:40px;border-radius:8px;object-fit:cover;background:#f0ede8;flex-shrink:0;display:block}
+    .home-list-main{flex:1;min-width:0}
+    .home-list-name{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .home-list-sub{font-size:11.5px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .home-list-right{font-size:12px;font-family:'IBM Plex Mono',monospace;text-align:right;flex-shrink:0}
+    .home-list-right.bad{color:#a83232;font-weight:600}
+    .home-list-right.warn{color:#b35a00;font-weight:600}
+    .home-rank{width:18px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);flex-shrink:0}
+    .home-empty{font-size:12.5px;color:var(--muted);margin:0}
+    .home-pills{display:flex;gap:6px}
+    .home-pill{padding:5px 11px;font-size:12px;background:#fff;border:1px solid var(--border);border-radius:999px;cursor:pointer;font-family:inherit;color:var(--text)}
+    .home-pill.active{background:var(--ink,#111114);color:#fff;border-color:var(--ink,#111114)}
+    .home-trend-total{font-size:12.5px;color:var(--muted);margin:0 0 6px}
+    .home-trend-total b{color:var(--text);font-family:'IBM Plex Mono',monospace}
     .perf-metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px}
 
     /* ===== LOGIN ===== */
@@ -1618,6 +1643,37 @@
 
         <div class="admin-section active" id="tab-home">
           <div class="admin-card">
+            <h3 class="admin-card-title">Perlu Ditindaklanjuti</h3>
+            <div class="home-stat-grid" style="margin:0">
+              <a href="#tab=orders&status=menunggu_pembayaran" class="home-stat-card" onclick="event.preventDefault();goToOrdersStatus('menunggu_pembayaran')">
+                <span class="home-stat-num" id="home-stat-unpaid" data-alert="1">–</span>
+                <span class="home-stat-label">Menunggu Pembayaran</span>
+              </a>
+              <a href="#tab=orders&status=diproses" class="home-stat-card" onclick="event.preventDefault();goToOrdersStatus('diproses')">
+                <span class="home-stat-num" id="home-stat-shipping" data-alert="1">–</span>
+                <span class="home-stat-label">Perlu Dikirim</span>
+              </a>
+              <a href="#tab=orders&status=dibatalkan" class="home-stat-card" onclick="event.preventDefault();goToOrdersStatus('dibatalkan')">
+                <span class="home-stat-num" id="home-stat-cancel">–</span>
+                <span class="home-stat-label">Pembatalan</span>
+                <span class="home-stat-note">hari ini</span>
+              </a>
+              <a href="#tab=reviews" class="home-stat-card" onclick="event.preventDefault();switchTab('reviews', document.querySelector('.admin-nav-item[data-tab=reviews]'))">
+                <span class="home-stat-num" id="home-stat-reviews">–</span>
+                <span class="home-stat-label">Ulasan</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="admin-card" id="home-lowstock-card">
+            <div class="home-card-head">
+              <h3 class="admin-card-title">Stok Menipis / Habis</h3>
+              <button type="button" class="home-card-link" id="home-lowstock-link" onclick="goToLowStock()" style="display:none">Lihat semua</button>
+            </div>
+            <div id="home-lowstock-list"><p class="home-empty">Memuat...</p></div>
+          </div>
+
+          <div class="admin-card">
             <h3 class="admin-card-title">Pengunjung</h3>
             <div id="home-visit-summary" class="home-visit-grid">
               <div class="home-visit-tile">
@@ -1657,26 +1713,20 @@
           </div>
 
           <div class="admin-card">
-            <h3 class="admin-card-title">Pesanan</h3>
-            <div class="home-stat-grid" style="margin:0">
-              <a href="#tab=orders&status=diproses" class="home-stat-card" onclick="event.preventDefault();goToOrdersStatus('diproses')">
-                <span class="home-stat-num" id="home-stat-shipping">–</span>
-                <span class="home-stat-label">Perlu Dikirim</span>
-              </a>
-              <a href="#tab=orders&status=dibatalkan" class="home-stat-card" onclick="event.preventDefault();goToOrdersStatus('dibatalkan')">
-                <span class="home-stat-num" id="home-stat-cancel">–</span>
-                <span class="home-stat-label">Pembatalan</span>
-              </a>
-              <div class="home-stat-card disabled">
-                <span class="home-stat-num">–</span>
-                <span class="home-stat-label">Pengembalian</span>
-                <span class="home-stat-note">Segera hadir</span>
+            <div class="home-card-head">
+              <h3 class="admin-card-title">Tren 7 Hari</h3>
+              <div class="home-pills">
+                <button type="button" class="home-pill active" id="home-trend-btn-sales" onclick="setHomeTrendMetric('sales')">Penjualan</button>
+                <button type="button" class="home-pill" id="home-trend-btn-orders" onclick="setHomeTrendMetric('orders')">Pesanan</button>
               </div>
-              <a href="#tab=reviews" class="home-stat-card" onclick="event.preventDefault();switchTab('reviews', document.querySelector('.admin-nav-item[data-tab=reviews]'))">
-                <span class="home-stat-num" id="home-stat-reviews">–</span>
-                <span class="home-stat-label">Ulasan</span>
-              </a>
             </div>
+            <div id="home-trend-chart"><p class="home-empty">Memuat...</p></div>
+            <p class="home-empty" style="margin-top:6px">Tidak termasuk pesanan yang dibatalkan.</p>
+          </div>
+
+          <div class="admin-card">
+            <h3 class="admin-card-title">Produk Terlaris 7 Hari</h3>
+            <div id="home-best-list"><p class="home-empty">Memuat...</p></div>
           </div>
 
           <div class="admin-card">
@@ -1686,7 +1736,7 @@
                 <span class="home-qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></span>
                 Tambah Produk
               </button>
-              <a href="#tab=orders" class="home-qa-item" onclick="event.preventDefault();switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
+              <a href="#tab=orders" class="home-qa-item home-qa-orders" onclick="event.preventDefault();switchTab('orders', document.querySelector('.admin-nav-item[data-tab=orders]'))">
                 <span class="home-qa-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/></svg></span>
                 Pesanan
               </a>
@@ -4387,27 +4437,191 @@ function goToOrdersStatus(status) {
   filterOrdersTab(status, btn);
 }
 
+function setHomeStat(id, n) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = n ?? '–';
+  const card = el.closest('.home-stat-card');
+  if (card) card.classList.toggle('alert', el.dataset.alert === '1' && (n || 0) > 0);
+}
+
 async function loadHomeStats() {
-  const elShip = document.getElementById('home-stat-shipping');
-  const elCancel = document.getElementById('home-stat-cancel');
-  const elReviews = document.getElementById('home-stat-reviews');
-  if (!elShip) return;
+  if (!document.getElementById('home-stat-shipping')) return;
 
   // Kartu Pembatalan hanya menghitung pesanan yang dibatalkan HARI INI (reset otomatis tengah malam)
   const todayStart = new Date(); todayStart.setHours(0,0,0,0);
   const todayStartIso = todayStart.toISOString();
 
-  const [{ count: shipCount }, { count: cancelCount }, { count: reviewCount }] = await Promise.all([
+  const [{ count: unpaidCount }, { count: shipCount }, { count: cancelCount }, { count: reviewCount }] = await Promise.all([
+    sb.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'menunggu_pembayaran'),
     sb.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'diproses'),
     sb.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'dibatalkan').gte('cancelled_at', todayStartIso),
     sb.from('reviews').select('*', { count: 'exact', head: true })
   ]);
 
-  elShip.textContent = shipCount ?? '–';
-  elCancel.textContent = cancelCount ?? '–';
-  elReviews.textContent = reviewCount ?? '–';
+  setHomeStat('home-stat-unpaid', unpaidCount);
+  setHomeStat('home-stat-shipping', shipCount);
+  setHomeStat('home-stat-cancel', cancelCount);
+  setHomeStat('home-stat-reviews', reviewCount);
 
   loadHomeVisitSummary();
+  loadHomeLowStock();
+  loadHomeTrend();
+}
+
+// ===== Beranda: Stok Menipis / Habis =====
+let homeLowStockCount = 0;
+async function loadHomeLowStock() {
+  const el = document.getElementById('home-lowstock-list');
+  const link = document.getElementById('home-lowstock-link');
+  if (!el) return;
+  try {
+    const { data, error } = await sb.from('products')
+      .select('id,name,image_url,variants(id,color_name,size,stock,is_active)')
+      .eq('is_active', true);
+    if (error) throw error;
+    const rows = [];
+    (data || []).forEach(p => {
+      const low = (p.variants || []).filter(v => v.is_active !== false && (v.stock ?? 0) <= LOW_STOCK_THRESHOLD);
+      if (!low.length) return;
+      const out = low.filter(v => (v.stock ?? 0) <= 0);
+      rows.push({ p, low, out: out.length, min: Math.min(...low.map(v => v.stock ?? 0)) });
+    });
+    rows.sort((a, b) => a.min - b.min || b.low.length - a.low.length);
+    homeLowStockCount = rows.length;
+    if (!rows.length) {
+      el.innerHTML = '<p class="home-empty">Semua stok aman.</p>';
+      if (link) link.style.display = 'none';
+      return;
+    }
+    if (link) { link.style.display = ''; link.textContent = `Lihat semua (${rows.length})`; }
+    el.innerHTML = rows.slice(0, 5).map(r => {
+      const chips = r.low.slice(0, 3).map(v => `${v.color_name || ''} ${v.size || ''}`.trim() + ((v.stock ?? 0) <= 0 ? ' (habis)' : ` (sisa ${v.stock})`)).join(', ');
+      const more = r.low.length > 3 ? ` +${r.low.length - 3} varian` : '';
+      const right = r.out ? `${r.out} habis` : `sisa ${r.min}`;
+      return `<div class="home-list-row">
+        ${r.p.image_url ? `<img class="home-list-img" src="${chatEsc(r.p.image_url)}" alt="" loading="lazy">` : '<div class="home-list-img"></div>'}
+        <div class="home-list-main"><div class="home-list-name">${chatEsc(r.p.name)}</div><div class="home-list-sub">${chatEsc(chips)}${more}</div></div>
+        <div class="home-list-right ${r.out ? 'bad' : 'warn'}">${right}</div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    console.warn('Gagal memuat stok menipis:', e && e.message);
+    el.innerHTML = '<p class="home-empty">Gagal memuat data stok.</p>';
+    if (link) link.style.display = 'none';
+  }
+}
+function goToLowStock() {
+  switchTab('products', document.querySelector('.admin-nav-item[data-tab=products]'));
+  if (!lowStockOnly) toggleLowStockFilter();
+}
+
+// ===== Beranda: Tren 7 Hari dan Produk Terlaris (pesanan dibatalkan tidak dihitung) =====
+let homeTrendData = [];
+let homeTrendMetric = 'sales';
+
+function homeDayKey(d) {
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+function homeShortRp(n) {
+  n = Math.round(n || 0);
+  if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '').replace('.', ',') + ' jt';
+  if (n >= 1000) return Math.round(n / 1000) + ' rb';
+  return String(n);
+}
+
+async function loadHomeTrend() {
+  const trendEl = document.getElementById('home-trend-chart');
+  const bestEl = document.getElementById('home-best-list');
+  if (!trendEl || !bestEl) return;
+  try {
+    const start = new Date(); start.setHours(0, 0, 0, 0); start.setDate(start.getDate() - 6);
+    const { data, error } = await sb.from('orders')
+      .select('id,created_at,total,items,status')
+      .neq('status', 'dibatalkan')
+      .gte('created_at', start.toISOString())
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      days.push({ key: homeDayKey(d), label: d.toLocaleDateString('id-ID', { weekday: 'short' }), dayNum: d.getDate(), sales: 0, orders: 0 });
+    }
+    const byKey = new Map(days.map(d => [d.key, d]));
+    const prod = new Map();
+    (data || []).forEach(o => {
+      const day = byKey.get(homeDayKey(new Date(o.created_at)));
+      if (day) { day.sales += Number(o.total) || 0; day.orders += 1; }
+      (Array.isArray(o.items) ? o.items : []).forEach(it => {
+        const key = it.productId || it.name;
+        if (!key) return;
+        const qty = Number(it.qty) || 0;
+        let r = prod.get(key);
+        if (!r) { r = { name: it.name || 'Produk', image: it.image || '', units: 0, revenue: 0 }; prod.set(key, r); }
+        r.units += qty;
+        r.revenue += (Number(it.price) || 0) * qty;
+        if (!r.image && it.image) r.image = it.image;
+      });
+    });
+    homeTrendData = days;
+    renderHomeTrend();
+    renderHomeBest(Array.from(prod.values()));
+  } catch (e) {
+    console.warn('Gagal memuat tren 7 hari:', e && e.message);
+    trendEl.innerHTML = '<p class="home-empty">Gagal memuat data.</p>';
+    bestEl.innerHTML = '<p class="home-empty">Gagal memuat data.</p>';
+  }
+}
+
+function setHomeTrendMetric(m) {
+  homeTrendMetric = m === 'orders' ? 'orders' : 'sales';
+  document.getElementById('home-trend-btn-sales')?.classList.toggle('active', homeTrendMetric === 'sales');
+  document.getElementById('home-trend-btn-orders')?.classList.toggle('active', homeTrendMetric === 'orders');
+  renderHomeTrend();
+}
+
+function renderHomeTrend() {
+  const el = document.getElementById('home-trend-chart');
+  if (!el || !homeTrendData.length) return;
+  const metric = homeTrendMetric;
+  const vals = homeTrendData.map(d => metric === 'sales' ? d.sales : d.orders);
+  const totalSales = homeTrendData.reduce((a, d) => a + d.sales, 0);
+  const totalOrders = homeTrendData.reduce((a, d) => a + d.orders, 0);
+  const max = Math.max(...vals, 1);
+  const W = 700, H = 210, top = 30, bottom = 46, bw = 56;
+  const gap = (W - bw * 7) / 8;
+  const bars = homeTrendData.map((d, i) => {
+    const v = vals[i];
+    const h = v ? Math.max(Math.round((H - top - bottom) * v / max), 4) : 2;
+    const x = Math.round(gap + i * (bw + gap));
+    const y = H - bottom - h;
+    const isToday = i === homeTrendData.length - 1;
+    const valLabel = v ? (metric === 'sales' ? homeShortRp(v) : String(v)) : '';
+    const tip = metric === 'sales' ? 'Rp ' + v.toLocaleString('id-ID') : v + ' pesanan';
+    return `<g><title>${chatEsc(d.label)} ${d.dayNum}: ${tip}</title>
+      <rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="5" fill="${isToday ? '#111114' : '#cfcac1'}"/>
+      ${valLabel ? `<text x="${x + bw / 2}" y="${y - 8}" text-anchor="middle" font-size="22" fill="#55524c" font-family="IBM Plex Mono, monospace">${valLabel}</text>` : ''}
+      <text x="${x + bw / 2}" y="${H - 22}" text-anchor="middle" font-size="22" fill="#8a867e">${chatEsc(d.label)}</text>
+      <text x="${x + bw / 2}" y="${H - 3}" text-anchor="middle" font-size="19" fill="#aaa69e">${d.dayNum}</text></g>`;
+  }).join('');
+  el.innerHTML = `<p class="home-trend-total">Total 7 hari: <b>Rp ${totalSales.toLocaleString('id-ID')}</b> &middot; <b>${totalOrders}</b> pesanan</p>
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block" role="img" aria-label="Grafik ${metric === 'sales' ? 'penjualan' : 'jumlah pesanan'} 7 hari terakhir">
+      <line x1="0" y1="${H - bottom}" x2="${W}" y2="${H - bottom}" stroke="#e4e1da" stroke-width="2"/>${bars}</svg>`;
+}
+
+function renderHomeBest(list) {
+  const el = document.getElementById('home-best-list');
+  if (!el) return;
+  const top = list.filter(r => r.units > 0).sort((a, b) => b.units - a.units || b.revenue - a.revenue).slice(0, 5);
+  if (!top.length) { el.innerHTML = '<p class="home-empty">Belum ada penjualan dalam 7 hari terakhir.</p>'; return; }
+  el.innerHTML = top.map((r, i) => `<div class="home-list-row">
+    <span class="home-rank">${i + 1}</span>
+    ${r.image ? `<img class="home-list-img" src="${chatEsc(r.image)}" alt="" loading="lazy">` : '<div class="home-list-img"></div>'}
+    <div class="home-list-main"><div class="home-list-name">${chatEsc(r.name)}</div><div class="home-list-sub">${r.units} pcs terjual</div></div>
+    <div class="home-list-right">Rp ${r.revenue.toLocaleString('id-ID')}</div>
+  </div>`).join('');
 }
 
 async function loadHomeVisitSummary() {
@@ -4424,8 +4638,8 @@ async function loadHomeVisitSummary() {
     sb.from('analytics_events').select('session_id').eq('event_type', 'view_store').gte('created_at', yestIso).lt('created_at', todayIso),
     sb.from('analytics_events').select('product_id').eq('event_type', 'view_product').gte('created_at', todayIso),
     sb.from('analytics_events').select('product_id').eq('event_type', 'view_product').gte('created_at', yestIso).lt('created_at', todayIso),
-    sb.from('orders').select('total').gte('created_at', todayIso),
-    sb.from('orders').select('total').gte('created_at', yestIso).lt('created_at', todayIso)
+    sb.from('orders').select('total').neq('status', 'dibatalkan').gte('created_at', todayIso),
+    sb.from('orders').select('total').neq('status', 'dibatalkan').gte('created_at', yestIso).lt('created_at', todayIso)
   ]);
 
   const hitsToday = (storeToday.data || []).length;
