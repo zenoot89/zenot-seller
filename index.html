@@ -581,7 +581,14 @@
     .ship-switch span::before{content:'';position:absolute;height:18px;width:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
     .ship-switch input:checked + span{background:#2fa56a}
     .ship-switch input:checked + span::before{transform:translateX(18px)}
-    .ship-switch input:disabled + span{opacity:.5;cursor:default}
+    .ship-switch input:disabled + span{opacity:.55;cursor:default}
+    .ship-btns{display:flex;gap:8px;flex-wrap:wrap}
+    .ship-btn{padding:8px 14px;font-size:12.5px;font-weight:500;background:#fff;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-family:inherit;color:var(--text)}
+    .ship-btn.primary{background:var(--ink,#111114);color:#fff;border-color:var(--ink,#111114)}
+    .ship-btn:disabled{opacity:.55;cursor:default}
+    .ship-minkg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--sec)}
+    .ship-minkg input{width:64px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit}
+    .ship-link{background:none;border:none;cursor:pointer;font-family:inherit;font-size:12px;color:#2a5fb0;padding:0}
     .perf-metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px}
 
     /* ===== LOGIN ===== */
@@ -1677,16 +1684,15 @@
         <!-- TAB: PENGATURAN PENGIRIMAN -->
         <div class="admin-section" id="tab-shipping">
           <div class="admin-card">
-            <h3 class="admin-card-title">Pengaturan Pengiriman</h3>
-            <p class="ship-desc">Pilih layanan kurir yang dipakai untuk menghitung ongkir di toko. Saat pembeli membayar, sistem memilih yang <b>termurah</b> di antara layanan yang aktif. Pembeli tidak memilih kurir.</p>
-            <div id="ship-status"></div>
-            <div class="ship-actions">
-              <input class="form-input" id="ship-dest" placeholder="Kota contoh (bawaan: Jakarta Selatan)" maxlength="60">
-              <button class="btn-primary" id="ship-discover-btn" onclick="discoverShipping()">Cek layanan tersedia</button>
+            <div class="home-card-head">
+              <h3 class="admin-card-title">Pengaturan Pengiriman</h3>
+              <div class="ship-btns" id="ship-btns"></div>
             </div>
-            <p class="ship-hint">Tombol ini menanyakan RajaOngkir layanan apa saja yang tersedia dari Bandung ke kota contoh (berat 1 kg dan 5 kg). Layanan baru ditambahkan dalam keadaan mati, dan toggle yang sudah kamu atur tidak berubah. Kalau sebuah kurir tidak muncul, bisa jadi ia tidak melayani rute contoh. Coba lagi dengan kota lain.</p>
+            <p class="ship-desc">Pilih layanan yang dipakai untuk menghitung ongkir. Sistem memilih yang <b>termurah</b> di antara layanan yang aktif, dan pembeli tidak memilih kurir. Tekan <b>Edit</b> untuk mengubah, lalu <b>Simpan</b>.</p>
+            <div id="ship-status"></div>
           </div>
           <div id="ship-groups"></div>
+          <p class="ship-hint" id="ship-others" style="text-align:center"></p>
         </div>
 
         <div class="admin-section active" id="tab-home">
@@ -3347,28 +3353,43 @@ async function saveBioLinks(){
 
 let lastNonChatTab = 'home';
 // ===================== PENGATURAN PENGIRIMAN =====================
-let shippingRows = [];
+// Hanya kurir utama yang tampil (kurir lain tersembunyi, tapi kurir lain yang masih aktif tetap ditampilkan).
+// Perubahan toggle disimpan sebagai draft sampai tombol Simpan ditekan dan dikonfirmasi.
+const SHIP_MAIN_COURIERS = [['jne', 'JNE'], ['jnt', 'J&T'], ['sicepat', 'SiCepat'], ['wahana', 'Wahana']];
+const SHIP_GRP_ORDER = ['reguler', 'nextday', 'sameday', 'hemat', 'kargo', 'lainnya'];
+const SHIP_GRP_LABEL = { reguler: 'Reguler', nextday: 'Next Day', sameday: 'Same Day', hemat: 'Hemat', kargo: 'Kargo', lainnya: '' };
+let shippingRows = [];        // data yang tersimpan di database
+let shippingDraft = null;     // null = mode lihat; Map(id -> { enabled, min_weight_g }) = mode Edit
 let shippingLastDiscover = null;
-let shipOpenAdv = new Set();
-const SHIP_GROUPS = [
-  ['reguler', 'Reguler', 'Pengiriman standar'],
-  ['nextday', 'Next Day', 'Tiba sekitar 1 hari'],
-  ['sameday', 'Same Day', 'Tiba di hari yang sama'],
-  ['hemat', 'Hemat', 'Lebih murah, biasanya lebih lama'],
-  ['kargo', 'Kargo', 'Untuk paket berat; ada berat minimal'],
-  ['lainnya', 'Lainnya', '']
-];
+let shipShowAll = false;
+let shipSaving = false;
 
-function shippingEnabledCount() { return shippingRows.filter(r => r.enabled).length; }
+function shipEditing() { return shippingDraft !== null; }
+function shipVal(r, f) { return (shippingDraft && shippingDraft.has(r.id)) ? shippingDraft.get(r.id)[f] : r[f]; }
+function shipEnabledCount() { return shippingRows.filter(r => shipVal(r, 'enabled')).length; }
+function shipChanges() {
+  if (!shippingDraft) return [];
+  const out = [];
+  shippingRows.forEach(r => {
+    const d = shippingDraft.get(r.id);
+    if (!d) return;
+    const patch = {};
+    if (!!d.enabled !== !!r.enabled) patch.enabled = !!d.enabled;
+    if ((Number(d.min_weight_g) || 0) !== (Number(r.min_weight_g) || 0)) patch.min_weight_g = Number(d.min_weight_g) || 0;
+    if (Object.keys(patch).length) out.push({ row: r, patch });
+  });
+  return out;
+}
 
 async function loadShipping() {
   const el = document.getElementById('ship-groups');
   if (!el) return;
-  el.innerHTML = '<div class="admin-card"><p class="home-empty">Memuat...</p></div>';
+  if (!shipEditing()) el.innerHTML = '<div class="admin-card"><p class="home-empty">Memuat...</p></div>';
   const { data, error } = await sb.from('shipping_services').select('*').order('courier_name', { ascending: true }).order('service', { ascending: true });
   if (error) {
     shippingRows = [];
-    renderShippingStatus();
+    shippingDraft = null;
+    renderShipping();
     el.innerHTML = `<div class="admin-card"><p style="font-size:13px;color:#a83232;margin:0">Gagal memuat: ${chatEsc(error.message)}. Pastikan SQL tahap 1 sudah dijalankan.</p></div>`;
     return;
   }
@@ -3376,98 +3397,144 @@ async function loadShipping() {
   renderShipping();
 }
 
+function renderShippingButtons() {
+  const el = document.getElementById('ship-btns');
+  if (!el) return;
+  if (shipEditing()) {
+    el.innerHTML = `<button type="button" class="ship-btn" onclick="shipCancelEdit()" ${shipSaving ? 'disabled' : ''}>Batal</button><button type="button" class="ship-btn primary" onclick="shipSave()" ${shipSaving ? 'disabled' : ''}>${shipSaving ? 'Menyimpan...' : 'Simpan'}</button>`;
+  } else {
+    el.innerHTML = `<button type="button" class="ship-btn" id="ship-discover-btn" onclick="discoverShipping()">Perbarui daftar layanan</button><button type="button" class="ship-btn primary" onclick="shipStartEdit()" ${shippingRows.length ? '' : 'disabled'}>Edit</button>`;
+  }
+}
+
 function renderShippingStatus() {
   const el = document.getElementById('ship-status');
   if (!el) return;
-  const total = shippingRows.length, on = shippingEnabledCount();
+  const total = shippingRows.length, on = shipEnabledCount();
   let html;
-  if (!total) html = `<div class="ship-banner warn"><b>Belum diatur</b>Checkout masih memakai cara lama (JNE, TIKI, dan POS termurah). Tekan "Cek layanan tersedia", lalu aktifkan layanan yang kamu pakai.</div>`;
+  if (!total) html = `<div class="ship-banner warn"><b>Belum diatur</b>Checkout masih memakai cara lama (JNE, TIKI, dan POS termurah). Tekan "Perbarui daftar layanan", lalu Edit untuk memilih layanan yang kamu pakai.</div>`;
   else if (!on) html = `<div class="ship-banner bad"><b>Tidak ada layanan aktif</b>Pembeli belum bisa membayar sampai minimal satu layanan diaktifkan.</div>`;
-  else html = `<div class="ship-banner ok"><b>${on} layanan aktif</b>Ongkir hanya dihitung dari layanan yang aktif. Sistem memilih yang termurah, dan layanan terpilih tampil di detail pesanan.</div>`;
+  else html = `<div class="ship-banner ok"><b>${on} layanan aktif${shipEditing() ? ' (belum disimpan)' : ''}</b>Ongkir hanya dihitung dari layanan yang aktif, dan layanan terpilih tampil di detail pesanan.</div>`;
   const d = shippingLastDiscover;
-  if (d) {
-    const none = (d.couriers_without_services || []).join(', ');
-    html += `<p class="ship-hint">Pemeriksaan terakhir (Bandung ke ${chatEsc(d.dest)}): ${d.found} layanan ditemukan, ${d.added} baru.${none ? ` Tanpa layanan di rute ini: ${chatEsc(none)}.` : ''}</p>`;
-  }
+  if (d) html += `<p class="ship-hint">Pemeriksaan terakhir (Bandung ke ${chatEsc(d.dest)}): ${d.found} layanan ditemukan, ${d.added} baru.</p>`;
   el.innerHTML = html;
 }
 
 function shipRowHTML(r) {
-  const id = r.id;
-  const min = Number(r.min_weight_g) || 0;
-  const open = shipOpenAdv.has(id);
+  const editing = shipEditing();
+  const en = !!shipVal(r, 'enabled');
+  const min = Number(shipVal(r, 'min_weight_g')) || 0;
+  const grp = SHIP_GRP_LABEL[r.grp] || '';
+  const sub = [r.description, grp && r.grp !== 'reguler' ? grp : '', min > 0 ? `min. ${(min / 1000).toLocaleString('id-ID')} kg` : ''].filter(Boolean).map(chatEsc).join(' · ');
   return `<div class="ship-row">
     <div class="ship-main">
       <div class="ship-name">${chatEsc(r.courier_name)} ${chatEsc(r.service)}</div>
-      <div class="ship-sub">${chatEsc(r.description || '')}${min > 0 ? `${r.description ? ' · ' : ''}min. ${(min / 1000).toLocaleString('id-ID')} kg` : ''}</div>
+      <div class="ship-sub">${sub}</div>
     </div>
-    <button type="button" class="ship-more" onclick="toggleShipMore('${id}')" aria-label="Pengaturan lanjutan">${open ? '&#9652;' : '&#9662;'}</button>
-    <label class="ship-switch"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleShippingService('${id}', this)"><span></span></label>
-    <div class="ship-adv" style="${open ? '' : 'display:none'}">
-      <label>Kelompok <select onchange="saveShippingField('${id}', 'grp', this.value)">${SHIP_GROUPS.map(g => `<option value="${g[0]}" ${(r.grp || 'lainnya') === g[0] ? 'selected' : ''}>${g[1]}</option>`).join('')}</select></label>
-      <label>Berat minimal (gram) <input type="number" min="0" step="100" value="${min}" onchange="saveShippingField('${id}', 'min_weight_g', this.value)"></label>
-    </div>
+    ${editing && r.grp === 'kargo' ? `<label class="ship-minkg">min. <input type="number" min="0" step="0.5" value="${min / 1000}" onchange="shipSetMin('${r.id}', this.value)"> kg</label>` : ''}
+    <label class="ship-switch"><input type="checkbox" ${en ? 'checked' : ''} ${editing ? '' : 'disabled'} onchange="shipToggle('${r.id}', this)"><span></span></label>
+  </div>`;
+}
+
+function shipCourierCard(name, rows, code) {
+  const on = rows.filter(r => shipVal(r, 'enabled')).length;
+  const sorted = rows.slice().sort((a, b) => SHIP_GRP_ORDER.indexOf(a.grp) - SHIP_GRP_ORDER.indexOf(b.grp) || String(a.service).localeCompare(String(b.service)));
+  const body = sorted.length
+    ? sorted.map(shipRowHTML).join('')
+    : `<p class="ship-sub" style="margin:0">Belum ada layanan ${chatEsc(name)} dari RajaOngkir untuk rute yang diperiksa. Coba "Perbarui daftar layanan" dengan kota lain.</p>`;
+  return `<div class="admin-card">
+    <div class="home-card-head"><h3 class="admin-card-title" style="margin:0">${chatEsc(name)}</h3><span class="ship-count">${sorted.length ? `${on}/${sorted.length} aktif` : ''}</span></div>
+    ${body}
   </div>`;
 }
 
 function renderShipping() {
   renderShippingStatus();
+  renderShippingButtons();
   const el = document.getElementById('ship-groups');
+  const oth = document.getElementById('ship-others');
   if (!el) return;
-  if (!shippingRows.length) { el.innerHTML = ''; return; }
-  const known = new Set(SHIP_GROUPS.map(g => g[0]));
-  el.innerHTML = SHIP_GROUPS.map(([key, label, sub]) => {
-    const rows = shippingRows.filter(r => (known.has(r.grp) ? r.grp : 'lainnya') === key);
-    if (!rows.length) return '';
-    const on = rows.filter(r => r.enabled).length;
-    return `<div class="admin-card">
-      <div class="home-card-head"><div><h3 class="admin-card-title" style="margin:0">${label}</h3>${sub ? `<div class="ship-sub">${sub}</div>` : ''}</div><span class="ship-count">${on}/${rows.length} aktif</span></div>
-      ${rows.map(shipRowHTML).join('')}
-    </div>`;
-  }).join('');
-}
-
-function toggleShipMore(id) {
-  if (shipOpenAdv.has(id)) shipOpenAdv.delete(id); else shipOpenAdv.add(id);
-  renderShipping();
-}
-
-async function toggleShippingService(id, cb) {
-  const row = shippingRows.find(r => r.id === id);
-  if (!row) return;
-  const want = cb.checked;
-  // Selalu sisakan minimal satu layanan aktif, supaya pembeli tidak terkunci dari pembayaran
-  if (!want && row.enabled && shippingEnabledCount() <= 1) {
-    cb.checked = true;
-    showToast('Minimal satu layanan harus aktif');
-    return;
+  const mainCodes = SHIP_MAIN_COURIERS.map(c => c[0]);
+  const byCourier = new Map();
+  shippingRows.forEach(r => { if (!byCourier.has(r.courier)) byCourier.set(r.courier, []); byCourier.get(r.courier).push(r); });
+  // kurir utama selalu tampil; kurir lain tampil hanya kalau masih ada layanan yang aktif (supaya tidak ada yang aktif tapi tersembunyi)
+  const extraShown = [...byCourier.keys()].filter(c => !mainCodes.includes(c) && (byCourier.get(c).some(r => shipVal(r, 'enabled')) || shipShowAll));
+  const hiddenCount = [...byCourier.keys()].filter(c => !mainCodes.includes(c) && !extraShown.includes(c)).reduce((n, c) => n + byCourier.get(c).length, 0);
+  if (!shippingRows.length) { el.innerHTML = ''; if (oth) oth.innerHTML = ''; return; }
+  el.innerHTML = SHIP_MAIN_COURIERS.map(([code, name]) => shipCourierCard(name, byCourier.get(code) || [], code)).join('') +
+    extraShown.map(c => shipCourierCard((byCourier.get(c)[0] || {}).courier_name || c, byCourier.get(c), c)).join('');
+  if (oth) {
+    const anyOther = [...byCourier.keys()].some(c => !mainCodes.includes(c));
+    oth.innerHTML = anyOther
+      ? (shipShowAll
+        ? `<button type="button" class="ship-link" onclick="shipToggleAll(false)">Sembunyikan kurir lain</button>`
+        : (hiddenCount ? `<button type="button" class="ship-link" onclick="shipToggleAll(true)">Tampilkan kurir lain (${hiddenCount} layanan)</button>` : ''))
+      : '';
   }
-  cb.disabled = true;
-  const { error } = await sb.from('shipping_services').update({ enabled: want, updated_at: new Date().toISOString() }).eq('id', id);
-  cb.disabled = false;
-  if (error) { cb.checked = !want; showToast('Gagal menyimpan, coba lagi'); console.warn(error.message); return; }
-  row.enabled = want;
+}
+
+function shipToggleAll(v) { shipShowAll = !!v; renderShipping(); }
+
+function shipStartEdit() {
+  if (!shippingRows.length || shipSaving) return;
+  shippingDraft = new Map(shippingRows.map(r => [r.id, { enabled: !!r.enabled, min_weight_g: Number(r.min_weight_g) || 0 }]));
   renderShipping();
 }
 
-async function saveShippingField(id, field, value) {
-  const row = shippingRows.find(r => r.id === id);
-  if (!row) return;
-  let v = value;
-  if (field === 'min_weight_g') v = Math.max(0, Math.min(100000, Math.round(Number(value) || 0)));
-  else if (field === 'grp') { if (!SHIP_GROUPS.some(g => g[0] === v)) return; }
-  else return;
-  const { error } = await sb.from('shipping_services').update({ [field]: v, updated_at: new Date().toISOString() }).eq('id', id);
-  if (error) { showToast('Gagal menyimpan, coba lagi'); console.warn(error.message); renderShipping(); return; }
-  row[field] = v;
-  showToast('Tersimpan ✓');
+function shipCancelEdit() {
+  if (shipSaving) return;
+  if (shipChanges().length && !confirm('Batalkan perubahan yang belum disimpan?')) return;
+  shippingDraft = null;
   renderShipping();
+}
+
+function shipToggle(id, cb) {
+  const d = shippingDraft && shippingDraft.get(id);
+  if (!d) { cb.checked = !cb.checked; return; } // di luar mode Edit toggle tidak bisa diubah
+  d.enabled = cb.checked;
+  renderShipping();
+}
+
+function shipSetMin(id, kg) {
+  const d = shippingDraft && shippingDraft.get(id);
+  if (!d) return;
+  d.min_weight_g = Math.max(0, Math.min(100000, Math.round((Number(kg) || 0) * 1000)));
+  renderShipping();
+}
+
+async function shipSave() {
+  if (!shipEditing() || shipSaving) return;
+  const changes = shipChanges();
+  if (!changes.length) { shippingDraft = null; renderShipping(); showToast('Tidak ada perubahan'); return; }
+  // Sisakan minimal satu layanan aktif, supaya pembeli tidak terkunci dari pembayaran
+  if (!shippingRows.some(r => shipVal(r, 'enabled'))) { showToast('Minimal satu layanan harus aktif'); return; }
+  const names = (arr) => { const n = arr.map(c => `${c.row.courier_name} ${c.row.service}`); return n.slice(0, 8).map(x => '- ' + x).join('\n') + (n.length > 8 ? `\n- dan ${n.length - 8} lainnya` : ''); };
+  const on = changes.filter(c => c.patch.enabled === true);
+  const off = changes.filter(c => c.patch.enabled === false);
+  const wt = changes.filter(c => c.patch.min_weight_g !== undefined && c.patch.enabled === undefined);
+  let msg = 'Simpan perubahan?';
+  if (on.length) msg += `\n\nDiaktifkan:\n${names(on)}`;
+  if (off.length) msg += `\n\nDimatikan:\n${names(off)}`;
+  if (wt.length) msg += `\n\nBerat minimal diubah: ${wt.length} layanan`;
+  if (!confirm(msg)) return;
+
+  shipSaving = true;
+  renderShippingButtons();
+  const now = new Date().toISOString();
+  const results = await Promise.all(changes.map(c => sb.from('shipping_services').update({ ...c.patch, updated_at: now }).eq('id', c.row.id)));
+  const failed = results.filter(r => r.error).length;
+  shipSaving = false;
+  shippingDraft = null;
+  await loadShipping();
+  showToast(failed ? `${failed} perubahan gagal disimpan, periksa daftarnya` : 'Perubahan disimpan ✓');
 }
 
 async function discoverShipping() {
+  if (shipEditing()) { showToast('Simpan atau batalkan edit dulu'); return; }
   const btn = document.getElementById('ship-discover-btn');
-  const destEl = document.getElementById('ship-dest');
   if (!btn || btn.disabled) return;
+  const dest = prompt('Kota contoh untuk memeriksa layanan (kosongkan untuk Jakarta Selatan):', '');
+  if (dest === null) return;
   const old = btn.textContent;
   btn.disabled = true;
   btn.textContent = 'Memeriksa...';
@@ -3475,11 +3542,11 @@ async function discoverShipping() {
     const { data } = await sb.auth.getSession();
     const token = data && data.session && data.session.access_token;
     if (!token) throw new Error('Belum login');
-    const dest = ((destEl && destEl.value) || '').trim();
+    const city = dest.trim();
     const r = await fetch(SUPABASE_URL + '/functions/v1/shipping-services', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token, apikey: SUPABASE_KEY },
-      body: JSON.stringify(dest ? { dest } : {})
+      body: JSON.stringify(city ? { dest: city } : {})
     });
     let j = {};
     try { j = (await r.json()) || {}; } catch (e) { /* bukan JSON */ }
@@ -3489,9 +3556,10 @@ async function discoverShipping() {
     await loadShipping();
   } catch (e) {
     showToast(e.message || 'Gagal memeriksa layanan');
+    renderShippingButtons();
   } finally {
-    btn.disabled = false;
-    btn.textContent = old;
+    const b = document.getElementById('ship-discover-btn');
+    if (b) { b.disabled = false; b.textContent = old; }
   }
 }
 
