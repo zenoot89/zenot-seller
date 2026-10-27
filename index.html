@@ -554,6 +554,34 @@
     .home-pill.active{background:var(--ink,#111114);color:#fff;border-color:var(--ink,#111114)}
     .home-trend-total{font-size:12.5px;color:var(--muted);margin:0 0 6px}
     .home-trend-total b{color:var(--text);font-family:'IBM Plex Mono',monospace}
+    .ship-desc{font-size:13px;color:var(--sec);line-height:1.6;margin:0 0 12px}
+    .ship-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+    .ship-actions .form-input{flex:1;min-width:180px}
+    .ship-actions .btn-primary{white-space:nowrap}
+    .ship-hint{font-size:12px;color:var(--muted);line-height:1.6;margin:10px 0 0}
+    .ship-banner{padding:10px 12px;border-radius:10px;font-size:12.5px;line-height:1.55}
+    .ship-banner b{display:block;font-size:13px;margin-bottom:2px}
+    .ship-banner.ok{background:#e6f4ec;color:#1e7a4c}
+    .ship-banner.warn{background:#fdecd8;color:#8a4700}
+    .ship-banner.bad{background:#fbe5e2;color:#a83232}
+    .ship-count{font-size:12px;color:var(--muted);white-space:nowrap}
+    .ship-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+    .ship-row:last-child{border-bottom:none;padding-bottom:0}
+    .ship-main{flex:1;min-width:0}
+    .ship-name{font-size:13.5px;font-weight:500}
+    .ship-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+    .ship-more{background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px;padding:4px 6px;font-family:inherit}
+    .ship-adv{flex-basis:100%;display:flex;gap:14px;flex-wrap:wrap;padding:10px 12px;background:#faf9f6;border-radius:8px;font-size:12px;color:var(--sec)}
+    .ship-adv label{display:flex;align-items:center;gap:8px}
+    .ship-adv select,.ship-adv input{padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;background:#fff;width:auto}
+    .ship-adv input{width:96px}
+    .ship-switch{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0}
+    .ship-switch input{opacity:0;width:0;height:0;position:absolute}
+    .ship-switch span{position:absolute;inset:0;background:#cfcac1;border-radius:999px;transition:.2s;cursor:pointer}
+    .ship-switch span::before{content:'';position:absolute;height:18px;width:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+    .ship-switch input:checked + span{background:#2fa56a}
+    .ship-switch input:checked + span::before{transform:translateX(18px)}
+    .ship-switch input:disabled + span{opacity:.5;cursor:default}
     .perf-metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px}
 
     /* ===== LOGIN ===== */
@@ -1575,6 +1603,10 @@
         Pelanggan
       </a>
       <p class="admin-nav-group-label">Lainnya</p>
+      <a href="#tab=shipping" class="admin-nav-item" data-tab="shipping" onclick="event.preventDefault();switchTab('shipping',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Pengaturan Pengiriman
+      </a>
       <button class="admin-nav-item" onclick="visitStore()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
         Kunjungi Toko
@@ -1629,6 +1661,7 @@
           <button type="button" class="me-row" onclick="switchTab('categories', document.querySelector('.admin-nav-item[data-tab=categories]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Data Master</span><span class="chev">&#8250;</span></button>
           <button type="button" class="me-row" onclick="switchTab('reviews', document.querySelector('.admin-nav-item[data-tab=reviews]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.3 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.3 9 9"/></svg><span>Ulasan</span><span class="chev">&#8250;</span></button>
           <button type="button" class="me-row" onclick="switchTab('customers', document.querySelector('.admin-nav-item[data-tab=customers]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M1 21c0-4 3.6-7 8-7s8 3 8 7"/><path d="M17 4a4 4 0 0 1 0 8M23 21c0-3-2-5.5-5-6.5"/></svg><span>Pelanggan</span><span class="chev">&#8250;</span></button>
+          <button type="button" class="me-row" onclick="switchTab('shipping', document.querySelector('.admin-nav-item[data-tab=shipping]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><span>Pengaturan Pengiriman</span><span class="chev">&#8250;</span></button>
           </div>
           <div class="me-group">
             <div class="me-group-title">Toko Online</div>
@@ -1639,6 +1672,21 @@
           <div class="me-group">
           <button type="button" class="me-row" onclick="doLogout()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span>Keluar</span><span class="chev">&#8250;</span></button>
           </div>
+        </div>
+
+        <!-- TAB: PENGATURAN PENGIRIMAN -->
+        <div class="admin-section" id="tab-shipping">
+          <div class="admin-card">
+            <h3 class="admin-card-title">Pengaturan Pengiriman</h3>
+            <p class="ship-desc">Pilih layanan kurir yang dipakai untuk menghitung ongkir di toko. Saat pembeli membayar, sistem memilih yang <b>termurah</b> di antara layanan yang aktif. Pembeli tidak memilih kurir.</p>
+            <div id="ship-status"></div>
+            <div class="ship-actions">
+              <input class="form-input" id="ship-dest" placeholder="Kota contoh (bawaan: Jakarta Selatan)" maxlength="60">
+              <button class="btn-primary" id="ship-discover-btn" onclick="discoverShipping()">Cek layanan tersedia</button>
+            </div>
+            <p class="ship-hint">Tombol ini menanyakan RajaOngkir layanan apa saja yang tersedia dari Bandung ke kota contoh (berat 1 kg dan 5 kg). Layanan baru ditambahkan dalam keadaan mati, dan toggle yang sudah kamu atur tidak berubah. Kalau sebuah kurir tidak muncul, bisa jadi ia tidak melayani rute contoh. Coba lagi dengan kota lain.</p>
+          </div>
+          <div id="ship-groups"></div>
         </div>
 
         <div class="admin-section active" id="tab-home">
@@ -3196,7 +3244,7 @@ function toggleSidebar(open) {
   document.getElementById('admin-scrim').classList.toggle('open', open);
 }
 
-const TAB_TITLES = { me: 'Saya', home: 'Beranda', products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', 'promo-hub': 'Pusat Promosi', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan', 'bio-link': 'Link Toko', chat: 'Chat' };
+const TAB_TITLES = { me: 'Saya', home: 'Beranda', products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', 'promo-hub': 'Pusat Promosi', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan', 'bio-link': 'Link Toko', shipping: 'Pengaturan Pengiriman', chat: 'Chat' };
 
 // Bottom nav (mobile) cuma punya 4 tab langsung; sisanya (vouchers/categories/reviews/dst) dianggap "Saya"/lainnya, dibuka lewat drawer sidebar yang sama
 const BOTTOM_NAV_TABS = ['home', 'chat', 'performance', 'orders'];
@@ -3298,6 +3346,155 @@ async function saveBioLinks(){
 }
 
 let lastNonChatTab = 'home';
+// ===================== PENGATURAN PENGIRIMAN =====================
+let shippingRows = [];
+let shippingLastDiscover = null;
+let shipOpenAdv = new Set();
+const SHIP_GROUPS = [
+  ['reguler', 'Reguler', 'Pengiriman standar'],
+  ['nextday', 'Next Day', 'Tiba sekitar 1 hari'],
+  ['sameday', 'Same Day', 'Tiba di hari yang sama'],
+  ['hemat', 'Hemat', 'Lebih murah, biasanya lebih lama'],
+  ['kargo', 'Kargo', 'Untuk paket berat; ada berat minimal'],
+  ['lainnya', 'Lainnya', '']
+];
+
+function shippingEnabledCount() { return shippingRows.filter(r => r.enabled).length; }
+
+async function loadShipping() {
+  const el = document.getElementById('ship-groups');
+  if (!el) return;
+  el.innerHTML = '<div class="admin-card"><p class="home-empty">Memuat...</p></div>';
+  const { data, error } = await sb.from('shipping_services').select('*').order('courier_name', { ascending: true }).order('service', { ascending: true });
+  if (error) {
+    shippingRows = [];
+    renderShippingStatus();
+    el.innerHTML = `<div class="admin-card"><p style="font-size:13px;color:#a83232;margin:0">Gagal memuat: ${chatEsc(error.message)}. Pastikan SQL tahap 1 sudah dijalankan.</p></div>`;
+    return;
+  }
+  shippingRows = data || [];
+  renderShipping();
+}
+
+function renderShippingStatus() {
+  const el = document.getElementById('ship-status');
+  if (!el) return;
+  const total = shippingRows.length, on = shippingEnabledCount();
+  let html;
+  if (!total) html = `<div class="ship-banner warn"><b>Belum diatur</b>Checkout masih memakai cara lama (JNE, TIKI, dan POS termurah). Tekan "Cek layanan tersedia", lalu aktifkan layanan yang kamu pakai.</div>`;
+  else if (!on) html = `<div class="ship-banner bad"><b>Tidak ada layanan aktif</b>Pembeli belum bisa membayar sampai minimal satu layanan diaktifkan.</div>`;
+  else html = `<div class="ship-banner ok"><b>${on} layanan aktif</b>Ongkir hanya dihitung dari layanan yang aktif. Sistem memilih yang termurah, dan layanan terpilih tampil di detail pesanan.</div>`;
+  const d = shippingLastDiscover;
+  if (d) {
+    const none = (d.couriers_without_services || []).join(', ');
+    html += `<p class="ship-hint">Pemeriksaan terakhir (Bandung ke ${chatEsc(d.dest)}): ${d.found} layanan ditemukan, ${d.added} baru.${none ? ` Tanpa layanan di rute ini: ${chatEsc(none)}.` : ''}</p>`;
+  }
+  el.innerHTML = html;
+}
+
+function shipRowHTML(r) {
+  const id = r.id;
+  const min = Number(r.min_weight_g) || 0;
+  const open = shipOpenAdv.has(id);
+  return `<div class="ship-row">
+    <div class="ship-main">
+      <div class="ship-name">${chatEsc(r.courier_name)} ${chatEsc(r.service)}</div>
+      <div class="ship-sub">${chatEsc(r.description || '')}${min > 0 ? `${r.description ? ' · ' : ''}min. ${(min / 1000).toLocaleString('id-ID')} kg` : ''}</div>
+    </div>
+    <button type="button" class="ship-more" onclick="toggleShipMore('${id}')" aria-label="Pengaturan lanjutan">${open ? '&#9652;' : '&#9662;'}</button>
+    <label class="ship-switch"><input type="checkbox" ${r.enabled ? 'checked' : ''} onchange="toggleShippingService('${id}', this)"><span></span></label>
+    <div class="ship-adv" style="${open ? '' : 'display:none'}">
+      <label>Kelompok <select onchange="saveShippingField('${id}', 'grp', this.value)">${SHIP_GROUPS.map(g => `<option value="${g[0]}" ${(r.grp || 'lainnya') === g[0] ? 'selected' : ''}>${g[1]}</option>`).join('')}</select></label>
+      <label>Berat minimal (gram) <input type="number" min="0" step="100" value="${min}" onchange="saveShippingField('${id}', 'min_weight_g', this.value)"></label>
+    </div>
+  </div>`;
+}
+
+function renderShipping() {
+  renderShippingStatus();
+  const el = document.getElementById('ship-groups');
+  if (!el) return;
+  if (!shippingRows.length) { el.innerHTML = ''; return; }
+  const known = new Set(SHIP_GROUPS.map(g => g[0]));
+  el.innerHTML = SHIP_GROUPS.map(([key, label, sub]) => {
+    const rows = shippingRows.filter(r => (known.has(r.grp) ? r.grp : 'lainnya') === key);
+    if (!rows.length) return '';
+    const on = rows.filter(r => r.enabled).length;
+    return `<div class="admin-card">
+      <div class="home-card-head"><div><h3 class="admin-card-title" style="margin:0">${label}</h3>${sub ? `<div class="ship-sub">${sub}</div>` : ''}</div><span class="ship-count">${on}/${rows.length} aktif</span></div>
+      ${rows.map(shipRowHTML).join('')}
+    </div>`;
+  }).join('');
+}
+
+function toggleShipMore(id) {
+  if (shipOpenAdv.has(id)) shipOpenAdv.delete(id); else shipOpenAdv.add(id);
+  renderShipping();
+}
+
+async function toggleShippingService(id, cb) {
+  const row = shippingRows.find(r => r.id === id);
+  if (!row) return;
+  const want = cb.checked;
+  // Selalu sisakan minimal satu layanan aktif, supaya pembeli tidak terkunci dari pembayaran
+  if (!want && row.enabled && shippingEnabledCount() <= 1) {
+    cb.checked = true;
+    showToast('Minimal satu layanan harus aktif');
+    return;
+  }
+  cb.disabled = true;
+  const { error } = await sb.from('shipping_services').update({ enabled: want, updated_at: new Date().toISOString() }).eq('id', id);
+  cb.disabled = false;
+  if (error) { cb.checked = !want; showToast('Gagal menyimpan, coba lagi'); console.warn(error.message); return; }
+  row.enabled = want;
+  renderShipping();
+}
+
+async function saveShippingField(id, field, value) {
+  const row = shippingRows.find(r => r.id === id);
+  if (!row) return;
+  let v = value;
+  if (field === 'min_weight_g') v = Math.max(0, Math.min(100000, Math.round(Number(value) || 0)));
+  else if (field === 'grp') { if (!SHIP_GROUPS.some(g => g[0] === v)) return; }
+  else return;
+  const { error } = await sb.from('shipping_services').update({ [field]: v, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) { showToast('Gagal menyimpan, coba lagi'); console.warn(error.message); renderShipping(); return; }
+  row[field] = v;
+  showToast('Tersimpan ✓');
+  renderShipping();
+}
+
+async function discoverShipping() {
+  const btn = document.getElementById('ship-discover-btn');
+  const destEl = document.getElementById('ship-dest');
+  if (!btn || btn.disabled) return;
+  const old = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Memeriksa...';
+  try {
+    const { data } = await sb.auth.getSession();
+    const token = data && data.session && data.session.access_token;
+    if (!token) throw new Error('Belum login');
+    const dest = ((destEl && destEl.value) || '').trim();
+    const r = await fetch(SUPABASE_URL + '/functions/v1/shipping-services', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token, apikey: SUPABASE_KEY },
+      body: JSON.stringify(dest ? { dest } : {})
+    });
+    let j = {};
+    try { j = (await r.json()) || {}; } catch (e) { /* bukan JSON */ }
+    if (!r.ok || !j.ok) throw new Error(j.error || ('Gagal memeriksa layanan (HTTP ' + r.status + ')'));
+    shippingLastDiscover = j;
+    showToast(j.added ? `${j.added} layanan baru ditemukan` : 'Tidak ada layanan baru');
+    await loadShipping();
+  } catch (e) {
+    showToast(e.message || 'Gagal memeriksa layanan');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = old;
+  }
+}
+
 function renderTab(tab, el) {
   if (tab === 'chat' && chatDeskMQ.matches) {
     // Desktop: Chat bukan halaman lagi, tapi dock melayang. Buka dock, halaman di belakangnya tetap yang terakhir dibuka.
@@ -3321,6 +3518,7 @@ function renderTab(tab, el) {
   if (tab === 'orders') loadOrdersAdmin();
   if (tab === 'chat') chatOnShow();
   if (tab === 'home') loadHomeStats();
+  if (tab === 'shipping') loadShipping();
   if (tab === 'me') {
     const ch = document.getElementById('admin-email-chip'), meEl = document.getElementById('me-email'), av = document.getElementById('me-avatar');
     if (meEl && ch) meEl.textContent = ch.textContent;
@@ -4742,7 +4940,7 @@ function renderOrderRow(o) {
   const resiRow = orderResiOpenId === o.id ? `
     <div style="margin-top:8px;padding:10px;background:var(--paper2,#f7f6f3);border-radius:6px">
       <div style="display:flex;gap:6px;margin-bottom:6px">
-        <input type="text" id="resi-input-${o.id}" placeholder="Kurir" value="${o.courier||''}" style="width:35%;flex-shrink:0;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px">
+        <input type="text" id="resi-input-${o.id}" placeholder="${o.shipping_service ? chatEsc(o.shipping_service) : 'Kurir'}" value="${o.courier||''}" style="width:35%;flex-shrink:0;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px">
         <input type="text" id="resi-num-${o.id}" placeholder="Nomor resi" value="${o.resi||''}" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:12px">
       </div>
       <div style="display:flex;gap:6px">
@@ -4827,7 +5025,7 @@ function renderOrderRow(o) {
   }
   const omResi = orderResiOpenId === o.id ? `
       <div class="om-resi">
-        <input type="text" id="resi-input-m-${o.id}" placeholder="Kurir" value="${o.courier || ''}">
+        <input type="text" id="resi-input-m-${o.id}" placeholder="${o.shipping_service ? chatEsc(o.shipping_service) : 'Kurir'}" value="${o.courier || ''}">
         <input type="text" id="resi-num-m-${o.id}" placeholder="Nomor resi" value="${o.resi || ''}">
         ${omBtn('Batal', 'orderResiOpenId=null;renderOrdersAdminTable()')}
         ${omBtn('Simpan Resi', `saveResiOnly('${o.id}')`, 'pri')}
@@ -5006,6 +5204,7 @@ function openOrderDetail(orderId) {
       <div class="od-card">
         <div class="od-h">Jasa Kirim</div>
         ${o.resi ? `<div class="od-name">${chatEsc(o.courier || 'Kurir')}</div><div class="od-sub">No. Resi: ${chatEsc(o.resi)}</div>` : `<div class="od-sub">Resi belum diinput</div>`}
+        ${o.shipping_service ? `<div class="od-sub" style="margin-top:4px">Ongkir pembeli dihitung dari: ${chatEsc(o.shipping_service)}</div>` : ''}
       </div>
 
       <div class="od-card">
