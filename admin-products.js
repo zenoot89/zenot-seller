@@ -740,7 +740,9 @@ async function saveProduct() {
   const category = category_id ? catName(category_id) : null; // nama leaf, buat kompatibilitas filter toko lama
   const gender = document.getElementById('p-gender').value;
   const supplier_id = document.getElementById('p-supplier').value || null;
-  const supplier = supplier_id ? supplierName(supplier_id) : null; // nama supplier, buat kompatibilitas legacy
+  // Nama supplier TIDAK lagi disalin ke products.supplier: kolom products bisa dibaca publik lewat API (RLS hanya per baris).
+  // Nama ada di tabel suppliers (khusus admin); produk cukup menyimpan supplier_id.
+  const supplier = null;
   const description = document.getElementById('p-desc').value.trim();
   const bahan = document.getElementById('p-bahan').value.trim() || null;
   const tipe_cutting = document.getElementById('p-tipe-cutting').value.trim() || null;
