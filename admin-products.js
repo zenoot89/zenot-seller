@@ -319,6 +319,7 @@ function photoStripRender() {
       </button>`;
   }
   strip.innerHTML = html;
+  if (typeof photoAltsRender === 'function') photoAltsRender();
 }
 
 function photoStripHandleFiles(input) {
@@ -547,7 +548,7 @@ function cropSave() {
 
   out.toBlob((blob) => {
     if (!blob) return;
-    photoSlots[cropTargetIdx] = {type:'cropped', blob, file:null, url:null};
+    photoSlots[cropTargetIdx] = {type:'cropped', blob, file:null, url:null, alt:(photoSlots[cropTargetIdx]||{}).alt||''};
     photoStripRender();
     cropClose();
   }, 'image/jpeg', 0.88);
@@ -561,12 +562,177 @@ function resetUploadState() {
 
 function prefillPhotosFromProduct(p) {
   const urls = (p.image_urls && p.image_urls.length) ? p.image_urls : (p.image_url ? [p.image_url] : []);
-  photoSlots = urls.map(url => ({type:'url', url, file:null, blob:null}));
+  const alts = Array.isArray(p.image_alts) ? p.image_alts : [];
+  photoSlots = urls.map((url, i) => ({type:'url', url, file:null, blob:null, alt: alts[i] || ''}));
   photoStripRender();
 }
 
 let editingProductId = null;
 let adminProductsData = [];
+
+// ===================== SEO, SPESIFIKASI TAMBAHAN, PENGIRIMAN =====================
+// Kolom baru (lihat 01-migrasi-supabase.sql). Kalau migrasi belum dijalankan, produk tetap
+// tersimpan tanpa kolom ini dan admin diberi tahu (lihat saveWithExtras).
+let slugTouched = false;
+
+function seoEsc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function seoSlugify(str) {
+  return String(str || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80).replace(/-+$/g, '');
+}
+function seoGenderLabel(g) { return g === 'wanita' ? 'Wanita' : (g === 'pria' ? 'Pria' : ''); }
+function seoWordIn(word, text) {
+  return !!word && new RegExp('(^|[^a-z0-9])' + String(word).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z0-9]|$)', 'i').test(text);
+}
+function seoCutWords(s, max) {
+  if (s.length <= max) return s;
+  const c = s.slice(0, max - 1);
+  const sp = c.lastIndexOf(' ');
+  return (sp > 40 ? c.slice(0, sp) : c).replace(/[\s.,;:\-]+$/, '') + '…';
+}
+function seoFormContext() {
+  const val = id => (document.getElementById(id) || {}).value || '';
+  const catId = val('p-cat-id');
+  const prices = [];
+  Object.keys(variantData || {}).forEach(k => { const n = parseInt((variantData[k] || {}).price) || 0; if (n > 0) prices.push(n); });
+  return {
+    name: val('p-name').trim(),
+    cat: catId ? catName(catId) : '',
+    gender: seoGenderLabel(val('p-gender')),
+    bahan: val('p-bahan').trim(), ketebalan: val('p-ketebalan').trim(), lengan: val('p-lengan').trim(),
+    gramasi: parseInt(val('p-gramasi')) || 0,
+    colors: (colorTags || []).map(c => c.name),
+    minPrice: prices.length ? Math.min.apply(null, prices) : 0
+  };
+}
+// Rumus ini sama persis dengan generator halaman produk di GitHub Actions (build-static.py).
+function seoAutoTitle(c) {
+  c = c || seoFormContext();
+  if (!c.name) return '';
+  const tail = [c.cat, c.gender].filter(x => x && !seoWordIn(x, c.name)).join(' ');
+  const t = tail ? `${c.name} | ${tail} | Zenoot` : `${c.name} | Zenoot`;
+  return t.length > 65 ? `${c.name} | Zenoot` : t;
+}
+function seoAutoDesc(c) {
+  c = c || seoFormContext();
+  if (!c.name) return '';
+  const lead = [c.name, c.cat && !seoWordIn(c.cat, c.name) ? c.cat : '', c.gender && !seoWordIn(c.gender, c.name) ? c.gender : ''].filter(Boolean).join(' ');
+  const parts = [lead + ' dari Zenoot Bandung.'];
+  const spec = [];
+  if (c.bahan) spec.push('Bahan ' + c.bahan);
+  if (c.gramasi) spec.push(c.gramasi + ' gr/m²');
+  if (c.ketebalan) spec.push('ketebalan ' + c.ketebalan.toLowerCase());
+  if (c.lengan) spec.push('lengan ' + c.lengan.toLowerCase());
+  if (spec.length) parts.push(spec.join(', ') + '.');
+  if (c.colors.length) parts.push(c.colors.length + ' pilihan warna' + (c.colors.length <= 5 ? ': ' + c.colors.join(', ') : '') + '.');
+  if (c.minPrice) parts.push('Harga mulai ' + fRp(c.minPrice).replace('Rp', 'Rp ') + '.');
+  return seoCutWords(parts.join(' '), 158);
+}
+function seoFormChanged() {
+  const t = document.getElementById('p-seo-title'), d = document.getElementById('p-seo-desc'), sl = document.getElementById('p-slug');
+  if (!t || !d || !sl) return;
+  const clean = sl.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-{2,}/g, '-');
+  if (clean !== sl.value) sl.value = clean;
+  const c = seoFormContext();
+  const title = t.value.trim() || seoAutoTitle(c) || 'Judul produk | Zenoot';
+  const desc = d.value.trim() || seoAutoDesc(c) || 'Deskripsi produk akan dibuat otomatis.';
+  const slug = sl.value.replace(/^-+|-+$/g, '') || seoSlugify(c.name) || 'nama-produk';
+  document.getElementById('seo-title-count').textContent = t.value ? `(${t.value.length}/60 disarankan)` : '(otomatis)';
+  document.getElementById('seo-desc-count').textContent = d.value ? `(${d.value.length}/160 disarankan)` : '(otomatis)';
+  document.getElementById('seo-prev-url').textContent = 'zenoot.web.id › produk › ' + slug;
+  document.getElementById('seo-prev-title').textContent = seoCutWords(title, 62);
+  document.getElementById('seo-prev-desc').textContent = seoCutWords(desc, 160);
+}
+function seoAutofill() {
+  const c = seoFormContext();
+  if (!c.name) { showToast('Isi nama produk dulu'); return; }
+  document.getElementById('p-seo-title').value = seoAutoTitle(c);
+  document.getElementById('p-seo-desc').value = seoAutoDesc(c);
+  if (!editingProductId || !document.getElementById('p-slug').value) document.getElementById('p-slug').value = seoSlugify(c.name);
+  seoFormChanged();
+  showToast('SEO terisi otomatis, silakan cek dan sesuaikan');
+}
+function photoAltsRender() {
+  const box = document.getElementById('photo-alts-list');
+  if (!box) return;
+  if (!photoSlots.length) { box.innerHTML = '<p style="font-size:12px;color:var(--muted)">Belum ada foto.</p>'; return; }
+  box.innerHTML = photoSlots.map((slot, i) => {
+    const src = slot.type === 'url' ? slot.url : URL.createObjectURL(slot.blob || slot.file);
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <img src="${seoEsc(src)}" alt="" style="width:34px;height:34px;object-fit:cover;border-radius:4px;flex-shrink:0"/>
+      <input class="form-input" style="padding:7px 10px;font-size:13px" maxlength="125" placeholder="${i === 0 ? 'Foto cover: ' : 'Foto ' + (i + 1) + ': '}jelaskan isi foto" value="${seoEsc(slot.alt || '')}" oninput="photoSlots[${i}].alt=this.value"/>
+    </div>`;
+  }).join('');
+}
+function photoAltsAutofill() {
+  const c = seoFormContext();
+  if (!c.name) { showToast('Isi nama produk dulu'); return; }
+  const lead = [c.name, c.cat && !seoWordIn(c.cat, c.name) ? c.cat : '', c.gender && !seoWordIn(c.gender, c.name) ? c.gender : ''].filter(Boolean).join(' ');
+  photoSlots.forEach((s, i) => { if (!s.alt) s.alt = i === 0 ? lead : `${c.name} - foto ${i + 1}`; });
+  photoAltsRender();
+  showToast('Alt text terisi, sesuaikan dengan isi tiap foto');
+}
+function numOrNull(id) {
+  const v = parseFloat((document.getElementById(id) || {}).value);
+  return Number.isFinite(v) && v > 0 ? v : null;
+}
+function collectExtraFields(imageAlts) {
+  const val = id => ((document.getElementById(id) || {}).value || '').trim();
+  const name = val('p-name');
+  let slug = val('p-slug').replace(/^-+|-+$/g, '') || seoSlugify(name);
+  return {
+    slug: slug || null,
+    seo_title: val('p-seo-title') || null,
+    seo_description: val('p-seo-desc') || null,
+    image_alts: imageAlts,
+    lengan: val('p-lengan') || null,
+    gramasi_gsm: numOrNull('p-gramasi') ? Math.round(numOrNull('p-gramasi')) : null,
+    lingkar_dada_cm: numOrNull('p-lingkar-dada'),
+    panjang_cm: numOrNull('p-panjang'),
+    perawatan: val('p-perawatan') || null,
+    weight_gram: numOrNull('p-weight') ? Math.round(numOrNull('p-weight')) : null,
+    pkg_length_cm: numOrNull('p-pkg-l'),
+    pkg_width_cm: numOrNull('p-pkg-w'),
+    pkg_height_cm: numOrNull('p-pkg-h')
+  };
+}
+function isMissingColumnError(err) {
+  return !!err && (err.code === 'PGRST204' || err.code === '42703' || /column .* does not exist|Could not find the .* column/i.test(err.message || ''));
+}
+// Simpan dengan kolom tambahan; kalau kolomnya belum ada di database, simpan tanpa kolom itu (produk tidak gagal tersimpan).
+async function saveWithExtras(write, base, extra) {
+  let res = await write({ ...base, ...extra });
+  if (res.error && isMissingColumnError(res.error)) {
+    console.warn('Kolom SEO/spesifikasi belum ada di database:', res.error.message);
+    res = await write(base);
+    res.extrasMissing = !res.error;
+  }
+  return res;
+}
+function fillExtraFields(p) {
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = (v == null ? '' : v); };
+  set('p-lengan', p.lengan); set('p-gramasi', p.gramasi_gsm); set('p-lingkar-dada', p.lingkar_dada_cm);
+  set('p-panjang', p.panjang_cm); set('p-perawatan', p.perawatan);
+  set('p-weight', p.weight_gram); set('p-pkg-l', p.pkg_length_cm); set('p-pkg-w', p.pkg_width_cm); set('p-pkg-h', p.pkg_height_cm);
+  set('p-seo-title', p.seo_title); set('p-seo-desc', p.seo_description);
+  set('p-slug', p.slug || seoSlugify(p.name));
+  slugTouched = true; // produk lama: alamat halaman tidak ikut berubah kalau nama diedit
+  seoFormChanged();
+}
+function clearExtraFields() {
+  ['p-lengan','p-gramasi','p-lingkar-dada','p-panjang','p-perawatan','p-weight','p-pkg-l','p-pkg-w','p-pkg-h','p-seo-title','p-seo-desc','p-slug']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  slugTouched = false;
+  seoFormChanged();
+}
+(function bindSeoNameSync() {
+  const n = document.getElementById('p-name');
+  if (!n) return;
+  n.addEventListener('input', () => {
+    if (!slugTouched) document.getElementById('p-slug').value = seoSlugify(n.value);
+    seoFormChanged();
+  });
+})();
 
 async function saveProduct() {
   const name = document.getElementById('p-name').value.trim();
@@ -604,12 +770,25 @@ async function saveProduct() {
   // === mulai proses upload & simpan: tampilkan loading, biar admin tau lagi proses (bukan freeze) ===
   setProductSaving(true);
   try {
+  const preSlug = collectExtraFields(null).slug;
+  // Alamat halaman (slug) harus unik dan berformat benar.
+  if (preSlug) {
+    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(preSlug)) { showToast('Alamat halaman (slug) hanya boleh huruf kecil, angka, dan tanda hubung'); return; }
+    const { data: dup, error: dupErr } = await sb.from('products').select('id,name').ilike('slug', preSlug).limit(5);
+    if (!dupErr && (dup || []).some(r => r.id !== editingProductId)) {
+      showToast('Alamat halaman "' + preSlug + '" sudah dipakai produk lain. Ubah slug di tab Deskripsi.');
+      pfSwitchTab(2);
+      return;
+    }
+  }
 
   // Upload foto produk dari photoSlots (url=langsung pakai, file/cropped=upload dulu)
   const finalUrls = [];
+  const finalAlts = [];
   for (const slot of photoSlots) {
     if (slot.type === 'url') {
       finalUrls.push(slot.url);
+      finalAlts.push((slot.alt || '').trim());
     } else {
       // file atau cropped blob
       const raw = slot.blob || slot.file;
@@ -620,23 +799,26 @@ async function saveProduct() {
       if (!upErr) {
         const { data: urlData } = sb.storage.from('product-photos').getPublicUrl(path);
         finalUrls.push(urlData.publicUrl);
+        finalAlts.push((slot.alt || '').trim());
       }
     }
   }
   const image_urls = finalUrls.length ? finalUrls : null;
+  const extra = collectExtraFields(finalAlts.some(a => a) ? finalAlts : null);
   const image_url = finalUrls.length ? finalUrls[0] : null;
 
   let prod;
+  let extrasMissing = false;
   if (editingProductId) {
     const payload = {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls};
-    const { data, error } = await sb.from('products').update(payload).eq('id',editingProductId).select().single();
-    if (error) { console.error('Update produk gagal:', error); showToast('Gagal update: ' + error.message); return; }
-    prod = data;
+    const res = await saveWithExtras(b => sb.from('products').update(b).eq('id',editingProductId).select().single(), payload, extra);
+    if (res.error) { console.error('Update produk gagal:', res.error); showToast('Gagal update: ' + res.error.message); return; }
+    prod = res.data; extrasMissing = !!res.extrasMissing;
     await sb.from('variants').delete().eq('product_id', prod.id);
   } else {
-    const { data, error } = await sb.from('products').insert({name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls}).select().single();
-    if (error) { console.error('Insert produk gagal:', error); showToast('Gagal simpan: ' + error.message); return; }
-    prod = data;
+    const res = await saveWithExtras(b => sb.from('products').insert(b).select().single(), {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls}, extra);
+    if (res.error) { console.error('Insert produk gagal:', res.error); showToast('Gagal simpan: ' + res.error.message); return; }
+    prod = res.data; extrasMissing = !!res.extrasMissing;
   }
 
   // Variants dari tag system
@@ -676,7 +858,9 @@ async function saveProduct() {
   }
   if (variants.length) await sb.from('variants').insert(variants);
 
-  showToast(editingProductId ? 'Produk berhasil diupdate ✓' : 'Produk berhasil disimpan ✓');
+  showToast(extrasMissing
+    ? 'Produk tersimpan, TAPI kolom SEO/spesifikasi baru belum ada di database. Jalankan 01-migrasi-supabase.sql di Supabase dulu.'
+    : (editingProductId ? 'Produk berhasil diupdate ✓' : 'Produk berhasil disimpan ✓'), extrasMissing ? 9000 : undefined);
   closeProductForm();
   loadAdminProducts();
   } finally {
@@ -723,6 +907,7 @@ function resetProductForm() {
   document.getElementById('p-motif').value='';
   document.getElementById('p-dipakai-model').value='';
   document.getElementById('p-supplier').value='';
+  clearExtraFields();
   document.getElementById('p-cat-id').value='';
   const catBtn = document.getElementById('p-cat-btn');
   catBtn.textContent = 'Pilih kategori';
@@ -771,6 +956,7 @@ function editProduct(id) {
   document.getElementById('p-ketebalan').value = p.ketebalan || '';
   document.getElementById('p-motif').value = p.motif || '';
   document.getElementById('p-dipakai-model').value = p.dipakai_model || '';
+  fillExtraFields(p);
   prefillPhotosFromProduct(p);
   // Prefill variant tag system dari data lama
   resetVariantSystem();
@@ -1143,12 +1329,21 @@ async function toggleProductActiveById(id) {
 async function duplicateProduct(id) {
   const p = adminProductsData.find(x => x.id === id);
   if (!p) return;
-  const { data: newProd, error } = await sb.from('products').insert({
+  const dupBase = {
     name: p.name + ' (Copy)', category: p.category, category_id: p.category_id, gender: p.gender,
     supplier: p.supplier, supplier_id: p.supplier_id, description: p.description,
     bahan: p.bahan, tipe_cutting: p.tipe_cutting, ketebalan: p.ketebalan,
     motif: p.motif, dipakai_model: p.dipakai_model, image_url: p.image_url, image_urls: p.image_urls
-  }).select().single();
+  };
+  // slug TIDAK disalin (harus unik); sisanya ikut disalin
+  const dupExtra = {
+    seo_title: p.seo_title || null, seo_description: p.seo_description || null, image_alts: p.image_alts || null,
+    lengan: p.lengan || null, gramasi_gsm: p.gramasi_gsm || null, lingkar_dada_cm: p.lingkar_dada_cm || null,
+    panjang_cm: p.panjang_cm || null, perawatan: p.perawatan || null, weight_gram: p.weight_gram || null,
+    pkg_length_cm: p.pkg_length_cm || null, pkg_width_cm: p.pkg_width_cm || null, pkg_height_cm: p.pkg_height_cm || null
+  };
+  const dres = await saveWithExtras(b => sb.from('products').insert(b).select().single(), dupBase, dupExtra);
+  const newProd = dres.data, error = dres.error;
   if (error) { console.error('Duplikat produk gagal:', error); showToast('Gagal duplikat: ' + error.message); return; }
   const vars = (p.variants || []).map(v => ({
     product_id: newProd.id, color_name: v.color_name, color_hex: v.color_hex, size: v.size,

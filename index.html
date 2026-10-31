@@ -1930,6 +1930,12 @@
                     <!-- thumbnail + add button dirender JS -->
                   </div>
                   <p style="font-size:11px;color:var(--muted);margin-top:8px">Foto pertama jadi <strong>Cover</strong>. Hover foto untuk crop atau hapus.</p>
+                  <details id="photo-alts-box" style="margin-top:10px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px">
+                    <summary style="cursor:pointer;font-size:12px;font-weight:600">Teks alternatif foto (alt text) untuk Google <span style="font-weight:400;color:var(--muted)">— opsional</span></summary>
+                    <p style="font-size:11px;color:var(--muted);margin:8px 0">Satu kalimat singkat per foto, sebut nama produk, warna, dan apa yang tampak. Kosong = dibuat otomatis dari nama produk.</p>
+                    <button type="button" class="btn-pf-back" style="padding:6px 12px;font-size:12px;margin-bottom:8px" onclick="photoAltsAutofill()">Isi otomatis yang kosong</button>
+                    <div id="photo-alts-list"></div>
+                  </details>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Nama Produk</label>
@@ -1982,6 +1988,28 @@
                     <label class="form-label">Dipakai Model</label>
                     <input class="form-input" id="p-dipakai-model" placeholder="cth: Ukuran L, Tinggi 170 cm, Berat 60 kg"/>
                   </div>
+                  <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label">Lengan</label>
+                    <input class="form-input" id="p-lengan" list="p-lengan-list" placeholder="cth: Panjang"/>
+                    <datalist id="p-lengan-list"><option value="Panjang"><option value="Pendek"><option value="3/4"><option value="Tanpa lengan"></datalist>
+                  </div>
+                  <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label">Gramasi (gr/m²)</label>
+                    <input class="form-input" id="p-gramasi" type="number" min="0" inputmode="numeric" placeholder="cth: 290"/>
+                  </div>
+                  <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label">Lingkar Dada (cm)</label>
+                    <input class="form-input" id="p-lingkar-dada" type="number" min="0" step="0.5" inputmode="decimal" placeholder="cth: 110"/>
+                  </div>
+                  <div class="form-group" style="margin-bottom:0">
+                    <label class="form-label">Panjang Baju (cm)</label>
+                    <input class="form-input" id="p-panjang" type="number" min="0" step="0.5" inputmode="decimal" placeholder="cth: 60"/>
+                  </div>
+                  <p style="grid-column:1/-1;font-size:11px;color:var(--muted);margin:-4px 0 0">Lingkar dada dan panjang adalah <strong>ukuran produk</strong> (diukur dari bajunya), bukan ukuran badan pemakai.</p>
+                  <div class="form-group" style="margin-bottom:0;grid-column:1/-1">
+                    <label class="form-label">Perawatan</label>
+                    <input class="form-input" id="p-perawatan" placeholder="cth: Cuci tangan air dingin, jangan diperas, jemur diangin-anginkan"/>
+                  </div>
                 </div>
                 <div class="pf-footer">
                   <button class="btn-pf-back" onclick="pfSwitchTab(0)">← Kembali</button>
@@ -2002,6 +2030,32 @@
                     <span style="font-size:11px;color:var(--muted)">Teks yang ditempel dari AI otomatis dibersihkan dari simbol #, ** dan *.</span>
                   </div>
                 </div>
+
+                <div class="form-group" style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
+                  <label class="form-label">Tampilan di Google (SEO)</label>
+                  <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Kosongkan judul dan deskripsi kalau mau dibuat otomatis dari nama, kategori, bahan, dan harga.</p>
+
+                  <div id="seo-preview" style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px;background:#fff">
+                    <div id="seo-prev-url" style="font-size:12px;color:#4d5156;word-break:break-all"></div>
+                    <div id="seo-prev-title" style="font-size:18px;line-height:1.3;color:#1a0dab;margin:2px 0 3px"></div>
+                    <div id="seo-prev-desc" style="font-size:13px;line-height:1.5;color:#4d5156"></div>
+                  </div>
+
+                  <label class="form-label">Judul Google (title) <span id="seo-title-count" style="text-transform:none;font-weight:400;color:var(--muted)"></span></label>
+                  <input class="form-input" id="p-seo-title" maxlength="80" placeholder="Otomatis dari nama produk" oninput="seoFormChanged()" style="margin-bottom:12px"/>
+
+                  <label class="form-label">Deskripsi Google (meta description) <span id="seo-desc-count" style="text-transform:none;font-weight:400;color:var(--muted)"></span></label>
+                  <textarea class="form-input" id="p-seo-desc" maxlength="200" placeholder="Otomatis dari nama, bahan, warna, dan harga" oninput="seoFormChanged()" style="resize:vertical;min-height:64px;line-height:1.5;margin-bottom:12px"></textarea>
+
+                  <label class="form-label">Alamat halaman (slug)</label>
+                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                    <span style="font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace">zenoot.web.id/produk/</span>
+                    <input class="form-input" id="p-slug" placeholder="otomatis dari nama produk" oninput="slugTouched=true;seoFormChanged()" style="flex:1;min-width:180px;font-family:'IBM Plex Mono',monospace"/>
+                  </div>
+                  <p style="font-size:11px;color:var(--muted);margin-top:6px">Huruf kecil, angka, dan tanda hubung. <strong>Jangan diubah setelah produk muncul di Google</strong>, karena alamat lama akan mati.</p>
+                  <button type="button" class="btn-pf-back" style="padding:6px 12px;font-size:12px;margin-top:8px" onclick="seoAutofill()">Isi otomatis semua</button>
+                </div>
+
                 <div class="pf-footer">
                   <button class="btn-pf-back" onclick="pfSwitchTab(1)">← Kembali</button>
                   <div class="pf-footer-right">
@@ -2078,10 +2132,23 @@
 
               <!-- ===== TAB 5: PENGIRIMAN ===== -->
               <div class="pf-panel" id="pf-panel-4">
-                <div class="pf-shipping-placeholder">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11a2 2 0 012 2v3m-4 12H9m10-12h2l3 4v4h-5m0 0a2 2 0 100 4 2 2 0 000-4zM9 17a2 2 0 100 4 2 2 0 000-4z"/></svg>
-                  <p style="font-weight:600;color:var(--text)">Fitur Pengiriman segera hadir</p>
-                  <small>Ongkir, resi, jasa kirim, berat & dimensi paket akan diatur di sini.</small>
+                <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Berat dan ukuran paket per produk. Dikirim ke feed Google dan Meta sebagai berat pengiriman.</p>
+                <div class="spec-fields-grid" style="gap:14px">
+                  <div class="form-group" style="margin-bottom:0;grid-column:1/-1">
+                    <label class="form-label">Berat paket (gram)</label>
+                    <input class="form-input" id="p-weight" type="number" min="0" inputmode="numeric" placeholder="cth: 400"/>
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;grid-column:1/-1">
+                    <label class="form-label">Ukuran paket (cm) — panjang × lebar × tinggi</label>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+                      <input class="form-input" id="p-pkg-l" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Panjang"/>
+                      <input class="form-input" id="p-pkg-w" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Lebar"/>
+                      <input class="form-input" id="p-pkg-h" type="number" min="0" step="0.5" inputmode="decimal" placeholder="Tinggi"/>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top:16px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:12px;line-height:1.6;color:var(--sec)">
+                  <strong>Gratis ongkir</strong> diatur lewat menu <strong>Voucher</strong> (jenis Gratis Ongkir), bukan per produk, jadi tidak ditulis di deskripsi produk. Layanan kurir diatur di menu <strong>Pengiriman</strong>.
                 </div>
                 <div class="pf-footer">
                   <button class="btn-pf-back" onclick="pfSwitchTab(3)">← Kembali</button>
@@ -2999,6 +3066,7 @@ function pfSwitchTab(idx) {
     tab.classList.toggle('active', i === idx);
     panel.classList.toggle('active', i === idx);
   }
+  if (idx === 2 && typeof seoFormChanged === 'function') seoFormChanged();
   // scroll form back to top
   const card = document.getElementById('product-form-card');
   if (card) card.scrollIntoView({behavior:'smooth', block:'start'});
@@ -3010,11 +3078,11 @@ function pfResetTabs() {
 }
 
 // ===================== TOAST =====================
-function showToast(msg) {
+function showToast(msg, ms) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2500);
+  setTimeout(()=>t.classList.remove('show'), ms || 2500);
 }
 
 // ===================== LOGIN =====================
