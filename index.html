@@ -2137,7 +2137,7 @@
 
               <!-- ===== TAB 5: PENGIRIMAN ===== -->
               <div class="pf-panel" id="pf-panel-4">
-                <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Berat dan ukuran paket per produk. Dikirim ke feed Google dan Meta sebagai berat pengiriman.</p>
+                <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Berat dan ukuran paket per produk. Berat paket dipakai menghitung <strong>ongkir di checkout</strong> (kosong dihitung 300 g per pcs) dan dikirim ke feed Google dan Meta sebagai berat pengiriman.</p>
                 <div class="spec-fields-grid" style="gap:14px">
                   <div class="form-group" style="margin-bottom:0;grid-column:1/-1">
                     <label class="form-label">Berat paket (gram)</label>
@@ -3435,6 +3435,7 @@ let shippingRows = [];        // data yang tersimpan di database
 let shippingDraft = null;     // null = mode lihat; Map(id -> { enabled, min_weight_g }) = mode Edit
 let shippingLastDiscover = null;
 let shipShowAll = false;
+let shipShowNonReg = false;   // tampilkan layanan non-reguler (hemat, kilat, kargo) yang tidak aktif; bawaannya disembunyikan
 let shipSaving = false;
 
 function shipEditing() { return shippingDraft !== null; }
@@ -3509,14 +3510,20 @@ function shipRowHTML(r) {
   </div>`;
 }
 
+// Yang tampil: layanan reguler, ditambah layanan apa pun yang sedang aktif (supaya tidak ada yang aktif tapi tersembunyi).
+// Layanan non-reguler yang mati (hemat, kilat, kargo) disembunyikan, jadi daftar tetap ringkas walau "Perbarui daftar layanan" menarik ulang semuanya.
+function shipRowVisible(r) { return r.grp === 'reguler' || !!r.enabled || !!shipVal(r, 'enabled') || shipShowNonReg; }
 function shipCourierCard(name, rows, code) {
-  const on = rows.filter(r => shipVal(r, 'enabled')).length;
   const sorted = rows.slice().sort((a, b) => SHIP_GRP_ORDER.indexOf(a.grp) - SHIP_GRP_ORDER.indexOf(b.grp) || String(a.service).localeCompare(String(b.service)));
-  const body = sorted.length
-    ? sorted.map(shipRowHTML).join('')
-    : `<p class="ship-sub" style="margin:0">Belum ada layanan ${chatEsc(name)} dari RajaOngkir untuk rute yang diperiksa. Coba "Perbarui daftar layanan" dengan kota lain.</p>`;
+  const vis = sorted.filter(shipRowVisible);
+  const on = vis.filter(r => shipVal(r, 'enabled')).length;
+  const body = vis.length
+    ? vis.map(shipRowHTML).join('')
+    : (sorted.length
+      ? `<p class="ship-sub" style="margin:0">Tidak ada layanan reguler ${chatEsc(name)} untuk rute yang diperiksa.</p>`
+      : `<p class="ship-sub" style="margin:0">Belum ada layanan ${chatEsc(name)} dari RajaOngkir untuk rute yang diperiksa. Coba "Perbarui daftar layanan" dengan kota lain.</p>`);
   return `<div class="admin-card">
-    <div class="home-card-head"><h3 class="admin-card-title" style="margin:0">${chatEsc(name)}</h3><span class="ship-count">${sorted.length ? `${on}/${sorted.length} aktif` : ''}</span></div>
+    <div class="home-card-head"><h3 class="admin-card-title" style="margin:0">${chatEsc(name)}</h3><span class="ship-count">${vis.length ? `${on}/${vis.length} aktif` : ''}</span></div>
     ${body}
   </div>`;
 }
@@ -3538,15 +3545,22 @@ function renderShipping() {
     extraShown.map(c => shipCourierCard((byCourier.get(c)[0] || {}).courier_name || c, byCourier.get(c), c)).join('');
   if (oth) {
     const anyOther = [...byCourier.keys()].some(c => !mainCodes.includes(c));
-    oth.innerHTML = anyOther
+    const shownCodes = [...mainCodes, ...extraShown];
+    const hiddenNonReg = shippingRows.filter(r => shownCodes.includes(r.courier) && !shipRowVisible(r)).length;
+    const nonRegBtn = shipShowNonReg
+      ? `<div style="margin-top:10px"><button type="button" class="ship-link" onclick="shipToggleNonReg(false)">Sembunyikan layanan non-reguler</button></div>`
+      : (hiddenNonReg ? `<div style="margin-top:10px"><button type="button" class="ship-link" onclick="shipToggleNonReg(true)">Tampilkan layanan non-reguler (${hiddenNonReg})</button></div>` : '');
+    const othersBtn = anyOther
       ? (shipShowAll
-        ? `<button type="button" class="ship-link" onclick="shipToggleAll(false)">Sembunyikan kurir lain</button>`
-        : (hiddenCount ? `<button type="button" class="ship-link" onclick="shipToggleAll(true)">Tampilkan kurir lain (${hiddenCount} layanan)</button>` : ''))
+        ? `<div style="margin-top:10px"><button type="button" class="ship-link" onclick="shipToggleAll(false)">Sembunyikan kurir lain</button></div>`
+        : (hiddenCount ? `<div style="margin-top:10px"><button type="button" class="ship-link" onclick="shipToggleAll(true)">Tampilkan kurir lain (${hiddenCount} layanan)</button></div>` : ''))
       : '';
+    oth.innerHTML = nonRegBtn + othersBtn;
   }
 }
 
 function shipToggleAll(v) { shipShowAll = !!v; renderShipping(); }
+function shipToggleNonReg(v) { shipShowNonReg = !!v; renderShipping(); }
 
 function shipStartEdit() {
   if (!shippingRows.length || shipSaving) return;
