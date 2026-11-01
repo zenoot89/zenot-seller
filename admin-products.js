@@ -811,12 +811,16 @@ async function saveProduct() {
 
   let prod;
   let extrasMissing = false;
+  let existingVars = [];
   if (editingProductId) {
     const payload = {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls};
     const res = await saveWithExtras(b => sb.from('products').update(b).eq('id',editingProductId).select().single(), payload, extra);
     if (res.error) { console.error('Update produk gagal:', res.error); showToast('Gagal update: ' + res.error.message); return; }
     prod = res.data; extrasMissing = !!res.extrasMissing;
-    await sb.from('variants').delete().eq('product_id', prod.id);
+    // Varian TIDAK dihapus-lalu-dibuat-ulang: harga coret, flash sale, dan tautan promo ada di baris varian itu.
+    const exRes = await sb.from('variants').select('id,color_name,size').eq('product_id', prod.id);
+    if (exRes.error) { console.error('Baca varian gagal:', exRes.error); showToast('Gagal membaca varian: ' + exRes.error.message); return; }
+    existingVars = exRes.data || [];
   } else {
     const res = await saveWithExtras(b => sb.from('products').insert(b).select().single(), {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls}, extra);
     if (res.error) { console.error('Insert produk gagal:', res.error); showToast('Gagal simpan: ' + res.error.message); return; }
@@ -858,7 +862,26 @@ async function saveProduct() {
       });
     }
   }
-  if (variants.length) await sb.from('variants').insert(variants);
+  // Varian yang sudah ada (warna+ukuran sama) diperbarui di tempat; original_price dan flash_sale_end tidak disentuh.
+  const vKey = v => String(v.color_name) + '\u0001' + String(v.size);
+  const existingByKey = new Map(existingVars.map(e => [vKey(e), e.id]));
+  const keepIds = new Set();
+  const toInsert = [];
+  for (const v of variants) {
+    const id = existingByKey.get(vKey(v));
+    if (id) {
+      keepIds.add(id);
+      const { error: uErr } = await sb.from('variants').update({
+        color_hex: v.color_hex, price: v.price, stock: v.stock, image_url: v.image_url, is_active: v.is_active
+      }).eq('id', id);
+      if (uErr) { console.error('Update varian gagal:', uErr); showToast('Gagal update varian: ' + uErr.message); return; }
+    } else {
+      toInsert.push(v);
+    }
+  }
+  if (toInsert.length) await sb.from('variants').insert(toInsert);
+  const dropIds = existingVars.map(e => e.id).filter(id => !keepIds.has(id));
+  if (dropIds.length) await sb.from('variants').delete().in('id', dropIds);
 
   showToast(extrasMissing
     ? 'Produk tersimpan, TAPI kolom SEO/spesifikasi baru belum ada di database. Jalankan 01-migrasi-supabase.sql di Supabase dulu.'
