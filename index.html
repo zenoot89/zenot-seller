@@ -1578,10 +1578,10 @@
     .kv-sub{font-size:12.5px;line-height:1.5;color:rgba(41,42,49,.58);margin:-6px 0 16px}
     .kvt .kv-chips{display:none}
     .kvt .kv-head,.kvt .kv-row{display:grid;grid-template-columns:minmax(190px,1.5fr) repeat(4,minmax(0,1fr));align-items:center}
-    .kvt .kv-head{grid-template-columns:120px minmax(190px,1.5fr) repeat(4,minmax(0,1fr));background:#111114;color:#fff;border-radius:6px;font-size:13px;font-weight:600;min-height:38px;margin-bottom:12px}
+    .kvt .kv-head{grid-template-columns:120px minmax(190px,1.5fr) repeat(4,minmax(0,1fr));background:#41434D;color:#fff;border-radius:6px;font-size:13px;font-weight:600;min-height:38px;margin-bottom:12px}
     .kvt .kv-head > div{padding:0 14px}
     .kvt .kv-grp{display:flex;border-radius:6px;box-shadow:0 0 0 1px rgba(17,17,20,.1);overflow:hidden;margin-bottom:14px}
-    .kvt .kv-gname{flex:0 0 120px;background:#111114;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-size:13px;font-weight:600;line-height:1.3}
+    .kvt .kv-gname{flex:0 0 120px;background:#41434D;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-size:13px;font-weight:600;line-height:1.3}
     .kvt .kv-rows{flex:1;min-width:0}
     .kvt .kv-row{min-height:54px;border-bottom:1px solid rgba(17,17,20,.08)}
     .kvt .kv-row:last-child{border-bottom:none}
@@ -1593,11 +1593,12 @@
     .kv-q{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid rgba(41,42,49,.4);border-radius:50%;font-size:9px;color:rgba(41,42,49,.55);cursor:help;flex:0 0 auto}
     .kv-legend{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
     .kv-ct{font-size:14px;font-weight:700;color:#111114}
-    .kv-lg{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:rgba(41,42,49,.78);margin-left:14px}
+    .kv-legend > span:last-child{display:flex;flex-wrap:wrap;gap:4px 0;justify-content:flex-end}
+    .kv-lg{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:rgba(41,42,49,.78);margin-left:14px;white-space:nowrap}
     .kv-lg i{width:8px;height:8px;border-radius:50%;display:inline-block}
     .kv-chartwrap{position:relative}
     .kv-chartwrap svg{display:block;max-width:100%;touch-action:pan-y}
-    .kv-tip{position:absolute;display:none;pointer-events:none;background:#fff;border-radius:6px;box-shadow:0 4px 18px rgba(17,17,20,.2);padding:10px 12px;font-size:12px;min-width:170px;z-index:5}
+    .kv-tip{position:absolute;display:none;pointer-events:none;background:#fff;border-radius:6px;box-shadow:0 4px 18px rgba(17,17,20,.2);padding:10px 12px;font-size:12px;min-width:190px;z-index:5}
     .kv-tip .t{color:rgba(41,42,49,.6);font-size:11.5px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid rgba(17,17,20,.08)}
     .kv-tip .r{display:flex;align-items:center;gap:8px;margin-top:4px;color:#111114}
     .kv-tip .r i{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
@@ -2558,11 +2559,6 @@
               <h3 class="admin-card-title">Corong Pembelian</h3>
               <p class="kv-sub" style="margin-top:-6px">Jumlah pengunjung unik di tiap tahap. Persen di kanan dihitung dari pengunjung toko.</p>
               <div id="perf-kv-funnel">Memuat...</div>
-            </div>
-            <div class="admin-card">
-              <h3 class="admin-card-title">Sumber Kunjungan</h3>
-              <p class="kv-sub" style="margin-top:-6px">Dari mana pengunjung datang ke toko (link IG/TikTok/WA/Google yang ditandai ?utm_source=, atau dari dalam web sendiri).</p>
-              <div id="perf-kv-sources">Memuat...</div>
             </div>
           </div>
 
@@ -4725,8 +4721,8 @@ const KV_METRICS = [
   { k: 'wa', g: 'aksi', label: 'Klik WhatsApp', f: 'n', tip: 'Berapa kali tombol WhatsApp ditekan.' },
   { k: 'checkout', g: 'aksi', label: 'Checkout Dibuat', f: 'n', tip: 'Berapa kali pembeli menekan buat pesanan.' },
 ];
-const KV_MAX = 4, KV_COLORS = ['#3b82f6', '#f97316', '#10b981', '#8b5cf6'];
-let kvState = null, kvSrc = 'all', kvMob = 0;
+const KV_MAX = 4, KV_LINES = 8, KV_COLORS = ['#3b82f6', '#f97316', '#10b981', '#8b5cf6', '#ef4444', '#0ea5e9', '#eab308', '#ec4899'];
+let kvState = null, kvSrcs = ['all'], kvMob = 0;
 let kvSel = (() => {
   try {
     const s = JSON.parse(localStorage.getItem('zenot_kv_sel') || 'null');
@@ -4815,7 +4811,6 @@ async function loadPerfKunjungan() {
     ['Masuk keranjang', sess('add_to_cart').size],
     ['Checkout atau chat WhatsApp', sess('begin_checkout', 'click_whatsapp').size],
   ]);
-  renderPerfSources(kvState.cur.filter(e => e.event_type === 'view_store'));
 }
 function kvRenderTable() {
   const s = kvState, el = document.getElementById('kv-table');
@@ -4840,16 +4835,25 @@ function kvPickCol(i) {
 function kvRenderCrit() {
   const box = document.getElementById('kv-crit');
   if (!box) return;
+  const nS = kvSrcs.length, nM = kvSel.length;
   box.innerHTML = `<div class="pp-crit-row"><div class="pp-crit-g">Sumber:</div><div class="pp-crit-items">${
-    KV_COLS.map(c => `<label class="pp-chk"><input type="radio" name="kv-src" ${kvSrc === c.k ? 'checked' : ''} onchange="kvSetSrc('${c.k}')"/><span>${c.label}</span></label>`).join('')}</div></div>` +
+    KV_COLS.map(c => {
+      const on = kvSrcs.includes(c.k), dis = !on && (nS + 1) * nM > KV_LINES;
+      return `<label class="pp-chk${dis ? ' dis' : ''}"><input type="checkbox" ${on ? 'checked' : ''} ${dis ? 'disabled' : ''} onchange="kvToggleSrc('${c.k}',this.checked)"/><span>${c.label}</span></label>`;
+    }).join('')}</div></div>` +
     KV_GROUPS.map(g => `<div class="pp-crit-row"><div class="pp-crit-g">${g.label}:</div><div class="pp-crit-items">${
       KV_METRICS.filter(m => m.g === g.k).map(m => {
-        const on = kvSel.includes(m.k), dis = !on && kvSel.length >= KV_MAX;
+        const on = kvSel.includes(m.k), dis = !on && (nM >= KV_MAX || nS * (nM + 1) > KV_LINES);
         return `<label class="pp-chk${dis ? ' dis' : ''}"><input type="checkbox" ${on ? 'checked' : ''} ${dis ? 'disabled' : ''} onchange="kvToggle('${m.k}',this.checked)"/><span>${m.label}</span></label>`;
       }).join('')}</div></div>`).join('') +
-    `<div class="pp-crit-foot">Kriteria Dipilih: <b>${kvSel.length}</b> /${KV_MAX}</div>`;
+    `<div class="pp-crit-foot">Sumber dipilih: <b>${nS}</b> · Kriteria dipilih: <b>${nM}</b> /${KV_MAX} · Garis di grafik: <b>${nS * nM}</b> /${KV_LINES}</div>`;
 }
-function kvSetSrc(k) { kvSrc = k; kvDrawChart(); }
+function kvToggleSrc(k, on) {
+  if (on) { if (!kvSrcs.includes(k)) kvSrcs.push(k); }
+  else if (kvSrcs.length > 1) kvSrcs = kvSrcs.filter(x => x !== k);
+  kvSrcs = KV_COLS.map(c => c.k).filter(x => kvSrcs.includes(x));
+  kvRenderCrit(); kvDrawChart();
+}
 function kvToggle(k, on) {
   if (on) { if (!kvSel.includes(k) && kvSel.length < KV_MAX) kvSel.push(k); }
   else kvSel = kvSel.filter(x => x !== k);
@@ -4863,15 +4867,24 @@ function kvDrawChart() {
   const sel = KV_METRICS.filter(m => kvSel.includes(m.k));
   if (!sel.length) { host.innerHTML = '<p style="font-size:12.5px;color:var(--muted)">Pilih minimal satu kriteria untuk menampilkan grafik.</p>'; return; }
   const spec = perfBucketSpec(kvState.period);
-  const ev = kvFilter(kvState.cur, kvState.curMap, kvSrc);
-  const by = {}; spec.labels.forEach(l => { by[l] = []; });
-  ev.forEach(e => { const k = spec.keyOf(e.created_at); if (by[k]) by[k].push(e); });
-  const per = spec.labels.map(l => kvCompute(by[l]));
   const n = spec.labels.length;
+  const perSrc = kvSrcs.map(sk => {
+    const ev = kvFilter(kvState.cur, kvState.curMap, sk);
+    const by = {}; spec.labels.forEach(l => { by[l] = []; });
+    ev.forEach(e => { const k = spec.keyOf(e.created_at); if (by[k]) by[k].push(e); });
+    return { sk, per: spec.labels.map(l => kvCompute(by[l])) };
+  });
+  const multi = kvSrcs.length > 1;
   const W = Math.max(300, Math.floor(host.clientWidth) || 800), H = isPerfMobile() ? 210 : 250;
   const pl = 10, pr = 10, pt = 12, pb = 28, iw = W - pl - pr, ih = H - pt - pb;
   const x = i => pl + (n <= 1 ? iw / 2 : i * iw / (n - 1));
-  const series = sel.map((m, si) => { const vals = per.map(p => p[m.k]); return { m, vals, mx: Math.max(0, ...vals), color: KV_COLORS[si % KV_COLORS.length] }; });
+  // skala dihitung per kriteria (dibagi semua sumber), jadi antar sumber bisa dibandingkan langsung
+  const mxBy = {}; sel.forEach(m => { mxBy[m.k] = Math.max(0, ...perSrc.flatMap(p => p.per.map(q => q[m.k]))); });
+  const series = [];
+  sel.forEach(m => perSrc.forEach(p => {
+    const sname = (KV_COLS.find(c => c.k === p.sk) || {}).label;
+    series.push({ m, vals: p.per.map(q => q[m.k]), mx: mxBy[m.k], label: multi ? m.label + ' · ' + sname : m.label, color: KV_COLORS[series.length % KV_COLORS.length] });
+  }));
   const y = (v, mx) => pt + ih - (mx > 0 ? v / mx * ih * 0.94 : 0);
   const axis = l => {
     if (spec.mode === 'hour') return String(l).padStart(2, '0') + ':00';
@@ -4893,7 +4906,7 @@ function kvDrawChart() {
     return `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${dots}`;
   }).join('');
   host.innerHTML = `
-    <div class="kv-legend"><span class="kv-ct">Grafik setiap Kriteria</span><span>${series.map(s => `<span class="kv-lg"><i style="background:${s.color}"></i>${s.m.label}</span>`).join('')}</span></div>
+    <div class="kv-legend"><span class="kv-ct">Grafik setiap Kriteria</span><span>${series.map(s => `<span class="kv-lg"><i style="background:${s.color}"></i>${s.label}</span>`).join('')}</span></div>
     <div class="kv-chartwrap">
       <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
         ${grid}${xl}${lines}
@@ -4902,7 +4915,7 @@ function kvDrawChart() {
       </svg>
       <div class="kv-tip"></div>
     </div>
-    <p class="kv-sub" style="margin:8px 0 0">Tiap garis memakai skala sendiri supaya bentuknya terlihat jelas. Arahkan kursor atau sentuh grafik untuk melihat angka sebenarnya.</p>`;
+    <p class="kv-sub" style="margin:8px 0 0">Garis untuk kriteria yang sama memakai skala yang sama, jadi antar sumber bisa dibandingkan langsung. Kriteria yang berbeda punya skala sendiri supaya bentuknya terlihat. Arahkan kursor atau sentuh grafik untuk melihat angka sebenarnya.</p>`;
   const svg = host.querySelector('svg'), tip = host.querySelector('.kv-tip'), guide = svg.querySelector('.kv-guide'), hd = [...svg.querySelectorAll('.kv-hd')];
   const show = e => {
     const r = svg.getBoundingClientRect();
@@ -4910,7 +4923,7 @@ function kvDrawChart() {
     i = Math.max(0, Math.min(n - 1, i));
     guide.setAttribute('x1', x(i)); guide.setAttribute('x2', x(i)); guide.style.display = '';
     hd.forEach((d, si) => { d.setAttribute('cx', x(i)); d.setAttribute('cy', y(series[si].vals[i], series[si].mx)); d.style.display = ''; });
-    tip.innerHTML = `<div class="t">${title(spec.labels[i])}</div>` + series.map(s => `<div class="r"><i style="background:${s.color}"></i>${s.m.label}<b>${kvFmt(s.m, s.vals[i])}</b></div>`).join('');
+    tip.innerHTML = `<div class="t">${title(spec.labels[i])}</div>` + series.map(s => `<div class="r"><i style="background:${s.color}"></i>${s.label}<b>${kvFmt(s.m, s.vals[i])}</b></div>`).join('');
     tip.style.display = 'block';
     const tw = tip.offsetWidth; let left = x(i) + 14; if (left + tw > W) left = x(i) - tw - 14;
     tip.style.left = Math.max(0, left) + 'px'; tip.style.top = '6px';
@@ -4970,7 +4983,7 @@ function renderPerfFunnel(stages) {
         <span>${label}</span>
         <span style="color:var(--muted)">${n.toLocaleString('id-ID')} (${pct.toFixed(1)}%)</span>
       </div>
-      <div style="height:8px;background:#f0ede8;border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--ink)"></div></div>
+      <div style="height:8px;background:#f0ede8;border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:#41434D"></div></div>
     </div>`;
   }).join('') + '</div>';
 }
