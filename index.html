@@ -1531,7 +1531,64 @@
       .dk-modal-foot .dk-btn{flex:1;height:42px}
     }
     .dk-chk{width:16px;height:16px;accent-color:var(--sc-ink);margin:0;cursor:pointer}
-  </style>
+  
+    /* ===== Performa Produk ala Shopee + kartu metrik & grafik proporsional ===== */
+    .pp-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px}
+    .pp-search{position:relative;flex:0 1 280px;min-width:0}
+    .pp-search input{width:100%;height:36px;padding:0 34px 0 12px;border:1px solid rgba(17,17,20,.18);border-radius:6px;font:400 13px 'Inter',sans-serif;background:#fff;color:var(--text);box-sizing:border-box}
+    .pp-search input:focus{outline:none;border-color:#111114}
+    .pp-search svg{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:rgba(41,42,49,.58);pointer-events:none}
+    .pp-crit-btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 16px;border:1px solid #111114;border-radius:6px;background:#fff;font:600 13px 'Inter',sans-serif;color:#111114;cursor:pointer;white-space:nowrap}
+    .pp-crit-btn svg{transition:transform .15s}
+    .pp-crit-btn.closed svg{transform:rotate(180deg)}
+    .pp-crit{margin-bottom:14px;border:1px solid rgba(17,17,20,.10);border-radius:8px;background:#fff}
+    .pp-crit[hidden]{display:none}
+    .pp-crit-row{display:flex;gap:16px;padding:14px 16px;border-bottom:1px solid rgba(17,17,20,.08)}
+    .pp-crit-g{flex:0 0 120px;font-size:13px;color:rgba(41,42,49,.58)}
+    .pp-crit-items{flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px 16px}
+    .pp-chk{display:flex;align-items:center;gap:8px;font-size:13px;color:#111114;cursor:pointer}
+    .pp-chk input{width:15px;height:15px;margin:0;accent-color:#111114;cursor:pointer}
+    .pp-chk.dis{opacity:.4;cursor:not-allowed}
+    .pp-chk.dis input{cursor:not-allowed}
+    .pp-crit-foot{padding:10px 16px;font-size:12px;color:rgba(41,42,49,.58);background:#F1F1F3;border-radius:0 0 8px 8px}
+    .pp-crit-foot b{color:#111114}
+    .pp-crit-reset{margin-left:12px;border:none;background:none;padding:0;font:500 12px 'Inter',sans-serif;color:#2a5fb0;cursor:pointer}
+    .pp-views{display:flex;gap:24px;border-bottom:1px solid rgba(17,17,20,.08);margin-bottom:0;overflow-x:auto}
+    .pp-view{flex:0 0 auto;padding:10px 2px 12px;border:none;border-bottom:2px solid transparent;background:none;font:500 13.5px 'Inter',sans-serif;color:rgba(41,42,49,.58);cursor:pointer}
+    .pp-view.active{color:#111114;font-weight:700;border-bottom-color:#111114}
+    .pp-scroll{position:relative;overflow-x:auto;overflow-y:hidden;cursor:grab;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(17,17,20,.3) transparent}
+    .pp-scroll.drag{cursor:grabbing;user-select:none}
+    .pp-scroll::-webkit-scrollbar{height:8px}
+    .pp-scroll::-webkit-scrollbar-thumb{background:rgba(17,17,20,.28);border-radius:4px}
+    .pp-tbl{width:100%;min-width:max-content;border-collapse:separate;border-spacing:0}
+    .pp-tbl th{padding:12px 14px;background:#F1F1F3;text-align:left;font-weight:500;font-size:12.5px;line-height:1.3;color:rgba(41,42,49,.78);vertical-align:middle;white-space:normal;min-width:130px;max-width:170px}
+    .pp-tbl th.pp-stick{min-width:300px;max-width:340px;font-weight:600}
+    .pp-th{display:inline-flex;align-items:center;gap:2px}
+    .pp-tbl td{padding:14px;border-bottom:1px solid rgba(17,17,20,.08);font-size:13px;color:#111114;background:#fff;text-align:left;white-space:nowrap}
+    .pp-tbl td.num,.pp-tbl th.num{text-align:left}
+    .pp-tbl .pp-stick{position:sticky;left:0;z-index:2}
+    .pp-tbl th.pp-stick{z-index:3}
+    .pp-scroll.scrolled .pp-stick{box-shadow:6px 0 8px -6px rgba(17,17,20,.22)}
+    .pp-tbl tbody tr:hover td{background:#fafafb}
+    .pp-pimg{flex:0 0 44px;width:44px;height:44px}
+    .pp-prodcell{gap:10px}
+    .pp-ptxt{min-width:0;max-width:240px}
+    .pp-pname{font-size:13px;font-weight:500;-webkit-line-clamp:2;white-space:normal}
+    @media(min-width:861px){
+      .perf-metric-grid{padding:16px 20px 18px !important;gap:10px !important}
+      .perf-metric-grid > .admin-card{min-height:84px !important;padding:12px 14px !important}
+      .perf-metric-grid > .admin-card > div:nth-child(2){margin-top:8px !important;font-size:clamp(16px,1.3vw,20px) !important}
+      .perf-metric-grid.perf-six{grid-template-columns:repeat(6,minmax(0,1fr)) !important}
+      .perf-panel .admin-card{padding:18px 20px}
+    }
+    @media(max-width:860px){
+      .pp-toolbar{flex-wrap:wrap}
+      .pp-search{flex:1 1 100%}
+      .pp-crit-row{flex-direction:column;gap:8px}
+      .pp-crit-g{flex:none}
+      .pp-views{gap:16px}
+    }
+</style>
 </head>
 <body>
 
@@ -2395,9 +2452,17 @@
 
           <!-- PANEL: PRODUK -->
           <div id="perf-panel-produk" class="perf-panel" style="display:none">
-            <div class="admin-card">
-              <h3 class="admin-card-title">Performa per Produk</h3>
-              <p style="font-size:13px;color:var(--sec);margin-bottom:16px">Dilihat, terjual, dan pendapatan tiap produk di periode ini.</p>
+            <div class="admin-card pp-card">
+              <h3 class="admin-card-title">Performa Produk</h3>
+              <div class="pp-toolbar">
+                <div class="pp-search"><input id="pp-q" type="text" placeholder="Pencarian Produk" autocomplete="off" oninput="ppSearch(this.value)"/><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
+                <button type="button" class="pp-crit-btn" id="pp-crit-btn" onclick="ppToggleCrit()">Pilih Kriteria <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 15l6-6 6 6"/></svg></button>
+              </div>
+              <div id="pp-crit" class="pp-crit" hidden></div>
+              <div class="pp-views" id="pp-views">
+                <button type="button" class="pp-view active" data-v="terbaik" onclick="ppSetView('terbaik')">Produk dengan Performa Terbaik</button>
+                <button type="button" class="pp-view" data-v="baru" onclick="ppSetView('baru')">Produk yang Baru Ditambahkan</button>
+              </div>
               <div id="perf-produk-render" style="font-size:13px;color:var(--muted)">Memuat...</div>
             </div>
           </div>
@@ -2434,7 +2499,7 @@
 
           <!-- PANEL: TINGKAT KUNJUNGAN -->
           <div id="perf-panel-kunjungan" class="perf-panel" style="display:none">
-            <div class="perf-metric-grid">
+            <div class="perf-metric-grid perf-six">
               <div class="admin-card" style="margin:0">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Total Pengunjung (unik)</div>
                 <div id="perf-kv-visitors" style="font-size:22px;font-weight:700">0</div>
@@ -2447,8 +2512,6 @@
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Kunjungan ke Halaman Produk</div>
                 <div id="perf-kv-productviews" style="font-size:22px;font-weight:700">0</div>
               </div>
-            </div>
-            <div class="perf-metric-grid" style="margin-top:12px">
               <div class="admin-card" style="margin:0">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Masuk Keranjang</div>
                 <div id="perf-kv-cart" style="font-size:22px;font-weight:700">0</div>
@@ -4351,44 +4414,142 @@ function renderPerfProductAnalysis() {
 }
 
 // ===================== TAB: PRODUK =====================
+// Tabel ala Shopee: kolom produk menempel di kiri, geser ke samping, kriteria bisa dipilih (maks 10), header bisa diurutkan.
+const PP_COLS = [
+  { k:'views',        g:'Tingkat Kunjungan', label:'Jumlah Produk Dilihat',        f:'n' },
+  { k:'visitors',     g:'Tingkat Kunjungan', label:'Pengunjung Produk',            f:'n' },
+  { k:'cart',         g:'Konversi',          label:'Dimasukkan ke Keranjang',      f:'n' },
+  { k:'cartVisitors', g:'Konversi',          label:'Pengunjung Memasukkan ke Keranjang', f:'n' },
+  { k:'cartRate',     g:'Konversi',          label:'Tingkat Konversi Keranjang',   f:'p' },
+  { k:'orderRate',    g:'Konversi',          label:'Tingkat Konversi Pesanan',     f:'p' },
+  { k:'revenue',      g:'Pesanan',           label:'Penjualan',                    f:'rp' },
+  { k:'orders',       g:'Pesanan',           label:'Pesanan',                      f:'n' },
+  { k:'qty',          g:'Pesanan',           label:'Produk Terjual (pcs)',         f:'n' },
+  { k:'buyers',       g:'Pesanan',           label:'Total Pembeli',                f:'n' },
+  { k:'aov',          g:'Pesanan',           label:'Penjualan per Pesanan',        f:'rp' },
+];
+const PP_DEFAULT = ['views','visitors','cart','cartRate','orderRate','revenue','orders','qty'];
+const PP_MAX = 10;
+let perfProdRows = [];
+let perfProdSort = { key: null, dir: null };
+let ppSel = (function () {
+  try { const v = JSON.parse(localStorage.getItem('zenot_pp_cols') || 'null'); if (Array.isArray(v) && v.length) return v.filter(k => PP_COLS.some(c => c.k === k)); } catch (e) {}
+  return PP_DEFAULT.slice();
+})();
+let ppQuery = '', ppView = 'terbaik';
+
+function ppFmt(c, v) {
+  if (c.f === 'rp') return 'Rp ' + Math.round(v).toLocaleString('id-ID');
+  if (c.f === 'p') return v.toLocaleString('id-ID', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) + '%';
+  return Math.round(v).toLocaleString('id-ID');
+}
+async function ppFetchEvents(types, start, end) {
+  const out = [], size = 1000;
+  for (let from = 0; from < 50000; from += size) {
+    const r = await sb.from('analytics_events').select('session_id, event_type, product_id')
+      .in('event_type', types).gte('created_at', start).lt('created_at', end)
+      .order('created_at', { ascending: true }).range(from, from + size - 1);
+    if (r.error) throw r.error;
+    const d = r.data || [];
+    out.push(...d);
+    if (d.length < size) break;
+  }
+  return out;
+}
 async function loadPerfProduk() {
   const period = document.getElementById('perf-period')?.value || 'today';
   const { start, end } = perfRangeBounds(period);
   const el = document.getElementById('perf-produk-render');
   el.innerHTML = 'Memuat...';
+  ppRenderCrit();
 
-  const [ordersRes, viewsRes] = await Promise.all([
-    sb.from('orders').select('items, created_at').gte('created_at', start).lt('created_at', end),
-    sb.from('analytics_events').select('product_id').eq('event_type', 'view_product').gte('created_at', start).lt('created_at', end),
-  ]);
-  const orders = ordersRes.data || [];
-  const views = viewsRes.data || [];
+  let orders = [], events = [];
+  try {
+    const [ordersRes, ev] = await Promise.all([
+      sb.from('orders').select('items, created_at, status, shipping_address').gte('created_at', start).lt('created_at', end),
+      ppFetchEvents(['view_product', 'add_to_cart'], start, end),
+    ]);
+    orders = ordersRes.data || [];
+    events = ev;
+  } catch (e) {
+    el.innerHTML = '<p style="color:#c0392b;font-size:13px">Data belum bisa dimuat: ' + chatEsc(String(e && e.message || e)) + '</p>';
+    return;
+  }
 
-  const viewCount = {};
-  views.forEach(e => { if (e.product_id) viewCount[e.product_id] = (viewCount[e.product_id]||0)+1; });
+  const agg = {};
+  const get = id => (agg[id] = agg[id] || { views: 0, vs: new Set(), cart: 0, cs: new Set(), qty: 0, revenue: 0, os: new Set(), buyers: new Set() });
+  events.forEach(e => {
+    if (!e.product_id) return;
+    const a = get(e.product_id);
+    if (e.event_type === 'view_product') { a.views++; a.vs.add(e.session_id); }
+    else { a.cart++; a.cs.add(e.session_id); }
+  });
+  const nameToId = {};
+  adminProductsData.forEach(p => { nameToId[p.name] = p.id; });
+  orders.forEach((o, oi) => {
+    if (o.status === 'dibatalkan') return;
+    const ad = o.shipping_address || {}; const who = ad.phone || ad.recipient_name || ('o' + oi);
+    (o.items || []).forEach(i => {
+      const id = i.productId || nameToId[i.name];
+      if (!id) return;
+      const a = get(id);
+      a.qty += (i.qty || 0);
+      a.revenue += (i.price || 0) * (i.qty || 0);
+      a.os.add(oi);
+      a.buyers.add(who);
+    });
+  });
 
-  const soldQty = {}, soldRevenue = {};
-  orders.forEach(o => (o.items||[]).forEach(i => {
-    // items disimpan per-produk berdasarkan nama saat checkout; cocokkan lewat product_id kalau tersedia, jika tidak fallback ke nama
-    const key = i.productId || i.name;
-    soldQty[key] = (soldQty[key]||0) + (i.qty||0);
-    soldRevenue[key] = (soldRevenue[key]||0) + (i.price||0)*(i.qty||0);
-  }));
-
-  perfProdRows = adminProductsData.map(p => ({
-    id: p.id,
-    name: p.name,
-    img: p.image_url,
-    views: viewCount[p.id] || 0,
-    qty: soldQty[p.id] || soldQty[p.name] || 0,
-    revenue: soldRevenue[p.id] || soldRevenue[p.name] || 0,
-  })).sort((a,b) => b.revenue - a.revenue || b.views - a.views); // urutan netral
+  perfProdRows = adminProductsData.map(p => {
+    const a = agg[p.id] || { views: 0, vs: new Set(), cart: 0, cs: new Set(), qty: 0, revenue: 0, os: new Set(), buyers: new Set() };
+    const visitors = a.vs.size, orders_ = a.os.size;
+    return {
+      id: p.id, name: p.name, img: p.image_url, created: p.created_at || '',
+      views: a.views, visitors, cart: a.cart, cartVisitors: a.cs.size,
+      cartRate: visitors > 0 ? Math.min(100, a.cs.size / visitors * 100) : 0,
+      orderRate: visitors > 0 ? Math.min(100, orders_ / visitors * 100) : 0,
+      revenue: a.revenue, orders: orders_, qty: a.qty, buyers: a.buyers.size,
+      aov: orders_ > 0 ? a.revenue / orders_ : 0,
+    };
+  });
   renderPerfProduk();
 }
 
-// Urutan kolom 3 status (klik header): netral -> terbanyak (desc) -> terkecil (asc) -> netral
-let perfProdRows = [];
-let perfProdSort = { key: null, dir: null };
+function ppRenderCrit() {
+  const box = document.getElementById('pp-crit');
+  if (!box) return;
+  const groups = ['Tingkat Kunjungan', 'Konversi', 'Pesanan'];
+  box.innerHTML = groups.map(g => `<div class="pp-crit-row"><div class="pp-crit-g">${g}:</div><div class="pp-crit-items">${
+    PP_COLS.filter(c => c.g === g).map(c => {
+      const on = ppSel.includes(c.k);
+      const dis = !on && ppSel.length >= PP_MAX;
+      return `<label class="pp-chk${dis ? ' dis' : ''}"><input type="checkbox" ${on ? 'checked' : ''} ${dis ? 'disabled' : ''} onchange="ppToggleCol('${c.k}',this.checked)"/><span>${c.label}</span></label>`;
+    }).join('')}</div></div>`).join('') +
+    `<div class="pp-crit-foot">Kriteria Dipilih: <b>${ppSel.length}</b> /${PP_MAX} <button type="button" class="pp-crit-reset" onclick="ppResetCols()">Atur Ulang</button></div>`;
+}
+function ppToggleCrit() {
+  const box = document.getElementById('pp-crit'), btn = document.getElementById('pp-crit-btn');
+  box.hidden = !box.hidden;
+  btn.classList.toggle('closed', box.hidden);
+  if (!box.hidden) ppRenderCrit();
+}
+function ppSaveCols() { try { localStorage.setItem('zenot_pp_cols', JSON.stringify(ppSel)); } catch (e) {} }
+function ppToggleCol(k, on) {
+  if (on) { if (!ppSel.includes(k) && ppSel.length < PP_MAX) ppSel.push(k); }
+  else ppSel = ppSel.filter(x => x !== k);
+  // urutan kolom mengikuti urutan daftar kriteria
+  ppSel = PP_COLS.map(c => c.k).filter(x => ppSel.includes(x));
+  if (perfProdSort.key && !ppSel.includes(perfProdSort.key)) perfProdSort = { key: null, dir: null };
+  ppSaveCols(); ppRenderCrit(); renderPerfProduk();
+}
+function ppResetCols() { ppSel = PP_DEFAULT.slice(); ppSaveCols(); ppRenderCrit(); renderPerfProduk(); }
+function ppSearch(v) { ppQuery = String(v || '').trim().toLowerCase(); renderPerfProduk(); }
+function ppSetView(v) {
+  ppView = v;
+  document.querySelectorAll('#pp-views .pp-view').forEach(b => b.classList.toggle('active', b.dataset.v === v));
+  renderPerfProduk();
+}
+// Urutan kolom (klik header): netral -> terbanyak -> terkecil -> netral
 function sortPerfProduk(key) {
   if (perfProdSort.key !== key) perfProdSort = { key, dir: 'desc' };
   else if (perfProdSort.dir === 'desc') perfProdSort = { key, dir: 'asc' };
@@ -4399,50 +4560,70 @@ function renderPerfProduk() {
   const el = document.getElementById('perf-produk-render');
   if (!el) return;
   if (!perfProdRows.length) { el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Belum ada produk.</p>'; return; }
-  let rows = perfProdRows;
+  let rows = perfProdRows.filter(r => !ppQuery || String(r.name).toLowerCase().includes(ppQuery));
+  if (ppView === 'baru') rows = [...rows].sort((a, b) => String(b.created).localeCompare(String(a.created)));
+  else rows = [...rows].sort((a, b) => b.revenue - a.revenue || b.views - a.views);
   if (perfProdSort.key) {
     const k = perfProdSort.key, sgn = perfProdSort.dir === 'desc' ? -1 : 1;
-    rows = [...perfProdRows].sort((a, b) => (a[k] - b[k]) * sgn); // sort stabil: seri tetap di urutan netral
+    rows = [...rows].sort((a, b) => (a[k] - b[k]) * sgn);
   }
-  const th = (key, label) => {
-    const on = perfProdSort.key === key;
+  if (!rows.length) { el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Tidak ada produk yang cocok.</p>'; return; }
+  const cols = PP_COLS.filter(c => ppSel.includes(c.k));
+  const th = c => {
+    const on = perfProdSort.key === c.k;
     const cls = on ? (perfProdSort.dir === 'desc' ? 'dn' : 'up') : '';
-    return `<th class="num srt${on ? ' on' : ''}" onclick="sortPerfProduk('${key}')" title="Klik untuk urutkan: terbanyak, terkecil, netral">${label}<span class="sort-ic ${cls}"><i class="u"></i><i class="d"></i></span></th>`;
+    return `<th class="srt${on ? ' on' : ''}" onclick="ppHeadClick('${c.k}')"><span class="pp-th"><span>${c.label}</span><span class="sort-ic ${cls}"><i class="u"></i><i class="d"></i></span></span></th>`;
   };
+  const shortId = r => chatEsc(String(r.id || '').slice(0, 8));
+  const mob = cols.slice(0, 4);
   el.innerHTML = `
-    <div class="perf-prod-table"><table class="pp-tbl">
+    <div class="perf-prod-table"><div class="pp-scroll" id="pp-scroll"><table class="pp-tbl">
       <thead><tr>
-        <th>Produk</th>
-        ${th('views','Dilihat')}
-        ${th('qty','Terjual (pcs)')}
-        ${th('revenue','Pendapatan')}
+        <th class="pp-stick">Informasi Produk</th>
+        ${cols.map(th).join('')}
       </tr></thead>
       <tbody>${rows.map(r => `
         <tr>
-          <td><div class="pp-prodcell">
+          <td class="pp-stick"><div class="pp-prodcell">
             <div class="pp-pimg">${r.img ? `<img src="${chatEsc(r.img)}" alt="" loading="lazy">` : ''}</div>
-            <div class="pp-ptxt"><div class="pp-pname">${chatEsc(r.name)}</div><div class="pp-pid">ID Produk: ${chatEsc(String(r.id || '').slice(0, 8))}</div></div>
+            <div class="pp-ptxt"><div class="pp-pname" title="${chatEsc(r.name)}">${chatEsc(r.name)}</div><div class="pp-pid">ID Produk: ${shortId(r)}</div></div>
           </div></td>
-          <td class="num">${r.views.toLocaleString('id-ID')}</td>
-          <td class="num">${r.qty.toLocaleString('id-ID')}</td>
-          <td class="num" style="font-weight:600">Rp ${r.revenue.toLocaleString('id-ID')}</td>
+          ${cols.map(c => `<td class="num">${ppFmt(c, r[c.k])}</td>`).join('')}
         </tr>`).join('')}
       </tbody>
-    </table></div>
+    </table></div></div>
     <div class="perf-prod-list">
+      <div class="pp-sortbar">${cols.map(c => `<button type="button" class="pp-sort${perfProdSort.key===c.k?' active':''}" onclick="sortPerfProduk('${c.k}')">${c.label}${perfProdSort.key===c.k ? (perfProdSort.dir==='desc'?' ↓':' ↑') : ''}</button>`).join('')}</div>
       ${rows.map((r, i) => `
         <div class="pp-item">
           <div class="pp-head">
-            <div class="pp-thumb">${r.img ? `<img src="${r.img}" alt="" loading="lazy">` : ''}<span class="pp-rank">${i+1}</span></div>
-            <div class="pp-name">${r.name}</div>
+            <div class="pp-thumb">${r.img ? `<img src="${chatEsc(r.img)}" alt="" loading="lazy">` : ''}<span class="pp-rank">${i+1}</span></div>
+            <div class="pp-name">${chatEsc(r.name)}</div>
           </div>
-          <div class="pp-metrics" style="--cols:3">
-            <div><span>Dilihat</span><b>${r.views}</b></div>
-            <div><span>Terjual</span><b>${r.qty}</b></div>
-            <div><span>Pendapatan</span><b>Rp${r.revenue.toLocaleString('id-ID')}</b></div>
+          <div class="pp-metrics" style="--cols:${Math.max(1, mob.length)}">
+            ${mob.map(c => `<div><span>${c.label.replace('Jumlah Produk Dilihat','Dilihat').replace('Dimasukkan ke Keranjang','Keranjang').replace('Tingkat Konversi ','Konv. ').replace('Produk Terjual (pcs)','Terjual')}</span><b>${ppFmt(c, r[c.k])}</b></div>`).join('')}
           </div>
         </div>`).join('')}
     </div>`;
+  ppInitScroll();
+}
+// klik header urut, kecuali baru selesai menggeser dengan mouse
+let ppDragMoved = false;
+function ppHeadClick(k) { if (ppDragMoved) { ppDragMoved = false; return; } sortPerfProduk(k); }
+function ppInitScroll() {
+  const sc = document.getElementById('pp-scroll');
+  if (!sc) return;
+  const mark = () => sc.classList.toggle('scrolled', sc.scrollLeft > 2);
+  sc.addEventListener('scroll', mark, { passive: true }); mark();
+  let down = false, x0 = 0, l0 = 0;
+  sc.addEventListener('mousedown', e => { if (e.button !== 0) return; down = true; ppDragMoved = false; x0 = e.pageX; l0 = sc.scrollLeft; });
+  window.addEventListener('mousemove', e => {
+    if (!down) return;
+    const dx = e.pageX - x0;
+    if (Math.abs(dx) > 5) { ppDragMoved = true; sc.classList.add('drag'); }
+    if (ppDragMoved) sc.scrollLeft = l0 - dx;
+  });
+  window.addEventListener('mouseup', () => { down = false; sc.classList.remove('drag'); setTimeout(() => { ppDragMoved = false; }, 0); });
 }
 
 // ===================== TAB: PENJUALAN =====================
@@ -4463,7 +4644,7 @@ async function loadPerfPenjualan() {
   labels.forEach(l => { buckets[l] = 0; });
   orders.forEach(o => { const k = spec.keyOf(o.created_at); if (buckets[k] !== undefined) buckets[k] += (o.total||0); });
   const values = labels.map(l=>buckets[l]);
-  chartEl.innerHTML = renderSvgLineChart(values, labels, period, v => 'Rp'+Math.round(v/1000)+'rb');
+  perfDrawChart('perf-penjualan-chart', values, labels, period, v => 'Rp'+Math.round(v/1000)+'rb');
 
   // Breakdown status
   const statusCount = { menunggu_pembayaran:0, diproses:0, dikirim:0, selesai:0, dibatalkan:0 };
@@ -4517,7 +4698,7 @@ async function loadPerfKunjungan() {
   labels.forEach(l => { buckets[l] = 0; });
   storeEvents.forEach(e => { const k = spec.keyOf(e.created_at); if (buckets[k] !== undefined) buckets[k]++; });
   const values = labels.map(l=>buckets[l]);
-  document.getElementById('perf-kv-chart').innerHTML = renderSvgLineChart(values, labels, period, v=>String(v));
+  perfDrawChart('perf-kv-chart', values, labels, period, v=>String(v));
 
   renderPerfSources(storeEvents);
   perfLoadActions(start, end);
@@ -4683,11 +4864,11 @@ function renderPerfMetricChart() {
   const title = document.getElementById('perf-chart-title');
   if (title) title.textContent = m.label + (spec.mode === 'hour' ? ' per Jam' : (spec.mode === 'month' ? ' per Bulan' : ' per Hari'));
   document.querySelectorAll('#perf-panel-tinjauan [data-metric]').forEach(t => t.classList.toggle('sel', t.dataset.metric === perfMetric));
-  el.innerHTML = renderSvgLineChart(values, labels, d.period, m.fmt);
+  perfDrawChart('perf-chart', values, labels, d.period, m.fmt);
 }
 
-function renderSvgLineChartMobile(values, labels, period, fmt, wide) {
-  const w = wide ? 900 : 340, h = wide ? 270 : 200, padL = wide ? 70 : 54, padR = 14, padT = 14, padB = 28, fs = wide ? 11.5 : 10;
+function renderSvgLineChartMobile(values, labels, period, fmt, wide, wpx) {
+  const w = wide ? (wpx || 900) : 340, h = wide ? 220 : 200, padL = wide ? 52 : 54, padR = 14, padT = 14, padB = 28, fs = wide ? 11.5 : 10;
   const rough = Math.max(Math.max(0, ...values), 1) / 4;
   const pow = Math.pow(10, Math.floor(Math.log10(rough)));
   const norm = rough / pow;
@@ -4719,8 +4900,32 @@ function renderSvgLineChartMobile(values, labels, period, fmt, wide) {
       ${xl}
     </svg>`;
 }
+// Lebar grafik desktop diukur dari kotak yang sedang tampil, supaya tinggi tetap 220px dan huruf tidak membesar.
+const PERF_CHART_HOSTS = ['perf-chart', 'perf-kv-chart', 'perf-penjualan-chart'];
+const perfChartCache = {};
+function perfChartWidth() {
+  const host = PERF_CHART_HOSTS.map(id => document.getElementById(id)).find(e => e && e.offsetParent !== null);
+  const w = host ? Math.floor(host.clientWidth) : 0;
+  return w > 300 ? w : 900;
+}
+function perfDrawChart(hostId, values, labels, period, fmt) {
+  const el = document.getElementById(hostId);
+  if (!el) return;
+  perfChartCache[hostId] = [values, labels, period, fmt];
+  el.innerHTML = renderSvgLineChart(values, labels, period, fmt);
+}
+let perfChartResizeT = null;
+window.addEventListener('resize', () => {
+  clearTimeout(perfChartResizeT);
+  perfChartResizeT = setTimeout(() => {
+    PERF_CHART_HOSTS.forEach(id => {
+      const el = document.getElementById(id), c = perfChartCache[id];
+      if (el && c && el.offsetParent !== null) el.innerHTML = renderSvgLineChart(...c);
+    });
+  }, 200);
+});
 function renderSvgLineChart(values, labels, period, valueFormatter) {
-  return renderSvgLineChartMobile(values, labels, period, valueFormatter, !isPerfMobile());
+  return renderSvgLineChartMobile(values, labels, period, valueFormatter, !isPerfMobile(), perfChartWidth());
   const max = Math.max(1, ...values);
   const w = 700, h = 160, pad = 24;
   const stepX = (w - pad*2) / Math.max(1, values.length - 1);
