@@ -1577,18 +1577,20 @@
     /* ===== Tingkat Kunjungan ala Shopee ===== */
     .kv-sub{font-size:12.5px;line-height:1.5;color:rgba(41,42,49,.58);margin:-6px 0 16px}
     .kvt .kv-chips{display:none}
-    .kvt .kv-head,.kvt .kv-row{display:grid;grid-template-columns:minmax(190px,1.5fr) repeat(4,minmax(0,1fr));align-items:center}
-    .kvt .kv-head{grid-template-columns:120px minmax(190px,1.5fr) repeat(4,minmax(0,1fr));background:#41434D;color:#fff;border-radius:6px;font-size:13px;font-weight:600;min-height:38px;margin-bottom:12px}
-    .kvt .kv-head > div{padding:0 14px}
-    .kvt .kv-grp{display:flex;border-radius:6px;box-shadow:0 0 0 1px rgba(17,17,20,.1);overflow:hidden;margin-bottom:14px}
-    .kvt .kv-gname{flex:0 0 120px;background:#41434D;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-size:13px;font-weight:600;line-height:1.3}
+    .kv-scroll{overflow-x:auto}
+    .kvt{min-width:calc(110px + 170px + var(--n,4) * 92px)}
+    .kvt .kv-head,.kvt .kv-row{display:grid;grid-template-columns:minmax(170px,1.4fr) repeat(var(--n,4),minmax(92px,1fr));align-items:center}
+    .kvt .kv-head{grid-template-columns:110px minmax(170px,1.4fr) repeat(var(--n,4),minmax(92px,1fr));background:#41434D;color:#fff;border-radius:6px;font-size:12.5px;font-weight:600;min-height:32px;margin-bottom:8px}
+    .kvt .kv-head > div{padding:0 10px}
+    .kvt .kv-grp{display:flex;border-radius:6px;box-shadow:0 0 0 1px rgba(17,17,20,.1);overflow:hidden;margin-bottom:8px}
+    .kvt .kv-gname{flex:0 0 110px;background:#41434D;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px;font-size:12.5px;font-weight:600;line-height:1.3}
     .kvt .kv-rows{flex:1;min-width:0}
-    .kvt .kv-row{min-height:54px;border-bottom:1px solid rgba(17,17,20,.08)}
+    .kvt .kv-row{min-height:44px;border-bottom:1px solid rgba(17,17,20,.08)}
     .kvt .kv-row:last-child{border-bottom:none}
-    .kvt .kv-lab{padding:10px 14px;font-size:13px;color:#111114;display:flex;align-items:center;gap:6px}
-    .kvt .kv-c{padding:10px 14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-    .kvt .kv-c b{font-size:16px;font-weight:700;color:#111114;font-variant-numeric:tabular-nums}
-    .kv-d{font-size:11px;font-weight:600;white-space:nowrap}
+    .kvt .kv-lab{padding:6px 10px 6px 12px;font-size:12.5px;color:#111114;display:flex;align-items:center;gap:6px}
+    .kvt .kv-c{padding:6px 10px;display:flex;flex-direction:column;align-items:flex-start;gap:0}
+    .kvt .kv-c b{font-size:15px;line-height:1.25;font-weight:700;color:#111114;font-variant-numeric:tabular-nums}
+    .kv-d{font-size:10.5px;line-height:1.25;font-weight:600;white-space:nowrap}
     .kv-d.good{color:#1e7a4c}.kv-d.bad{color:#c0392b}.kv-d.flat{color:rgba(41,42,49,.5);font-weight:500}
     .kv-q{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border:1px solid rgba(41,42,49,.4);border-radius:50%;font-size:9px;color:rgba(41,42,49,.55);cursor:help;flex:0 0 auto}
     .kv-legend{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
@@ -1610,15 +1612,13 @@
       .kvt .kv-chip.active{background:#fff;border-color:#111114;color:#111114;font-weight:600}
       .kvt .kv-head{display:none}
       .kvt .kv-grp{flex-direction:column}
-      .kvt .kv-gname{flex:none;justify-content:flex-start;padding:9px 14px;font-size:12.5px}
-      .kvt .kv-row{grid-template-columns:1fr auto;min-height:48px}
-      .kvt .kv-lab{font-size:12.5px;padding:10px 8px 10px 14px}
-      .kvt .kv-c{padding:10px 14px 10px 0;flex-wrap:nowrap;justify-content:flex-end;text-align:right}
+      .kvt{min-width:0}
+      .kvt .kv-gname{flex:none;justify-content:flex-start;padding:7px 12px;font-size:12.5px}
+      .kvt .kv-row{grid-template-columns:1fr auto;min-height:42px}
+      .kvt .kv-lab{font-size:12.5px;padding:8px 8px 8px 12px}
+      .kvt .kv-c{display:none;padding:8px 12px 8px 0;flex-direction:row;align-items:baseline;gap:8px;justify-content:flex-end;text-align:right}
+      .kvt .kv-c.on{display:flex}
       .kvt .kv-c b{font-size:15px}
-      .kvt[data-sel="0"] .c1,.kvt[data-sel="0"] .c2,.kvt[data-sel="0"] .c3,
-      .kvt[data-sel="1"] .c0,.kvt[data-sel="1"] .c2,.kvt[data-sel="1"] .c3,
-      .kvt[data-sel="2"] .c0,.kvt[data-sel="2"] .c1,.kvt[data-sel="2"] .c3,
-      .kvt[data-sel="3"] .c0,.kvt[data-sel="3"] .c1,.kvt[data-sel="3"] .c2{display:none}
     }
     @media(min-width:861px){
       .perf-metric-grid{padding:16px 20px 18px !important;gap:10px !important}
@@ -2483,6 +2483,8 @@
               </div>
             </aside>
             </div>
+            <div class="perf-main-row">
+            <div class="perf-main-left">
             <div class="admin-card">
               <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
                 <h3 class="admin-card-title" style="margin:0">Analisis Produk</h3>
@@ -2493,6 +2495,13 @@
               </div>
               <p class="perf-hint-cols" style="font-size:11.5px;color:var(--muted);margin:8px 0 4px">Klik judul kolom buat urutin (misal CTR atau Conversion Rate tertinggi).</p>
               <div id="perf-top-products" style="margin-top:10px;font-size:13px;color:var(--muted)">Memuat...</div>
+            </div>
+            </div>
+            <aside class="admin-card perf-fn-card" style="margin:0">
+              <h3 class="admin-card-title" style="margin:0 0 4px">Corong Pembelian</h3>
+              <p style="font-size:11.5px;line-height:1.45;color:var(--muted);margin:0 0 14px">Pengunjung unik di tiap tahap. Persen dihitung dari pengunjung toko.</p>
+              <div id="perf-kv-funnel">Memuat...</div>
+            </aside>
             </div>
           </div>
 
@@ -2554,11 +2563,6 @@
               <h3 class="admin-card-title">Grafik Kriteria</h3>
               <div id="kv-crit" class="pp-crit"></div>
               <div id="kv-chart" style="margin-top:14px"></div>
-            </div>
-            <div class="admin-card">
-              <h3 class="admin-card-title">Corong Pembelian</h3>
-              <p class="kv-sub" style="margin-top:-6px">Jumlah pengunjung unik di tiap tahap. Persen di kanan dihitung dari pengunjung toko.</p>
-              <div id="perf-kv-funnel">Memuat...</div>
             </div>
           </div>
 
@@ -4215,6 +4219,25 @@ async function loadPerformanceDashboard() {
   perfProductAnalysisData = { productEvents, orders, uniqueVisitors, allProducts: adminProductsData };
   renderPerfProductAnalysis();
   loadPerfRealtime();
+  perfLoadFunnel(start, end);
+}
+
+// Corong pembelian (kolom kanan di Tinjauan): pengunjung unik per tahap
+async function perfLoadFunnel(start, end) {
+  const el = document.getElementById('perf-kv-funnel');
+  if (!el) return;
+  try {
+    const ev = await kvFetch(start, end);
+    const n = (...ts) => new Set(ev.filter(e => ts.includes(e.event_type)).map(e => e.session_id)).size;
+    renderPerfFunnel([
+      ['Pengunjung toko', n('view_store')],
+      ['Melihat produk', n('view_product')],
+      ['Masuk keranjang', n('add_to_cart')],
+      ['Checkout atau chat WhatsApp', n('begin_checkout', 'click_whatsapp')],
+    ]);
+  } catch (e) {
+    el.innerHTML = '<p style="font-size:12.5px;color:var(--muted)">Data belum bisa dimuat.</p>';
+  }
 }
 
 let perfAutoRefreshTimer = null;
@@ -4702,10 +4725,14 @@ async function loadPerfLayanan() {
 
 // ===================== TAB: TINGKAT KUNJUNGAN =====================
 // ===================== TAB: TINGKAT KUNJUNGAN (tinjauan + grafik kriteria ala Shopee) =====================
-const KV_COLS = [
-  { k: 'all', label: 'Semua' }, { k: 'instagram', label: 'Instagram' },
-  { k: 'tiktok', label: 'TikTok' }, { k: 'lain', label: 'Langsung & Lainnya' },
-];
+const KV_ORDER = ['instagram', 'tiktok', 'facebook', 'whatsapp', 'google', 'langsung'];
+function kvCols() { return (kvState && kvState.cols) || [{ k: 'all', label: 'Semua' }]; }
+function kvBuildCols(...maps) {
+  const seen = {};
+  maps.forEach(m => Object.values(m).forEach(v => { const k = kvGrp(v); seen[k] = (seen[k] || 0) + 1; }));
+  const extra = Object.keys(seen).filter(k => !KV_ORDER.includes(k)).sort((x, y) => seen[y] - seen[x] || x.localeCompare(y));
+  return [{ k: 'all', label: 'Semua' }].concat([...KV_ORDER, ...extra].map(k => ({ k, label: SOURCE_LABEL[k] || (k.charAt(0).toUpperCase() + k.slice(1)) })));
+}
 const KV_GROUPS = [
   { k: 'dilihat', label: 'Statistik Dilihat' },
   { k: 'kunjungan', label: 'Statistik Kunjungan' },
@@ -4732,10 +4759,8 @@ let kvSel = (() => {
 })();
 
 function kvGrp(src) {
-  const s = String(src || 'langsung').toLowerCase();
-  if (s === 'instagram' || s === 'ig') return 'instagram';
-  if (s === 'tiktok') return 'tiktok';
-  return 'lain';
+  const s = String(src || 'langsung').toLowerCase().trim() || 'langsung';
+  return ({ ig: 'instagram', fb: 'facebook', wa: 'whatsapp' })[s] || s;
 }
 function kvSessionSrc(ev) {
   const map = {};
@@ -4798,48 +4823,48 @@ async function loadPerfKunjungan() {
   if (tbl) tbl.innerHTML = '<p style="font-size:13px;color:var(--muted)">Memuat...</p>';
   try {
     const [cur, prev] = await Promise.all([kvFetch(start, end), kvFetch(pr.prevStart.toISOString(), prevEnd.toISOString())]);
-    kvState = { cur, prev, period, curMap: kvSessionSrc(cur), prevMap: kvSessionSrc(prev) };
+    const curMap = kvSessionSrc(cur), prevMap = kvSessionSrc(prev);
+    kvState = { cur, prev, period, curMap, prevMap, cols: kvBuildCols(curMap, prevMap) };
+    kvSrcs = kvSrcs.filter(k => kvState.cols.some(c => c.k === k));
+    if (!kvSrcs.length) kvSrcs = ['all'];
+    if (kvMob >= kvState.cols.length) kvMob = 0;
   } catch (e) {
     if (tbl) tbl.innerHTML = '<p style="color:#c0392b;font-size:13px">Data belum bisa dimuat: ' + chatEsc(String(e && e.message || e)) + '</p>';
     return;
   }
   kvRenderTable(); kvRenderCrit(); kvDrawChart();
-  const sess = (...ts) => new Set(kvState.cur.filter(e => ts.includes(e.event_type)).map(e => e.session_id));
-  renderPerfFunnel([
-    ['Pengunjung toko', sess('view_store').size],
-    ['Melihat produk', sess('view_product').size],
-    ['Masuk keranjang', sess('add_to_cart').size],
-    ['Checkout atau chat WhatsApp', sess('begin_checkout', 'click_whatsapp').size],
-  ]);
 }
 function kvRenderTable() {
-  const s = kvState, el = document.getElementById('kv-table');
-  if (!s || !el) return;
-  const cur = KV_COLS.map(c => kvCompute(kvFilter(s.cur, s.curMap, c.k)));
-  const prev = KV_COLS.map(c => kvCompute(kvFilter(s.prev, s.prevMap, c.k)));
-  el.innerHTML = `<div class="kvt" data-sel="${kvMob}">
-    <div class="kv-chips">${KV_COLS.map((c, i) => `<button type="button" class="kv-chip${i === kvMob ? ' active' : ''}" onclick="kvPickCol(${i})">${c.label}</button>`).join('')}</div>
-    <div class="kv-head"><div></div><div></div>${KV_COLS.map(c => `<div>${c.label}</div>`).join('')}</div>
+  const st = kvState, el = document.getElementById('kv-table');
+  if (!st || !el) return;
+  const cols = kvCols();
+  const cur = cols.map(c => kvCompute(kvFilter(st.cur, st.curMap, c.k)));
+  const prev = cols.map(c => kvCompute(kvFilter(st.prev, st.prevMap, c.k)));
+  el.innerHTML = `<div class="kv-scroll"><div class="kvt" style="--n:${cols.length}">
+    <div class="kv-chips">${cols.map((c, i) => `<button type="button" class="kv-chip${i === kvMob ? ' active' : ''}" onclick="kvPickCol(${i})">${chatEsc(c.label)}</button>`).join('')}</div>
+    <div class="kv-head"><div></div><div></div>${cols.map(c => `<div>${chatEsc(c.label)}</div>`).join('')}</div>
     ${KV_GROUPS.map(g => `<div class="kv-grp"><div class="kv-gname">${g.label}</div><div class="kv-rows">${
       KV_METRICS.filter(m => m.g === g.k).map(m => `<div class="kv-row">
         <div class="kv-lab">${m.label}<span class="kv-q" title="${chatEsc(m.tip)}">?</span></div>
-        ${KV_COLS.map((c, i) => `<div class="kv-c c${i}"><b>${kvFmt(m, cur[i][m.k])}</b>${kvDelta(cur[i][m.k], prev[i][m.k], m.good)}</div>`).join('')}
+        ${cols.map((c, i) => `<div class="kv-c c${i}${i === kvMob ? ' on' : ''}"><b>${kvFmt(m, cur[i][m.k])}</b>${kvDelta(cur[i][m.k], prev[i][m.k], m.good)}</div>`).join('')}
       </div>`).join('')}</div></div>`).join('')}
-  </div>`;
+  </div></div>`;
 }
 function kvPickCol(i) {
   kvMob = i;
   const t = document.querySelector('#kv-table .kvt');
-  if (t) { t.dataset.sel = i; t.querySelectorAll('.kv-chip').forEach((b, j) => b.classList.toggle('active', j === i)); }
+  if (!t) return;
+  t.querySelectorAll('.kv-chip').forEach((b, j) => b.classList.toggle('active', j === i));
+  t.querySelectorAll('.kv-c').forEach(c => c.classList.toggle('on', c.classList.contains('c' + i)));
 }
 function kvRenderCrit() {
   const box = document.getElementById('kv-crit');
   if (!box) return;
   const nS = kvSrcs.length, nM = kvSel.length;
   box.innerHTML = `<div class="pp-crit-row"><div class="pp-crit-g">Sumber:</div><div class="pp-crit-items">${
-    KV_COLS.map(c => {
+    kvCols().map(c => {
       const on = kvSrcs.includes(c.k), dis = !on && (nS + 1) * nM > KV_LINES;
-      return `<label class="pp-chk${dis ? ' dis' : ''}"><input type="checkbox" ${on ? 'checked' : ''} ${dis ? 'disabled' : ''} onchange="kvToggleSrc('${c.k}',this.checked)"/><span>${c.label}</span></label>`;
+      return `<label class="pp-chk${dis ? ' dis' : ''}"><input type="checkbox" ${on ? 'checked' : ''} ${dis ? 'disabled' : ''} onchange="kvToggleSrc('${c.k}',this.checked)"/><span>${chatEsc(c.label)}</span></label>`;
     }).join('')}</div></div>` +
     KV_GROUPS.map(g => `<div class="pp-crit-row"><div class="pp-crit-g">${g.label}:</div><div class="pp-crit-items">${
       KV_METRICS.filter(m => m.g === g.k).map(m => {
@@ -4851,7 +4876,7 @@ function kvRenderCrit() {
 function kvToggleSrc(k, on) {
   if (on) { if (!kvSrcs.includes(k)) kvSrcs.push(k); }
   else if (kvSrcs.length > 1) kvSrcs = kvSrcs.filter(x => x !== k);
-  kvSrcs = KV_COLS.map(c => c.k).filter(x => kvSrcs.includes(x));
+  kvSrcs = kvCols().map(c => c.k).filter(x => kvSrcs.includes(x));
   kvRenderCrit(); kvDrawChart();
 }
 function kvToggle(k, on) {
@@ -4882,7 +4907,7 @@ function kvDrawChart() {
   const mxBy = {}; sel.forEach(m => { mxBy[m.k] = Math.max(0, ...perSrc.flatMap(p => p.per.map(q => q[m.k]))); });
   const series = [];
   sel.forEach(m => perSrc.forEach(p => {
-    const sname = (KV_COLS.find(c => c.k === p.sk) || {}).label;
+    const sname = (kvCols().find(c => c.k === p.sk) || {}).label;
     series.push({ m, vals: p.per.map(q => q[m.k]), mx: mxBy[m.k], label: multi ? m.label + ' · ' + sname : m.label, color: KV_COLORS[series.length % KV_COLORS.length] });
   }));
   const y = (v, mx) => pt + ih - (mx > 0 ? v / mx * ih * 0.94 : 0);
