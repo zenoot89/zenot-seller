@@ -2448,6 +2448,25 @@
                 <div id="perf-kv-productviews" style="font-size:22px;font-weight:700">0</div>
               </div>
             </div>
+            <div class="perf-metric-grid" style="margin-top:12px">
+              <div class="admin-card" style="margin:0">
+                <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Masuk Keranjang</div>
+                <div id="perf-kv-cart" style="font-size:22px;font-weight:700">0</div>
+              </div>
+              <div class="admin-card" style="margin:0">
+                <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Klik WhatsApp</div>
+                <div id="perf-kv-wa" style="font-size:22px;font-weight:700">0</div>
+              </div>
+              <div class="admin-card" style="margin:0">
+                <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Checkout Dibuat</div>
+                <div id="perf-kv-checkout" style="font-size:22px;font-weight:700">0</div>
+              </div>
+            </div>
+            <div class="admin-card">
+              <h3 class="admin-card-title">Corong Pembelian</h3>
+              <p style="font-size:11.5px;color:var(--muted);margin:-8px 0 12px">Jumlah pengunjung unik di tiap tahap. Persen di kanan dihitung dari pengunjung toko.</p>
+              <div id="perf-kv-funnel">Memuat...</div>
+            </div>
             <div class="admin-card">
               <h3 class="admin-card-title">Tren Kunjungan</h3>
               <div id="perf-kv-chart">Memuat...</div>
@@ -4501,6 +4520,58 @@ async function loadPerfKunjungan() {
   document.getElementById('perf-kv-chart').innerHTML = renderSvgLineChart(values, labels, period, v=>String(v));
 
   renderPerfSources(storeEvents);
+  perfLoadActions(start, end);
+}
+
+// Kartu keranjang / WhatsApp / checkout dan corong pembelian. Data dari analytics_events (diisi oleh toko).
+async function perfFetchEvents(types, start, end) {
+  const out = [], size = 1000;
+  for (let from = 0; from < 50000; from += size) {
+    const r = await sb.from('analytics_events').select('session_id, event_type')
+      .in('event_type', types).gte('created_at', start).lt('created_at', end)
+      .order('created_at', { ascending: true }).range(from, from + size - 1);
+    if (r.error) throw r.error;
+    const d = r.data || [];
+    out.push(...d);
+    if (d.length < size) break;
+  }
+  return out;
+}
+async function perfLoadActions(start, end) {
+  const setT = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  try {
+    const ev = await perfFetchEvents(['view_store', 'view_product', 'add_to_cart', 'begin_checkout', 'click_whatsapp'], start, end);
+    const cnt = t => ev.filter(e => e.event_type === t).length;
+    const sess = (...ts) => new Set(ev.filter(e => ts.includes(e.event_type)).map(e => e.session_id));
+    setT('perf-kv-cart', cnt('add_to_cart').toLocaleString('id-ID'));
+    setT('perf-kv-wa', cnt('click_whatsapp').toLocaleString('id-ID'));
+    setT('perf-kv-checkout', cnt('begin_checkout').toLocaleString('id-ID'));
+    renderPerfFunnel([
+      ['Pengunjung toko', sess('view_store').size],
+      ['Melihat produk', sess('view_product').size],
+      ['Masuk keranjang', sess('add_to_cart').size],
+      ['Checkout atau chat WhatsApp', sess('begin_checkout', 'click_whatsapp').size],
+    ]);
+  } catch (e) {
+    const el = document.getElementById('perf-kv-funnel');
+    if (el) el.innerHTML = '<p style="font-size:12.5px;color:var(--muted)">Data belum bisa dimuat (' + String(e && e.message || e).replace(/[<>&]/g, '') + ').</p>';
+  }
+}
+function renderPerfFunnel(stages) {
+  const el = document.getElementById('perf-kv-funnel');
+  if (!el) return;
+  const base = stages[0][1];
+  if (!stages.some(s => s[1] > 0)) { el.innerHTML = '<p style="font-size:12.5px;color:var(--muted)">Belum ada data di periode ini.</p>'; return; }
+  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">' + stages.map(([label, n]) => {
+    const pct = base > 0 ? Math.min(100, n / base * 100) : 0;
+    return `<div>
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px">
+        <span>${label}</span>
+        <span style="color:var(--muted)">${n.toLocaleString('id-ID')} (${pct.toFixed(1)}%)</span>
+      </div>
+      <div style="height:8px;background:#f0ede8;border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--ink)"></div></div>
+    </div>`;
+  }).join('') + '</div>';
 }
 
 const SOURCE_LABEL = {
