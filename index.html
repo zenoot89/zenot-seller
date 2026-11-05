@@ -2570,6 +2570,11 @@
               <div id="kv-table">Memuat...</div>
             </div>
             <div class="admin-card">
+              <h3 class="admin-card-title">Pengunjung dari Google Analytics <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Data dari Google Analytics 4, terpisah dari data toko di atas. Kolom dipisah menurut perangkat pengunjung. Pengunjung lama dihitung dari pengunjung aktif dikurangi pengunjung baru. GA4 bisa terlambat beberapa jam, jadi angka hari ini mungkin belum lengkap.">?</span></h3>
+              <div id="ga-table" style="margin-top:12px">Memuat...</div>
+              <div id="ga-city"></div>
+            </div>
+            <div class="admin-card">
               <h3 class="admin-card-title">Grafik Kriteria</h3>
               <div id="kv-crit" class="pp-crit"></div>
               <div id="kv-chart" style="margin-top:14px"></div>
@@ -4846,6 +4851,7 @@ async function kvFetch(start, end) {
 }
 async function loadPerfKunjungan() {
   const period = document.getElementById('perf-period')?.value || 'today';
+  gaLoad(period);
   const { start, end } = perfRangeBounds(period);
   const pr = perfPrevRange(period);
   let prevEnd = pr.prevEnd;
@@ -4865,6 +4871,81 @@ async function loadPerfKunjungan() {
     return;
   }
   kvRenderTable(); kvRenderCrit(); kvDrawChart();
+}
+
+// ===================== GOOGLE ANALYTICS (lewat Edge Function ga4-report) =====================
+const GA_COLS = [{ k: 'all', label: 'Semua' }, { k: 'mobile', label: 'HP' }, { k: 'desktop', label: 'Komputer' }, { k: 'tablet', label: 'Tablet' }];
+let gaMob = 0, gaData = null, gaPeriod = 'today';
+function gaYmd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function gaDur(sec) {
+  sec = Math.round(sec || 0);
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  return [h, m, s].map(x => String(x).padStart(2, '0')).join(':');
+}
+async function gaLoad(period) {
+  const el = document.getElementById('ga-table'), city = document.getElementById('ga-city');
+  if (!el) return;
+  el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Memuat...</p>'; if (city) city.innerHTML = '';
+  try {
+    const { start, end } = perfRangeBounds(period);
+    const pr = perfPrevRange(period);
+    const endD = new Date(Math.min(new Date(end).getTime() - 1, Date.now()));
+    gaPeriod = period;
+    const prevEndD = new Date(pr.prevEnd.getTime() - 86400000);
+    const body = { start: gaYmd(new Date(start)), end: gaYmd(endD), prevStart: gaYmd(pr.prevStart), prevEnd: gaYmd(prevEndD < pr.prevStart ? pr.prevStart : prevEndD) };
+    const r = await sb.functions.invoke('ga4-report', { body });
+    if (r.error) {
+      let msg = r.error.message || 'gagal';
+      try { const j = await r.error.context.json(); if (j && j.error) msg = j.error; } catch (e) {}
+      throw new Error(msg);
+    }
+    if (!r.data || r.data.error) throw new Error((r.data && r.data.error) || 'jawaban kosong');
+    gaData = r.data;
+  } catch (e) {
+    el.innerHTML = '<p style="color:#c0392b;font-size:13px">Data Google Analytics belum bisa dimuat: ' + chatEsc(String(e && e.message || e)) + '</p>';
+    return;
+  }
+  gaRender();
+}
+function gaRender() {
+  const el = document.getElementById('ga-table'), city = document.getElementById('ga-city');
+  if (!el || !gaData) return;
+  const z = { activeUsers: 0, newUsers: 0, sessions: 0, engagementSeconds: 0, pageViews: 0 };
+  const dev = {}; (gaData.byDevice || []).forEach(d => { dev[d.device] = d; });
+  const pick = (k, w) => k === 'all' ? gaData.totals[w] : ((dev[k] && dev[k][w]) || z);
+  const GM = [
+    { g: 'Statistik Pengunjung', rows: [
+      { label: 'Pengunjung Aktif', tip: 'Pengunjung unik yang aktif di situs.', v: o => o.activeUsers, f: 'n' },
+      { label: 'Pengunjung Baru', tip: 'Pengunjung yang pertama kali datang.', v: o => o.newUsers, f: 'n' },
+      { label: 'Pengunjung Lama', tip: 'Pengunjung aktif dikurangi pengunjung baru.', v: o => Math.max(0, o.activeUsers - o.newUsers), f: 'n' },
+      { label: 'Rata-rata Waktu Dihabiskan', tip: 'Rata-rata lama pengunjung aktif membuka situs (jam:menit:detik).', v: o => o.activeUsers ? o.engagementSeconds / o.activeUsers : 0, f: 't' },
+    ] },
+    { g: 'Statistik Halaman', rows: [
+      { label: 'Halaman Dilihat', tip: 'Jumlah halaman yang dibuka.', v: o => o.pageViews, f: 'n' },
+      { label: 'Sesi', tip: 'Jumlah kunjungan (satu pengunjung bisa punya beberapa sesi).', v: o => o.sessions, f: 'n' },
+    ] },
+  ];
+  const fmt = (f, v) => f === 't' ? gaDur(v) : Math.round(v).toLocaleString('id-ID');
+  el.innerHTML = `<div class="kv-scroll"><div class="kvt" style="--n:${GA_COLS.length}">
+    <div class="kv-chips">${GA_COLS.map((c, i) => `<button type="button" class="kv-chip${i === gaMob ? ' active' : ''}" onclick="gaPickCol(${i})">${c.label}</button>`).join('')}</div>
+    <div class="kv-head"><div></div><div></div>${GA_COLS.map(c => `<div>${c.label}</div>`).join('')}</div>
+    ${GM.map(g => `<div class="kv-grp"><div class="kv-gname">${g.g}</div><div class="kv-rows">${g.rows.map(m => `<div class="kv-row">
+      <div class="kv-lab">${m.label}${kvHint(m.tip)}</div>
+      ${GA_COLS.map((c, i) => { const cu = m.v(pick(c.k, 'cur')), pv = m.v(pick(c.k, 'prev')); return `<div class="kv-c c${i}${i === gaMob ? ' on' : ''}"><b>${fmt(m.f, cu)}</b>${gaPeriod === 'today' ? '' : kvDelta(cu, pv)}</div>`; }).join('')}
+    </div>`).join('')}</div></div>`).join('')}
+  </div></div>`;
+  const cities = (gaData.byCity || []).filter(c => c.city && c.city !== '(not set)');
+  if (city) {
+    const mx = Math.max(1, ...cities.map(c => c.activeUsers));
+    city.innerHTML = cities.length ? `<h4 style="font-size:13.5px;font-weight:700;margin:18px 0 10px">Kota Asal Pengunjung ${kvHint('10 kota dengan pengunjung aktif terbanyak di periode ini, menurut Google Analytics.')}</h4><div style="display:flex;flex-direction:column;gap:8px">${cities.map(c => `<div><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px"><span>${chatEsc(c.city)}</span><span style="color:var(--muted)">${c.activeUsers.toLocaleString('id-ID')}</span></div><div style="height:6px;background:#f0ede8;border-radius:3px;overflow:hidden"><div style="height:100%;width:${c.activeUsers / mx * 100}%;background:#41434D"></div></div></div>`).join('')}</div>` : '';
+  }
+}
+function gaPickCol(i) {
+  gaMob = i;
+  const t = document.querySelector('#ga-table .kvt');
+  if (!t) return;
+  t.querySelectorAll('.kv-chip').forEach((b, j) => b.classList.toggle('active', j === i));
+  t.querySelectorAll('.kv-c').forEach(c => c.classList.toggle('on', c.classList.contains('c' + i)));
 }
 function kvRenderTable() {
   const st = kvState, el = document.getElementById('kv-table');
