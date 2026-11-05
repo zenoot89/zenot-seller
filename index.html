@@ -1607,8 +1607,8 @@
     .kv-ptbl th.sortable{cursor:pointer;user-select:none}
     .kv-rk{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-weight:700;font-size:12px;color:#41434D}
     .kv-rk.r1{background:#f5c542;color:#111114}.kv-rk.r2{background:#d5d7de}.kv-rk.r3{background:#e3b08a}
-    .kv-pn{display:flex;align-items:center;gap:10px;min-width:170px}
-    .kv-pn b{display:block;font-weight:600;color:#111114;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .kv-pn{display:flex;align-items:center;gap:10px;min-width:140px}
+    .kv-pn b{display:block;font-weight:600;color:#111114;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .kv-pn span{display:block;font-size:11.5px;color:rgba(41,42,49,.6)}
     @media (max-width:860px){.kv-cards,.kv-src{grid-template-columns:repeat(2,minmax(0,1fr))}}
     .kv-sub{font-size:12.5px;line-height:1.5;color:rgba(41,42,49,.58);margin:-6px 0 16px}
@@ -4282,31 +4282,45 @@ async function perfLoadSources(period, start, end, prevStart, prevEnd) {
   try {
     let pe = prevEnd;
     if (period === 'today') pe = new Date(prevStart.getTime() + Math.max(0, Date.now() - new Date(start).getTime()));
-    const [cur, prev] = await Promise.all([kvFetch(start, end), kvFetch(prevStart.toISOString(), pe.toISOString())]);
+    const scope = document.getElementById('perf-scope')?.value || 'dibuat';
+    const ordQ = (a, b2) => { let q = sb.from('orders').select('total, source, status').gte('created_at', a).lt('created_at', b2); if (scope === 'siap_kirim') q = q.eq('status', 'diproses'); return q; };
+    const [cur, prev, oc, op] = await Promise.all([
+      kvFetch(start, end), kvFetch(prevStart.toISOString(), pe.toISOString()),
+      ordQ(start, end), ordQ(prevStart.toISOString(), pe.toISOString()),
+    ]);
     if (seq !== perfSrcSeq) return;
+    const haveSrc = !oc.error && !op.error;
+    const oCur = (oc.data || []), oPrev = (op.data || []);
     const cm = kvSessionSrc(cur), pm = kvSessionSrc(prev);
     const cols = kvBuildCols(cm, pm).filter(c => c.k !== 'all');
-    const rows = cols.map(c => ({ c, cu: kvCompute(kvFilter(cur, cm, c.k)), pv: kvCompute(kvFilter(prev, pm, c.k)) }));
-    const tc = kvCompute(cur), tp = kvCompute(prev);
-    const pct = (a, b) => b ? (a / b * 100) : 0;
+    const sumBy = (list, key) => { let rp = 0, n = 0; list.forEach(o => { if (key === 'all' || (o.source ? kvGrp(o.source) : '_none') === key) { rp += Number(o.total) || 0; n++; } }); return { rp, n }; };
+    // sumber yang tercatat di pesanan tapi belum ada di daftar kolom ikut ditampilkan
+    const known = new Set(cols.map(c => c.k));
+    [...oCur, ...oPrev].forEach(o => { if (o.source) { const k = kvGrp(o.source); if (!known.has(k)) { known.add(k); cols.push({ k, label: SOURCE_LABEL[k] || (k.charAt(0).toUpperCase() + k.slice(1)) }); } } });
+    if (haveSrc && oCur.concat(oPrev).some(o => !o.source)) cols.push({ k: '_none', label: 'Tidak tercatat' });
+    const rows = cols.map(c => ({ c, cu: kvCompute(kvFilter(cur, cm, c.k)), pv: kvCompute(kvFilter(prev, pm, c.k)), sc: sumBy(oCur, c.k), sp: sumBy(oPrev, c.k) }));
+    const tc = kvCompute(cur), tp = kvCompute(prev), stc = sumBy(oCur, 'all'), stp = sumBy(oPrev, 'all');
+    const pct = (a, b2) => b2 ? (a / b2 * 100) : 0;
     const fp = v => v.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
     const fn = v => Math.round(v).toLocaleString('id-ID');
-    const cards = rows.map(r => `<div class="kv-card"><div class="kc-l">${chatEsc(r.c.label)}</div><div class="kc-v">${fn(r.cu.visitors)}</div><div class="kc-s">${fp(pct(r.cu.visitors, tc.visitors))} dari total${kvDelta(r.cu.visitors, r.pv.visitors)}</div></div>`).join('');
+    const rp = v => 'Rp' + Math.round(v).toLocaleString('id-ID');
+    const cards = rows.map(r => `<div class="kv-card"><div class="kc-l">${chatEsc(r.c.label)}</div><div class="kc-v">${rp(r.sc.rp)}</div><div class="kc-s">${fp(pct(r.sc.rp, stc.rp))} dari penjualan${kvDelta(r.sc.rp, r.sp.rp)}</div></div>`).join('');
     const th = (t, tip) => `<th>${t}${tip ? ' ' + kvHint(tip) : ''}</th>`;
-    const cell = (a, b, f) => `<td>${f(a)}<small>${kvDelta(a, b)}</small></td>`;
+    const cell = (a, b2, f) => `<td>${f(a)}<small>${kvDelta(a, b2)}</small></td>`;
     const body = rows.map(r => {
       const cu = r.cu, pv = r.pv;
       const cr = pct(cu.checkout, cu.visitors), pr = pct(pv.checkout, pv.visitors);
       return `<tr><td class="nm"><b>${chatEsc(r.c.label)}</b></td>
-        <td>${fp(pct(cu.visitors, tc.visitors))}<small>${kvDelta(pct(cu.visitors, tc.visitors), pct(pv.visitors, tp.visitors))}</small></td>
+        ${cell(pct(r.sc.rp, stc.rp), pct(r.sp.rp, stp.rp), fp)}${cell(r.sc.rp, r.sp.rp, rp)}${cell(r.sc.n, r.sp.n, fn)}
         ${cell(cu.visitors, pv.visitors, fn)}${cell(cu.views, pv.views, fn)}${cell(cu.cart, pv.cart, fn)}${cell(cu.wa, pv.wa, fn)}${cell(cu.checkout, pv.checkout, fn)}${cell(cr, pr, fp)}</tr>`;
     }).join('');
-    el.innerHTML = `
-      <div class="src-band"><h4>Rincian Kunjungan Toko</h4>
-        <div class="kv-cards"><div class="kv-card tot"><div class="kc-l">Total Pengunjung ${kvHint('Pengunjung unik yang membuka halaman toko, semua sumber.')}</div><div class="kc-v">${fn(tc.visitors)}</div><div class="kc-s">100% dari total${kvDelta(tc.visitors, tp.visitors)}</div></div>${cards}</div>
+    const note = haveSrc ? '' : '<p style="font-size:12.5px;color:var(--muted);margin:0 0 12px">Rp per sumber belum aktif: jalankan langkah SQL "sumber pesanan" di Supabase.</p>';
+    el.innerHTML = `${note}
+      <div class="src-band"><h4>Rincian Kontribusi Penjualan Toko</h4>
+        <div class="kv-cards"><div class="kv-card tot"><div class="kc-l">Total Penjualan ${kvHint('Jumlah nilai pesanan di periode ini, semua sumber. Pesanan lama sebelum fitur ini aktif masuk ke "Tidak tercatat".')}</div><div class="kc-v">${rp(stc.rp)}</div><div class="kc-s">100% dari penjualan${kvDelta(stc.rp, stp.rp)}</div></div>${cards}</div>
       </div>
       <div class="src-scroll"><table class="kv-ptbl"><thead><tr>
-        <th style="text-align:left">Sumber Kunjungan</th>${th('Rasio Pengunjung', 'Bagian pengunjung dari sumber ini terhadap total pengunjung.')}${th('Pengunjung')}${th('Produk Dilihat')}${th('Masuk Keranjang')}${th('Klik WhatsApp')}${th('Checkout Dibuat')}${th('Konversi Checkout', 'Checkout dibuat dibagi pengunjung dari sumber yang sama.')}
+        <th style="text-align:left">Sumber Kunjungan</th>${th('Rasio Penjualan', 'Bagian penjualan dari sumber ini terhadap total penjualan.')}${th('Penjualan')}${th('Pesanan')}${th('Pengunjung')}${th('Produk Dilihat')}${th('Masuk Keranjang')}${th('Klik WhatsApp')}${th('Checkout Dibuat')}${th('Konversi Checkout', 'Checkout dibuat dibagi pengunjung dari sumber yang sama.')}
       </tr></thead><tbody>${body}</tbody></table></div>`;
   } catch (e) {
     el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Gagal memuat sumber kunjungan.</p>';
@@ -4477,8 +4491,15 @@ function renderPerfProductAnalysis() {
         return { id: p.id, name: p.name, img: p.image_url, views, productOrders, ctr, conv, revenue: revenueByProduct[p.id] || 0 };
       });
   } else {
-    rows = Object.keys(viewsByProduct).map(pid => {
-      const p = allProducts.find(x => x.id === pid);
+    // Semua produk ikut dihitung (yang belum punya data tampil 0), supaya 10 teratas selalu terisi
+    const byNew = [...(allProducts || [])].sort((x, y) => new Date(y.created_at) - new Date(x.created_at));
+    const ids = [];
+    const addId = id => { if (id && !ids.includes(id)) ids.push(id); };
+    byNew.forEach(p => addId(p.id));
+    Object.keys(viewsByProduct).forEach(addId);
+    Object.keys(ordersByProduct).forEach(addId);
+    rows = ids.map(pid => {
+      const p = (allProducts || []).find(x => x.id === pid);
       const views = viewsByProduct[pid] || 0;
       const productOrders = ordersByProduct[pid] || 0;
       const ctr = uniqueVisitors > 0 ? (views / uniqueVisitors * 100) : 0;
