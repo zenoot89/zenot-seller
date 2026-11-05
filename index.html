@@ -1597,6 +1597,16 @@
     .kv-card .kc-s{font-size:11.5px;color:rgba(41,42,49,.6);line-height:1.35}
     .kv-card .kc-s .kv-d{margin-left:4px}
     .src-scroll{overflow-x:auto}
+    .src-car{position:relative}
+    .src-track{display:flex;gap:10px;overflow-x:auto;scroll-behavior:smooth;scroll-snap-type:x mandatory;scrollbar-width:none}
+    .src-track::-webkit-scrollbar{display:none}
+    .src-track .kv-card{flex:0 0 calc((100% - 30px) / 4);scroll-snap-align:start}
+    .src-arr{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:0;background:rgba(65,67,77,.55);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;padding:0}
+    .src-arr:hover{background:rgba(65,67,77,.85)}
+    .src-arr.l{left:-14px}.src-arr.r{right:-14px}
+    .src-arr[hidden]{display:none}
+    .src-arr svg{width:16px;height:16px}
+    @media (max-width:860px){.src-track .kv-card{flex-basis:calc((100% - 10px) / 2)}}
     .kv-ptbl{width:100%;border-collapse:collapse;font-size:13px}
     .kv-ptbl th{padding:10px 6px;font-weight:600;color:rgba(41,42,49,.65);text-align:right;white-space:nowrap;background:#F1F1F3}
     .kv-ptbl th:first-child{text-align:left;border-radius:6px 0 0 6px}.kv-ptbl th:last-child{border-radius:0 6px 6px 0}
@@ -4275,6 +4285,18 @@ async function loadPerformanceDashboard() {
 
 // Sumber Kunjungan (tab Tinjauan): kartu per sumber + tabel rincian, dibandingkan dengan periode sebelumnya
 let perfSrcSeq = 0;
+function srcArrows(car) {
+  if (!car) return;
+  const t = car.querySelector('.src-track'), l = car.querySelector('.src-arr.l'), r = car.querySelector('.src-arr.r');
+  if (!t) return;
+  l.hidden = t.scrollLeft <= 2;
+  r.hidden = t.scrollLeft + t.clientWidth >= t.scrollWidth - 2;
+}
+function srcSlide(btn, dir) {
+  const car = btn.closest('.src-car'), t = car.querySelector('.src-track');
+  t.scrollBy({ left: dir * (t.clientWidth + 10), behavior: 'smooth' });
+}
+window.addEventListener('resize', () => document.querySelectorAll('.src-car').forEach(srcArrows));
 async function perfLoadSources(period, start, end, prevStart, prevEnd) {
   const el = document.getElementById('perf-src');
   if (!el) return;
@@ -4317,11 +4339,12 @@ async function perfLoadSources(period, start, end, prevStart, prevEnd) {
     const note = haveSrc ? '' : '<p style="font-size:12.5px;color:var(--muted);margin:0 0 12px">Rp per sumber belum aktif: jalankan langkah SQL "sumber pesanan" di Supabase.</p>';
     el.innerHTML = `${note}
       <div class="src-band"><h4>Rincian Kontribusi Penjualan Toko</h4>
-        <div class="kv-cards"><div class="kv-card tot"><div class="kc-l">Total Penjualan ${kvHint('Jumlah nilai pesanan di periode ini, semua sumber. Pesanan lama sebelum fitur ini aktif masuk ke "Tidak tercatat".')}</div><div class="kc-v">${rp(stc.rp)}</div><div class="kc-s">100% dari penjualan${kvDelta(stc.rp, stp.rp)}</div></div>${cards}</div>
+        <div class="src-car"><button type="button" class="src-arr l" hidden aria-label="Sebelumnya" onclick="srcSlide(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="src-track" onscroll="srcArrows(this.parentNode)"><div class="kv-card tot"><div class="kc-l">Total Penjualan ${kvHint('Jumlah nilai pesanan di periode ini, semua sumber. Pesanan lama sebelum fitur ini aktif masuk ke "Tidak tercatat".')}</div><div class="kc-v">${rp(stc.rp)}</div><div class="kc-s">100% dari penjualan${kvDelta(stc.rp, stp.rp)}</div></div>${cards}</div><button type="button" class="src-arr r" hidden aria-label="Berikutnya" onclick="srcSlide(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button></div>
       </div>
       <div class="src-scroll"><table class="kv-ptbl"><thead><tr>
         <th style="text-align:left">Sumber Kunjungan</th>${th('Rasio Penjualan', 'Bagian penjualan dari sumber ini terhadap total penjualan.')}${th('Penjualan')}${th('Pesanan')}${th('Pengunjung')}${th('Produk Dilihat')}${th('Masuk Keranjang')}${th('Klik WhatsApp')}${th('Checkout Dibuat')}${th('Konversi Checkout', 'Checkout dibuat dibagi pengunjung dari sumber yang sama.')}
       </tr></thead><tbody>${body}</tbody></table></div>`;
+    srcArrows(el.querySelector('.src-car'));
   } catch (e) {
     el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Gagal memuat sumber kunjungan.</p>';
   }
