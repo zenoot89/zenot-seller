@@ -1585,6 +1585,32 @@
       #perf-sticky #perf-period-controls{margin-bottom:12px}
     }
     /* ===== Tingkat Kunjungan ala Shopee ===== */
+
+    .kv-split{display:grid;grid-template-columns:minmax(0,1fr);gap:0 16px;align-items:start}
+    @media (min-width:861px){.kv-split{grid-template-columns:minmax(0,7fr) minmax(0,3fr)}}
+    .kv-cards,.kv-src{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
+    .kv-card{position:relative;text-align:left;background:#fff;border:1px solid rgba(17,17,20,.12);border-radius:8px;padding:12px 14px;cursor:pointer;font-family:inherit;color:#111114;min-width:0}
+    .kv-card:hover{border-color:rgba(17,17,20,.3)}
+    .kv-card.on{border-top:3px solid #41434D;padding-top:10px;box-shadow:0 2px 10px rgba(17,17,20,.08)}
+    .kv-card.dis{opacity:.45;cursor:not-allowed}
+    .kv-card .kc-l{font-size:12.5px;color:rgba(41,42,49,.75);display:flex;align-items:center;gap:6px;line-height:1.3}
+    .kv-card .kc-v{font-size:22px;font-weight:700;margin:6px 0 2px;line-height:1.2;font-variant-numeric:tabular-nums}
+    .kv-card .kc-s{font-size:11.5px;color:rgba(41,42,49,.6);line-height:1.35}
+    .kv-card .kc-s .kv-d{margin-left:4px}
+    .kv-foot{margin-top:10px;font-size:12px;color:rgba(41,42,49,.58)}
+    .kv-rt-v{display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;margin-top:12px}
+    .kv-rt-v div span{display:block;font-size:12.5px;color:rgba(41,42,49,.65)}
+    .kv-rt-v div b{font-size:22px;font-weight:700;color:#111114;font-variant-numeric:tabular-nums}
+    .kv-ptbl{width:100%;border-collapse:collapse;font-size:13px}
+    .kv-ptbl th{padding:10px 8px;font-weight:600;color:rgba(41,42,49,.65);text-align:right;white-space:nowrap;background:#F1F1F3}
+    .kv-ptbl th:first-child{text-align:left;border-radius:6px 0 0 6px}.kv-ptbl th:last-child{border-radius:0 6px 6px 0}
+    .kv-ptbl td{padding:12px 8px;border-bottom:1px solid rgba(17,17,20,.08);text-align:right;font-variant-numeric:tabular-nums;vertical-align:middle}
+    .kv-ptbl td:first-child{text-align:left;width:46px}
+    .kv-ptbl td.nm{text-align:left}
+    .kv-rk{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-weight:700;font-size:12px;color:#41434D}
+    .kv-rk.r1{background:#f5c542;color:#111114}.kv-rk.r2{background:#d5d7de}.kv-rk.r3{background:#e3b08a}
+    .kv-more{margin-top:12px;background:#fff;border:1px solid rgba(17,17,20,.2);border-radius:6px;padding:7px 16px;font:600 13px 'Inter',sans-serif;cursor:pointer;color:#111114}
+    @media (max-width:860px){.kv-cards,.kv-src{grid-template-columns:repeat(2,minmax(0,1fr))}.kv-ptbl .hm{display:none}}
     .kv-sub{font-size:12.5px;line-height:1.5;color:rgba(41,42,49,.58);margin:-6px 0 16px}
     .kvt .kv-chips{display:none}
     .kv-scroll{overflow-x:auto}
@@ -2565,19 +2591,39 @@
 
           <!-- PANEL: TINGKAT KUNJUNGAN -->
           <div id="perf-panel-kunjungan" class="perf-panel" style="display:none">
+            <div class="kv-split">
+              <div class="admin-card kv-main">
+                <h3 class="admin-card-title">Kriteria Utama <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Klik kartu untuk menampilkan atau menyembunyikan kriteria di grafik (maksimal 4). Angka kecil membandingkan dengan periode sebelumnya.">?</span></h3>
+                <div id="kv-cards" class="kv-cards">Memuat...</div>
+                <div id="kv-chart" style="margin-top:16px"></div>
+              </div>
+              <div class="admin-card kv-rt-card">
+                <h3 class="admin-card-title">Metrik Real-time <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Hari ini sampai sekarang, tidak terpengaruh periode yang dipilih. Grafik kecil menunjukkan pengunjung per jam.">?</span></h3>
+                <div id="kv-rt">Memuat...</div>
+              </div>
+            </div>
+            <div class="admin-card">
+              <h3 class="admin-card-title">Sumber Kunjungan <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Dari mana pengunjung datang. Klik kartu sumber untuk membandingkannya di grafik. Persentase adalah bagian dari total pengunjung.">?</span></h3>
+              <div id="kv-src" class="kv-src">Memuat...</div>
+              <div id="kv-crit-foot" class="kv-foot"></div>
+            </div>
             <div class="admin-card">
               <h3 class="admin-card-title">Tinjauan <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Data dihitung dari kunjungan dan pesanan yang tercatat di toko. Angka kecil di sebelah kanan membandingkan dengan periode sebelumnya: ▲ hijau berarti membaik, ▼ merah berarti memburuk.">?</span></h3>
               <div id="kv-table">Memuat...</div>
             </div>
             <div class="admin-card">
-              <h3 class="admin-card-title">Pengunjung dari Google Analytics <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Data dari Google Analytics 4, terpisah dari data toko di atas. Kolom dipisah menurut perangkat pengunjung. Pengunjung lama dihitung dari pengunjung aktif dikurangi pengunjung baru. GA4 bisa terlambat beberapa jam, jadi angka hari ini mungkin belum lengkap.">?</span></h3>
-              <div id="ga-table" style="margin-top:12px">Memuat...</div>
-              <div id="ga-city"></div>
+              <h3 class="admin-card-title">Kunjungan Produk <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Produk diurutkan dari yang paling sering dilihat. Mengikuti sumber yang dipilih di kartu Sumber Kunjungan (kalau memilih lebih dari satu, semua sumber dihitung). Persentase aksi = (keranjang + WhatsApp + checkout) dibagi dilihat.">?</span></h3>
+              <div id="kv-prod">Memuat...</div>
             </div>
-            <div class="admin-card">
-              <h3 class="admin-card-title">Grafik Kriteria</h3>
-              <div id="kv-crit" class="pp-crit"></div>
-              <div id="kv-chart" style="margin-top:14px"></div>
+            <div class="kv-split">
+              <div class="admin-card">
+                <h3 class="admin-card-title">Pengunjung dari Google Analytics <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Data dari Google Analytics 4, terpisah dari data toko di atas. Kolom dipisah menurut perangkat pengunjung. Pengunjung lama dihitung dari pengunjung aktif dikurangi pengunjung baru. GA4 bisa terlambat beberapa jam, jadi angka hari ini mungkin belum lengkap.">?</span></h3>
+                <div id="ga-table" style="margin-top:12px">Memuat...</div>
+              </div>
+              <div class="admin-card">
+                <h3 class="admin-card-title">Kota Asal Pengunjung <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="10 kota dengan pengunjung aktif terbanyak di periode ini, menurut Google Analytics.">?</span></h3>
+                <div id="ga-city" style="margin-top:12px"></div>
+              </div>
             </div>
           </div>
 
@@ -4838,7 +4884,7 @@ function kvDelta(cur, prev, goodDir) {
 async function kvFetch(start, end) {
   const out = [], size = 1000;
   for (let from = 0; from < 60000; from += size) {
-    const r = await sb.from('analytics_events').select('session_id, event_type, source, created_at')
+    const r = await sb.from('analytics_events').select('session_id, event_type, source, product_id, created_at')
       .in('event_type', ['view_store', 'view_product', 'add_to_cart', 'begin_checkout', 'click_whatsapp'])
       .gte('created_at', start).lt('created_at', end)
       .order('created_at', { ascending: true }).range(from, from + size - 1);
@@ -4870,7 +4916,7 @@ async function loadPerfKunjungan() {
     if (tbl) tbl.innerHTML = '<p style="color:#c0392b;font-size:13px">Data belum bisa dimuat: ' + chatEsc(String(e && e.message || e)) + '</p>';
     return;
   }
-  kvRenderTable(); kvRenderCrit(); kvDrawChart();
+  kvRenderTable(); kvRenderCrit(); kvDrawChart(); kvRenderProd(); kvLoadRt();
 }
 
 // ===================== GOOGLE ANALYTICS (lewat Edge Function ga4-report) =====================
@@ -4937,7 +4983,7 @@ function gaRender() {
   const cities = (gaData.byCity || []).filter(c => c.city && c.city !== '(not set)');
   if (city) {
     const mx = Math.max(1, ...cities.map(c => c.activeUsers));
-    city.innerHTML = cities.length ? `<h4 style="font-size:13.5px;font-weight:700;margin:18px 0 10px">Kota Asal Pengunjung ${kvHint('10 kota dengan pengunjung aktif terbanyak di periode ini, menurut Google Analytics.')}</h4><div style="display:flex;flex-direction:column;gap:8px">${cities.map(c => `<div><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px"><span>${chatEsc(c.city)}</span><span style="color:var(--muted)">${c.activeUsers.toLocaleString('id-ID')}</span></div><div style="height:6px;background:#f0ede8;border-radius:3px;overflow:hidden"><div style="height:100%;width:${c.activeUsers / mx * 100}%;background:#41434D"></div></div></div>`).join('')}</div>` : '';
+    city.innerHTML = cities.length ? `<div style="display:flex;flex-direction:column;gap:8px">${cities.map(c => `<div><div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px"><span>${chatEsc(c.city)}</span><span style="color:var(--muted)">${c.activeUsers.toLocaleString('id-ID')}</span></div><div style="height:6px;background:#f0ede8;border-radius:3px;overflow:hidden"><div style="height:100%;width:${c.activeUsers / mx * 100}%;background:#41434D"></div></div></div>`).join('')}</div>` : '';
   }
 }
 function gaPickCol(i) {
@@ -4971,26 +5017,81 @@ function kvPickCol(i) {
   t.querySelectorAll('.kv-c').forEach(c => c.classList.toggle('on', c.classList.contains('c' + i)));
 }
 function kvRenderCrit() {
-  const box = document.getElementById('kv-crit');
-  if (!box) return;
+  const cardsEl = document.getElementById('kv-cards'), srcEl = document.getElementById('kv-src'), foot = document.getElementById('kv-crit-foot');
+  if (!kvState) return;
   const nS = kvSrcs.length, nM = kvSel.length;
-  box.innerHTML = `<div class="pp-crit-row"><div class="pp-crit-g">Sumber:</div><div class="pp-crit-items">${
-    kvCols().map(c => {
+  const curAll = kvCompute(kvState.cur), prevAll = kvCompute(kvState.prev);
+  if (cardsEl) cardsEl.innerHTML = KV_METRICS.map(m => {
+    const on = kvSel.includes(m.k), dis = !on && (nM >= KV_MAX || nS * (nM + 1) > KV_LINES);
+    return `<button type="button" class="kv-card${on ? ' on' : ''}${dis ? ' dis' : ''}" onclick="kvToggle('${m.k}',${!on})"><div class="kc-l">${m.label}</div><div class="kc-v">${kvFmt(m, curAll[m.k])}</div><div class="kc-s">vs periode sebelumnya${kvDelta(curAll[m.k], prevAll[m.k], m.good)}</div></button>`;
+  }).join('');
+  if (srcEl) {
+    const tot = curAll.visitors;
+    srcEl.innerHTML = kvCols().map(c => {
+      const cu = kvCompute(kvFilter(kvState.cur, kvState.curMap, c.k)).visitors, pv = kvCompute(kvFilter(kvState.prev, kvState.prevMap, c.k)).visitors;
       const on = kvSrcs.includes(c.k), dis = !on && (nS + 1) * nM > KV_LINES;
-      return `<label class="pp-chk${dis ? ' dis' : ''}"><input type="checkbox" ${on ? 'checked' : ''} ${dis ? 'disabled' : ''} onchange="kvToggleSrc('${c.k}',this.checked)"/><span>${chatEsc(c.label)}</span></label>`;
-    }).join('')}</div></div>` +
-    KV_GROUPS.map(g => `<div class="pp-crit-row"><div class="pp-crit-g">${g.label}:</div><div class="pp-crit-items">${
-      KV_METRICS.filter(m => m.g === g.k).map(m => {
-        const on = kvSel.includes(m.k), dis = !on && (nM >= KV_MAX || nS * (nM + 1) > KV_LINES);
-        return `<label class="pp-chk${dis ? ' dis' : ''}"><input type="checkbox" ${on ? 'checked' : ''} ${dis ? 'disabled' : ''} onchange="kvToggle('${m.k}',this.checked)"/><span>${m.label}</span></label>`;
-      }).join('')}</div></div>`).join('') +
-    `<div class="pp-crit-foot">Sumber dipilih: <b>${nS}</b> · Kriteria dipilih: <b>${nM}</b> /${KV_MAX} · Garis di grafik: <b>${nS * nM}</b> /${KV_LINES}</div>`;
+      const share = c.k === 'all' ? '100%' : (tot ? (cu / tot * 100).toLocaleString('id-ID', { maximumFractionDigits: 1 }) : '0') + '%';
+      return `<button type="button" class="kv-card${on ? ' on' : ''}${dis ? ' dis' : ''}" onclick="kvToggleSrc('${c.k}',${!on})"><div class="kc-l">${c.k === 'all' ? 'Total Pengunjung' : chatEsc(c.label)}</div><div class="kc-v">${cu.toLocaleString('id-ID')}</div><div class="kc-s">${share} dari total${kvDelta(cu, pv)}</div></button>`;
+    }).join('');
+  }
+  if (foot) foot.innerHTML = `Sumber dipilih: <b>${nS}</b> · Kriteria dipilih: <b>${nM}</b> /${KV_MAX} · Garis di grafik: <b>${nS * nM}</b> /${KV_LINES}`;
+}
+
+let kvProdAll = false;
+function kvToggleProdAll() { kvProdAll = !kvProdAll; kvRenderProd(); }
+function kvRenderProd() {
+  const el = document.getElementById('kv-prod');
+  if (!el || !kvState) return;
+  const single = kvSrcs.length === 1 && kvSrcs[0] !== 'all' ? kvSrcs[0] : 'all';
+  const ev = kvFilter(kvState.cur, kvState.curMap, single);
+  const agg = {};
+  ev.forEach(e => {
+    if (!e.product_id) return;
+    const a = agg[e.product_id] || (agg[e.product_id] = { views: 0, cart: 0, wa: 0, co: 0, vs: new Set() });
+    if (e.event_type === 'view_product') { a.views++; a.vs.add(e.session_id); }
+    else if (e.event_type === 'add_to_cart') a.cart++;
+    else if (e.event_type === 'click_whatsapp') a.wa++;
+    else if (e.event_type === 'begin_checkout') a.co++;
+  });
+  const prods = (typeof adminProductsData !== 'undefined' && Array.isArray(adminProductsData)) ? adminProductsData : [];
+  const byId = {}; prods.forEach(p => { byId[p.id] = p; });
+  const ids = new Set([...Object.keys(agg), ...prods.map(p => String(p.id))]);
+  const rows = [...ids].map(id => {
+    const a = agg[id] || { views: 0, cart: 0, wa: 0, co: 0, vs: new Set() }, p = byId[id] || {};
+    return { id, name: p.name || 'Produk (ID ' + String(id).slice(0, 8) + ')', img: p.image_url, views: a.views, visitors: a.vs.size, cart: a.cart, wa: a.wa, co: a.co, rate: a.views ? Math.min(100, (a.cart + a.wa + a.co) / a.views * 100) : 0 };
+  }).sort((x, y) => y.views - x.views || y.cart - x.cart);
+  if (!rows.length) { el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Belum ada data produk.</p>'; return; }
+  const shown = kvProdAll ? rows : rows.slice(0, 10);
+  const label = (kvCols().find(c => c.k === single) || {}).label || 'Semua';
+  el.innerHTML = `<div style="font-size:12px;color:rgba(41,42,49,.6);margin-bottom:8px">Sumber: <b>${chatEsc(label)}</b></div>
+    <div class="kv-scroll"><table class="kv-ptbl"><thead><tr><th>#</th><th style="text-align:left">Informasi Produk</th><th>Dilihat</th><th class="hm">Pengunjung</th><th>Keranjang</th><th>WhatsApp</th><th class="hm">Checkout</th><th>% Aksi</th></tr></thead><tbody>${
+    shown.map((r, i) => `<tr><td><span class="kv-rk${i < 3 ? ' r' + (i + 1) : ''}">${i + 1}</span></td>
+      <td class="nm"><div class="pp-prodcell"><div class="pp-pimg" style="flex-basis:48px;width:48px;height:48px">${r.img ? `<img src="${chatEsc(r.img)}" alt="" loading="lazy">` : ''}</div><div class="pp-ptxt"><div class="pp-pname" title="${chatEsc(r.name)}">${chatEsc(r.name)}</div><div class="pp-pid">ID Produk: ${chatEsc(String(r.id).slice(0, 8))}</div></div></div></td>
+      <td>${r.views.toLocaleString('id-ID')}</td><td class="hm">${r.visitors.toLocaleString('id-ID')}</td><td>${r.cart.toLocaleString('id-ID')}</td><td>${r.wa.toLocaleString('id-ID')}</td><td class="hm">${r.co.toLocaleString('id-ID')}</td><td>${r.rate.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%</td></tr>`).join('')
+  }</tbody></table></div>${rows.length > 10 ? `<button type="button" class="kv-more" onclick="kvToggleProdAll()">${kvProdAll ? 'Tampilkan 10 teratas' : 'Tampilkan semua (' + rows.length + ')'}</button>` : ''}`;
+}
+async function kvLoadRt() {
+  const el = document.getElementById('kv-rt');
+  if (!el) return;
+  try {
+    const { start } = perfRangeBounds('today');
+    const ev = await kvFetch(start, new Date(Date.now() + 60000).toISOString());
+    const c = kvCompute(ev);
+    const hrs = new Array(24).fill(0).map(() => new Set());
+    ev.forEach(e => { if (e.event_type === 'view_store') hrs[new Date(e.created_at).getHours()].add(e.session_id); });
+    const vals = hrs.map(x => x.size), nowH = new Date().getHours(), mx = Math.max(1, ...vals);
+    const W = 260, H = 70, pts = vals.slice(0, nowH + 1).map((v, i) => `${(i / 23 * W).toFixed(1)},${(H - 6 - v / mx * (H - 14)).toFixed(1)}`).join(' ');
+    el.innerHTML = `<div style="font-size:12px;color:rgba(41,42,49,.6);display:flex;align-items:center;gap:6px"><i style="width:7px;height:7px;border-radius:50%;background:#1e7a4c;display:inline-block"></i>Update setiap kali halaman dibuka</div>
+      <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;margin-top:8px"><line x1="0" x2="${W}" y1="${H - 6}" y2="${H - 6}" stroke="rgba(17,17,20,.12)"/><polyline points="${pts}" fill="none" stroke="#41434D" stroke-width="2" stroke-linejoin="round"/></svg>
+      <div style="display:flex;justify-content:space-between;font-size:10.5px;color:rgba(41,42,49,.55)"><span>00:00</span><span>12:00</span><span>24:00</span></div>
+      <div class="kv-rt-v"><div><span>Total Pengunjung</span><b>${c.visitors.toLocaleString('id-ID')}</b></div><div><span>Produk Dilihat</span><b>${c.views.toLocaleString('id-ID')}</b></div><div><span>Klik WhatsApp</span><b>${c.wa.toLocaleString('id-ID')}</b></div><div><span>Checkout Dibuat</span><b>${c.checkout.toLocaleString('id-ID')}</b></div></div>`;
+  } catch (e) { el.innerHTML = '<p style="color:#c0392b;font-size:13px">Belum bisa dimuat.</p>'; }
 }
 function kvToggleSrc(k, on) {
   if (on) { if (!kvSrcs.includes(k)) kvSrcs.push(k); }
   else if (kvSrcs.length > 1) kvSrcs = kvSrcs.filter(x => x !== k);
   kvSrcs = kvCols().map(c => c.k).filter(x => kvSrcs.includes(x));
-  kvRenderCrit(); kvDrawChart();
+  kvRenderCrit(); kvDrawChart(); kvRenderProd();
 }
 function kvToggle(k, on) {
   if (on) { if (!kvSel.includes(k) && kvSel.length < KV_MAX) kvSel.push(k); }
