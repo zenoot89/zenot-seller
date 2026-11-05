@@ -774,7 +774,6 @@
 
       /* Kriteria Utama: kartu putih berisi kotak metrik abu */
       .perf-metric-grid{background:#fff;border-radius:12px;padding:16px 14px 14px;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:8px !important;margin-bottom:12px !important}
-      .perf-metric-grid::before{content:"Kriteria Utama";grid-column:1/-1;font-size:16px;font-weight:700;color:var(--sc-ink);margin-bottom:4px}
       .perf-metric-grid > .admin-card{display:flex;flex-direction:column;min-height:92px;background:var(--sc-bg) !important;border:none !important;border-radius:12px !important;padding:12px 10px !important}
       .perf-metric-grid > .admin-card > div:first-child{font-size:12px !important;line-height:1.3;color:var(--sc-mute) !important;margin-bottom:auto !important}
       .perf-metric-grid > .admin-card > div:nth-child(2){font-size:15px !important;font-weight:700;color:var(--sc-ink);margin-top:10px;overflow-wrap:anywhere}
@@ -1090,7 +1089,6 @@
       .perf-period-btn.active{background:#fff;border-color:var(--sc-ink);color:var(--sc-ink);font-weight:600}
 
       .perf-metric-grid{background:#fff;border-radius:12px;padding:20px 24px 22px;grid-template-columns:repeat(5,minmax(0,1fr)) !important;gap:12px !important;margin-bottom:16px !important}
-      .perf-metric-grid::before{content:"Kriteria Utama";grid-column:1/-1;margin-bottom:4px;font-size:16px;font-weight:700;color:var(--sc-ink)}
       .perf-metric-grid > .admin-card{display:flex;flex-direction:column;min-height:104px;background:var(--sc-bg) !important;border:none !important;border-radius:12px !important;padding:14px 16px !important}
       .perf-metric-grid > .admin-card > div:first-child{margin-bottom:auto !important;font-size:12.5px !important;line-height:1.3;color:var(--sc-mute) !important}
       .perf-metric-grid > .admin-card > div:nth-child(2){margin-top:10px;font-size:20px !important;font-weight:700;color:var(--sc-ink);overflow-wrap:anywhere}
@@ -1574,6 +1572,18 @@
     .pp-prodcell{gap:10px}
     .pp-ptxt{min-width:0;max-width:240px}
     .pp-pname{font-size:13px;font-weight:500;-webkit-line-clamp:2;white-space:normal}
+    /* ===== Ikon (?) petunjuk ala Shopee ===== */
+    .hint{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;margin-left:6px;vertical-align:middle;border:1.3px solid rgba(41,42,49,.45);border-radius:50%;font:600 10px/1 'Inter',sans-serif;color:rgba(41,42,49,.6);cursor:help;user-select:none;outline:none;background:transparent;transform:translateY(-1px)}
+    .hint:hover,.hint:focus{border-color:#41434D;color:#41434D}
+    .hint-tip{position:fixed;z-index:10000;display:none;max-width:min(300px,calc(100vw - 16px));padding:9px 12px;border-radius:6px;background:#41434D;color:#fff;font:400 12px/1.5 'Inter',sans-serif;box-shadow:0 6px 20px rgba(17,17,20,.25);pointer-events:none}
+    .perf-grid-title{grid-column:1/-1;display:flex;align-items:center;font-size:16px;font-weight:700;color:var(--sc-ink);margin-bottom:4px}
+    .perf-grid-title .hint{margin-left:6px}
+    /* Header Performa Toko (tab + periode) tetap di atas saat konten digulir */
+    #perf-sticky{display:contents}
+    @media(min-width:861px){
+      #perf-sticky{display:block;position:sticky;top:-24px;z-index:30;background:var(--sc-bg,#F1F1F3);margin:-24px -28px 8px;padding:24px 28px 0}
+      #perf-sticky #perf-period-controls{margin-bottom:12px}
+    }
     /* ===== Tingkat Kunjungan ala Shopee ===== */
     .kv-sub{font-size:12.5px;line-height:1.5;color:rgba(41,42,49,.58);margin:-6px 0 16px}
     .kvt .kv-chips{display:none}
@@ -2390,6 +2400,7 @@
         <!-- TAB: ULASAN -->
         <!-- TAB: PERFORMA TOKO -->
         <div class="admin-section" id="tab-performance">
+          <div id="perf-sticky">
           <div id="perf-sub-tabs" style="display:flex;gap:2px;flex-wrap:wrap;margin-bottom:10px">
             <a href="#tab=performance&sub=tinjauan" class="orders-tab active" data-perf="tinjauan" onclick="event.preventDefault();switchPerfTab('tinjauan',this)">Tinjauan</a>
             <a href="#tab=performance&sub=produk" class="orders-tab" data-perf="produk" onclick="event.preventDefault();switchPerfTab('produk',this)">Produk</a>
@@ -2428,13 +2439,14 @@
             </div>
           </div>
           <input type="hidden" id="perf-period" value="today"/>
-          <div style="font-size:12.5px;color:var(--muted);margin-bottom:16px">Data dihitung dari kunjungan &amp; pesanan tercatat di toko.</div>
+          </div>
 
           <!-- PANEL: TINJAUAN -->
           <div id="perf-panel-tinjauan" class="perf-panel">
             <div class="perf-main-row">
             <div class="perf-main-left">
             <div class="perf-metric-grid">
+              <div class="perf-grid-title">Kriteria Utama <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Data dihitung dari kunjungan dan pesanan yang tercatat di toko.">?</span></div>
               <div class="admin-card" style="margin:0" data-metric="revenue" onclick="selectPerfMetric('revenue')">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Total Penjualan</div>
                 <div id="perf-revenue" style="font-size:22px;font-weight:700">Rp 0</div>
@@ -2487,19 +2499,17 @@
             <div class="perf-main-left">
             <div class="admin-card">
               <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-                <h3 class="admin-card-title" style="margin:0">Analisis Produk</h3>
+                <h3 class="admin-card-title" style="margin:0">Analisis Produk <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Klik judul kolom untuk mengurutkan, misalnya CTR atau Conversion Rate tertinggi.">?</span></h3>
                 <div style="display:flex;gap:2px">
                   <a href="#tab=performance&sub=produk&view=performa" class="orders-tab active" data-panview="performa" onclick="event.preventDefault();switchProdAnalysisView('performa',this)">Performa Terbaik</a>
                   <a href="#tab=performance&sub=produk&view=baru" class="orders-tab" data-panview="baru" onclick="event.preventDefault();switchProdAnalysisView('baru',this)">Baru Ditambahkan</a>
                 </div>
               </div>
-              <p class="perf-hint-cols" style="font-size:11.5px;color:var(--muted);margin:8px 0 4px">Klik judul kolom buat urutin (misal CTR atau Conversion Rate tertinggi).</p>
               <div id="perf-top-products" style="margin-top:10px;font-size:13px;color:var(--muted)">Memuat...</div>
             </div>
             </div>
             <aside class="admin-card perf-fn-card" style="margin:0">
-              <h3 class="admin-card-title" style="margin:0 0 4px">Corong Pembelian</h3>
-              <p style="font-size:11.5px;line-height:1.45;color:var(--muted);margin:0 0 14px">Pengunjung unik di tiap tahap. Persen dihitung dari pengunjung toko.</p>
+              <h3 class="admin-card-title" style="margin:0 0 14px">Corong Pembelian <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Jumlah pengunjung unik di tiap tahap. Persen di kanan dihitung dari pengunjung toko.">?</span></h3>
               <div id="perf-kv-funnel">Memuat...</div>
             </aside>
             </div>
@@ -2508,7 +2518,7 @@
           <!-- PANEL: PRODUK -->
           <div id="perf-panel-produk" class="perf-panel" style="display:none">
             <div class="admin-card pp-card">
-              <h3 class="admin-card-title">Performa Produk</h3>
+              <h3 class="admin-card-title">Performa Produk <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Data dihitung dari kunjungan dan pesanan yang tercatat di toko. Klik judul kolom untuk mengurutkan, pakai Pilih Kriteria untuk memilih kolom (maksimal 10), dan geser tabel ke samping untuk melihat kolom lain.">?</span></h3>
               <div class="pp-toolbar">
                 <div class="pp-search"><input id="pp-q" type="text" placeholder="Pencarian Produk" autocomplete="off" oninput="ppSearch(this.value)"/><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></div>
                 <button type="button" class="pp-crit-btn" id="pp-crit-btn" onclick="ppToggleCrit()">Pilih Kriteria <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 15l6-6 6 6"/></svg></button>
@@ -2525,7 +2535,7 @@
           <!-- PANEL: PENJUALAN -->
           <div id="perf-panel-penjualan" class="perf-panel" style="display:none">
             <div class="admin-card" style="margin-bottom:16px">
-              <h3 class="admin-card-title">Penjualan per Hari</h3>
+              <h3 class="admin-card-title">Penjualan per Hari <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Data dihitung dari kunjungan dan pesanan yang tercatat di toko.">?</span></h3>
               <div id="perf-penjualan-chart">Memuat...</div>
             </div>
             <div class="admin-card">
@@ -2537,6 +2547,7 @@
           <!-- PANEL: LAYANAN -->
           <div id="perf-panel-layanan" class="perf-panel" style="display:none">
             <div class="perf-metric-grid">
+              <div class="perf-grid-title">Kriteria Utama <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Data dihitung dari kunjungan dan pesanan yang tercatat di toko.">?</span></div>
               <div class="admin-card" style="margin:0">
                 <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Rata-rata Waktu Konfirmasi Bayar</div>
                 <div id="perf-layanan-konfirmasi" style="font-size:20px;font-weight:700">–</div>
@@ -2555,8 +2566,7 @@
           <!-- PANEL: TINGKAT KUNJUNGAN -->
           <div id="perf-panel-kunjungan" class="perf-panel" style="display:none">
             <div class="admin-card">
-              <h3 class="admin-card-title">Tinjauan</h3>
-              <p class="kv-sub">Ringkasan kunjungan ke toko dan halaman produk. Angka kecil di sebelah kanan membandingkan dengan periode sebelumnya: ▲ hijau berarti membaik, ▼ merah berarti memburuk.</p>
+              <h3 class="admin-card-title">Tinjauan <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Data dihitung dari kunjungan dan pesanan yang tercatat di toko. Angka kecil di sebelah kanan membandingkan dengan periode sebelumnya: ▲ hijau berarti membaik, ▼ merah berarti memburuk.">?</span></h3>
               <div id="kv-table">Memuat...</div>
             </div>
             <div class="admin-card">
@@ -2569,8 +2579,7 @@
           <!-- PANEL: PROMOSI -->
           <div id="perf-panel-promosi" class="perf-panel" style="display:none">
             <div class="admin-card">
-              <h3 class="admin-card-title">Performa Voucher</h3>
-              <p style="font-size:13px;color:var(--sec);margin-bottom:16px">Pemakaian dan estimasi diskon yang sudah diberikan (data sepanjang waktu, tidak terikat periode di atas).</p>
+              <h3 class="admin-card-title">Performa Voucher <span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="Pemakaian dan estimasi diskon yang sudah diberikan. Datanya sepanjang waktu, tidak terikat periode di atas.">?</span></h3>
               <div id="perf-promosi-render" style="font-size:13px;color:var(--muted)">Memuat...</div>
             </div>
           </div>
@@ -4724,6 +4733,28 @@ async function loadPerfLayanan() {
 }
 
 // ===================== TAB: TINGKAT KUNJUNGAN =====================
+
+// ===== Ikon (?) petunjuk: tooltip melayang, aman dari kotak yang bisa digeser =====
+(function () {
+  let tip = null;
+  const get = () => { if (!tip) { tip = document.createElement('div'); tip.className = 'hint-tip'; document.body.appendChild(tip); } return tip; };
+  const show = h => {
+    const t = get(); t.textContent = h.dataset.tip || ''; t.style.display = 'block';
+    const r = h.getBoundingClientRect(), tw = t.offsetWidth, th = t.offsetHeight;
+    let left = r.left + r.width / 2 - tw / 2; left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+    let top = r.bottom + 8; if (top + th > window.innerHeight - 8) top = Math.max(8, r.top - th - 8);
+    t.style.left = left + 'px'; t.style.top = top + 'px';
+  };
+  const hide = () => { if (tip) tip.style.display = 'none'; };
+  const hint = e => (e.target && e.target.closest) ? e.target.closest('.hint') : null;
+  document.addEventListener('mouseover', e => { const h = hint(e); if (h) show(h); });
+  document.addEventListener('mouseout', e => { if (hint(e)) hide(); });
+  document.addEventListener('focusin', e => { const h = hint(e); if (h) show(h); });
+  document.addEventListener('focusout', e => { if (hint(e)) hide(); });
+  document.addEventListener('click', e => { const h = hint(e); if (h) show(h); else hide(); });
+  window.addEventListener('scroll', hide, true);
+})();
+
 // ===================== TAB: TINGKAT KUNJUNGAN (tinjauan + grafik kriteria ala Shopee) =====================
 const KV_ORDER = ['instagram', 'tiktok', 'facebook', 'whatsapp', 'google', 'langsung'];
 function kvCols() { return (kvState && kvState.cols) || [{ k: 'all', label: 'Semua' }]; }
@@ -4758,6 +4789,7 @@ let kvSel = (() => {
   return ['views', 'visitors'];
 })();
 
+function kvHint(t) { return '<span class="hint" tabindex="0" role="button" aria-label="Keterangan" data-tip="' + chatEsc(t) + '">?</span>'; }
 function kvGrp(src) {
   const s = String(src || 'langsung').toLowerCase().trim() || 'langsung';
   return ({ ig: 'instagram', fb: 'facebook', wa: 'whatsapp' })[s] || s;
@@ -4845,7 +4877,7 @@ function kvRenderTable() {
     <div class="kv-head"><div></div><div></div>${cols.map(c => `<div>${chatEsc(c.label)}</div>`).join('')}</div>
     ${KV_GROUPS.map(g => `<div class="kv-grp"><div class="kv-gname">${g.label}</div><div class="kv-rows">${
       KV_METRICS.filter(m => m.g === g.k).map(m => `<div class="kv-row">
-        <div class="kv-lab">${m.label}<span class="kv-q" title="${chatEsc(m.tip)}">?</span></div>
+        <div class="kv-lab">${m.label}${kvHint(m.tip)}</div>
         ${cols.map((c, i) => `<div class="kv-c c${i}${i === kvMob ? ' on' : ''}"><b>${kvFmt(m, cur[i][m.k])}</b>${kvDelta(cur[i][m.k], prev[i][m.k], m.good)}</div>`).join('')}
       </div>`).join('')}</div></div>`).join('')}
   </div></div>`;
@@ -4931,7 +4963,7 @@ function kvDrawChart() {
     return `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>${dots}`;
   }).join('');
   host.innerHTML = `
-    <div class="kv-legend"><span class="kv-ct">Grafik setiap Kriteria</span><span>${series.map(s => `<span class="kv-lg"><i style="background:${s.color}"></i>${s.label}</span>`).join('')}</span></div>
+    <div class="kv-legend"><span class="kv-ct">Grafik setiap Kriteria ${kvHint('Garis untuk kriteria yang sama memakai skala yang sama, jadi antar sumber bisa dibandingkan langsung. Kriteria yang berbeda punya skala sendiri supaya bentuknya terlihat. Arahkan kursor atau sentuh grafik untuk melihat angka sebenarnya.')}</span><span>${series.map(s => `<span class="kv-lg"><i style="background:${s.color}"></i>${s.label}</span>`).join('')}</span></div>
     <div class="kv-chartwrap">
       <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
         ${grid}${xl}${lines}
@@ -4940,7 +4972,7 @@ function kvDrawChart() {
       </svg>
       <div class="kv-tip"></div>
     </div>
-    <p class="kv-sub" style="margin:8px 0 0">Garis untuk kriteria yang sama memakai skala yang sama, jadi antar sumber bisa dibandingkan langsung. Kriteria yang berbeda punya skala sendiri supaya bentuknya terlihat. Arahkan kursor atau sentuh grafik untuk melihat angka sebenarnya.</p>`;
+`;
   const svg = host.querySelector('svg'), tip = host.querySelector('.kv-tip'), guide = svg.querySelector('.kv-guide'), hd = [...svg.querySelectorAll('.kv-hd')];
   const show = e => {
     const r = svg.getBoundingClientRect();
