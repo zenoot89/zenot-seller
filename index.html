@@ -1600,7 +1600,7 @@
     .src-car{position:relative}
     .src-track{display:flex;gap:10px;overflow-x:auto;scroll-behavior:smooth;scroll-snap-type:x mandatory;scrollbar-width:none}
     .src-track::-webkit-scrollbar{display:none}
-    .src-track .kv-card{flex:0 0 calc((100% - 30px) / 4);scroll-snap-align:start}
+    .src-track .kv-card{flex:0 0 calc((100% - 40px) / 5);scroll-snap-align:start}
     .src-arr{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:0;background:rgba(65,67,77,.55);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;padding:0}
     .src-arr:hover{background:rgba(65,67,77,.85)}
     .src-arr.l{left:-14px}.src-arr.r{right:-14px}
@@ -1614,6 +1614,15 @@
     .kv-ptbl td:first-child{text-align:left}
     .kv-ptbl td small{display:block;font-size:11px;margin-top:2px}
     .kv-ptbl td.nm{text-align:left}
+    .kv-ptbl.stk th:first-child,.kv-ptbl.stk td:first-child{position:sticky;left:0;z-index:1}
+    .kv-ptbl.stk td:first-child{background:#fff}.kv-ptbl.stk th:first-child{background:#F1F1F3}
+    .kv-ptbl th.srt{cursor:pointer;user-select:none}
+    .kv-ptbl th.srt:hover{color:#111114}
+    .kv-ptbl th.srt.on{color:#111114}
+    .srt-i{display:inline-flex;flex-direction:column;gap:2px;vertical-align:middle;margin-left:4px}
+    .srt-i i{display:block;width:0;height:0;border-left:3.5px solid transparent;border-right:3.5px solid transparent}
+    .srt-i i.u{border-bottom:4.5px solid rgba(41,42,49,.3)}.srt-i i.d{border-top:4.5px solid rgba(41,42,49,.3)}
+    .srt-i i.u.on{border-bottom-color:#41434D}.srt-i i.d.on{border-top-color:#41434D}
     .kv-ptbl th.sortable{cursor:pointer;user-select:none}
     .kv-rk{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-weight:700;font-size:12px;color:#41434D}
     .kv-rk.r1{background:#f5c542;color:#111114}.kv-rk.r2{background:#d5d7de}.kv-rk.r3{background:#e3b08a}
@@ -4297,6 +4306,26 @@ function srcSlide(btn, dir) {
   t.scrollBy({ left: dir * (t.clientWidth + 10), behavior: 'smooth' });
 }
 window.addEventListener('resize', () => document.querySelectorAll('.src-car').forEach(srcArrows));
+let perfSrcData = null, perfSrcSortState = { k: 'rp', dir: 'desc' };
+function perfSrcSort(k) {
+  if (perfSrcSortState.k === k) perfSrcSortState.dir = perfSrcSortState.dir === 'desc' ? 'asc' : 'desc';
+  else perfSrcSortState = { k, dir: 'desc' };
+  perfSrcDrawTable();
+}
+function perfSrcDrawTable() {
+  const d = perfSrcData, host = document.getElementById('perf-src-tbl');
+  if (!d || !host) return;
+  const { rows, M } = d, st = perfSrcSortState;
+  const mk = M.find(m => m.k === st.k) || M[1];
+  const sorted = rows.slice().sort((a, b) => {
+    const x = mk.v(a, 0), y = mk.v(b, 0);
+    const r = st.dir === 'desc' ? y - x : x - y;
+    return r || (b.sc.rp - a.sc.rp) || (b.cu.visitors - a.cu.visitors);
+  });
+  const head = M.map(m => `<th class="srt${m.k === st.k ? ' on' : ''}" onclick="perfSrcSort('${m.k}')">${m.l}${m.tip ? ' ' + kvHint(m.tip) : ''}<span class="srt-i"><i class="u${m.k === st.k && st.dir === 'asc' ? ' on' : ''}"></i><i class="d${m.k === st.k && st.dir === 'desc' ? ' on' : ''}"></i></span></th>`).join('');
+  const body = sorted.map(r => `<tr><td class="nm"><b>${chatEsc(r.c.label)}</b></td>${M.map(m => `<td>${m.f(mk === m ? m.v(r, 0) : m.v(r, 0))}<small>${kvDelta(m.v(r, 0), m.v(r, 1))}</small></td>`).join('')}</tr>`).join('');
+  host.innerHTML = `<table class="kv-ptbl stk"><thead><tr><th style="text-align:left">Sumber Kunjungan</th>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
 async function perfLoadSources(period, start, end, prevStart, prevEnd) {
   const el = document.getElementById('perf-src');
   if (!el) return;
@@ -4305,7 +4334,7 @@ async function perfLoadSources(period, start, end, prevStart, prevEnd) {
     let pe = prevEnd;
     if (period === 'today') pe = new Date(prevStart.getTime() + Math.max(0, Date.now() - new Date(start).getTime()));
     const scope = document.getElementById('perf-scope')?.value || 'dibuat';
-    const ordQ = (a, b2) => { let q = sb.from('orders').select('total, source, status').gte('created_at', a).lt('created_at', b2); if (scope === 'siap_kirim') q = q.eq('status', 'diproses'); return q; };
+    const ordQ = (a, b2) => { let q = sb.from('orders').select('total, source, status, user_id, items').gte('created_at', a).lt('created_at', b2); if (scope === 'siap_kirim') q = q.eq('status', 'diproses'); return q; };
     const [cur, prev, oc, op] = await Promise.all([
       kvFetch(start, end), kvFetch(prevStart.toISOString(), pe.toISOString()),
       ordQ(start, end), ordQ(prevStart.toISOString(), pe.toISOString()),
@@ -4315,35 +4344,56 @@ async function perfLoadSources(period, start, end, prevStart, prevEnd) {
     const oCur = (oc.data || []), oPrev = (op.data || []);
     const cm = kvSessionSrc(cur), pm = kvSessionSrc(prev);
     const cols = kvBuildCols(cm, pm).filter(c => c.k !== 'all');
-    const sumBy = (list, key) => { let rp = 0, n = 0; list.forEach(o => { if (key === 'all' || (o.source ? kvGrp(o.source) : '_none') === key) { rp += Number(o.total) || 0; n++; } }); return { rp, n }; };
-    // sumber yang tercatat di pesanan tapi belum ada di daftar kolom ikut ditampilkan
+    const sumBy = (list, key) => {
+      let rp = 0, n = 0, qty = 0; const buyers = new Set();
+      list.forEach(o => {
+        if (key === 'all' || (o.source ? kvGrp(o.source) : '_none') === key) {
+          rp += Number(o.total) || 0; n++;
+          (o.items || []).forEach(it => { qty += Number(it.qty) || 0; });
+          if (o.user_id) buyers.add(o.user_id);
+        }
+      });
+      return { rp, n, qty, buyers: buyers.size };
+    };
     const known = new Set(cols.map(c => c.k));
     [...oCur, ...oPrev].forEach(o => { if (o.source) { const k = kvGrp(o.source); if (!known.has(k)) { known.add(k); cols.push({ k, label: SOURCE_LABEL[k] || (k.charAt(0).toUpperCase() + k.slice(1)) }); } } });
     if (haveSrc && oCur.concat(oPrev).some(o => !o.source)) cols.push({ k: '_none', label: 'Tidak tercatat' });
-    const rows = cols.map(c => ({ c, cu: kvCompute(kvFilter(cur, cm, c.k)), pv: kvCompute(kvFilter(prev, pm, c.k)), sc: sumBy(oCur, c.k), sp: sumBy(oPrev, c.k) }));
+    const pvSess = (ev) => { const ss = new Set(); ev.forEach(e => { if (e.event_type === 'view_product') ss.add(e.session_id); }); return ss.size; };
+    const rows = cols.map(c => {
+      const ec = kvFilter(cur, cm, c.k), ep = kvFilter(prev, pm, c.k);
+      return { c, cu: Object.assign(kvCompute(ec), { clicked: pvSess(ec) }), pv: Object.assign(kvCompute(ep), { clicked: pvSess(ep) }), sc: sumBy(oCur, c.k), sp: sumBy(oPrev, c.k) };
+    });
     const tc = kvCompute(cur), tp = kvCompute(prev), stc = sumBy(oCur, 'all'), stp = sumBy(oPrev, 'all');
     const pct = (a, b2) => b2 ? (a / b2 * 100) : 0;
     const fp = v => v.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
     const fn = v => Math.round(v).toLocaleString('id-ID');
     const rp = v => 'Rp' + Math.round(v).toLocaleString('id-ID');
+    const side = (r, i) => ({ vis: i ? r.pv : r.cu, sal: i ? r.sp : r.sc, tv: i ? tp : tc, ts: i ? stp : stc });
+    const M = [
+      { k: 'ratio', l: 'Rasio Penjualan', tip: 'Bagian penjualan dari sumber ini terhadap total penjualan.', f: fp, v: (r, i) => { const x = side(r, i); return pct(x.sal.rp, x.ts.rp); } },
+      { k: 'rp', l: 'Penjualan', f: rp, v: (r, i) => side(r, i).sal.rp },
+      { k: 'ord', l: 'Pesanan', f: fn, v: (r, i) => side(r, i).sal.n },
+      { k: 'qty', l: 'Produk', tip: 'Jumlah produk (item) yang terjual dari pesanan sumber ini.', f: fn, v: (r, i) => side(r, i).sal.qty },
+      { k: 'buyers', l: 'Pembeli', tip: 'Jumlah pembeli unik dari sumber ini.', f: fn, v: (r, i) => side(r, i).sal.buyers },
+      { k: 'vis', l: 'Pengunjung', f: fn, v: (r, i) => side(r, i).vis.visitors },
+      { k: 'views', l: 'Jumlah Produk Dilihat', tip: 'Berapa kali halaman produk dibuka.', f: fn, v: (r, i) => side(r, i).vis.views },
+      { k: 'clicked', l: 'Produk Diklik', tip: 'Pengunjung unik yang membuka halaman produk.', f: fn, v: (r, i) => side(r, i).vis.clicked },
+      { k: 'ctr', l: 'Persentase Klik', tip: 'Pengunjung yang membuka produk dibagi pengunjung toko.', f: fp, v: (r, i) => { const x = side(r, i); return pct(x.vis.clicked, x.vis.visitors); } },
+      { k: 'cart', l: 'Masuk Keranjang', f: fn, v: (r, i) => side(r, i).vis.cart },
+      { k: 'wa', l: 'Klik WhatsApp', f: fn, v: (r, i) => side(r, i).vis.wa },
+      { k: 'co', l: 'Checkout Dibuat', f: fn, v: (r, i) => side(r, i).vis.checkout },
+      { k: 'cvr', l: 'Tingkat Konversi Pesanan', tip: 'Pesanan dibagi pengunjung dari sumber yang sama.', f: fp, v: (r, i) => { const x = side(r, i); return pct(x.sal.n, x.vis.visitors); } },
+    ];
+    perfSrcData = { rows, M };
     const cards = rows.map(r => `<div class="kv-card"><div class="kc-l">${chatEsc(r.c.label)}</div><div class="kc-v">${rp(r.sc.rp)}</div><div class="kc-s">${fp(pct(r.sc.rp, stc.rp))} dari penjualan${kvDelta(r.sc.rp, r.sp.rp)}</div></div>`).join('');
-    const th = (t, tip) => `<th>${t}${tip ? ' ' + kvHint(tip) : ''}</th>`;
-    const cell = (a, b2, f) => `<td>${f(a)}<small>${kvDelta(a, b2)}</small></td>`;
-    const body = rows.map(r => {
-      const cu = r.cu, pv = r.pv;
-      const cr = pct(cu.checkout, cu.visitors), pr = pct(pv.checkout, pv.visitors);
-      return `<tr><td class="nm"><b>${chatEsc(r.c.label)}</b></td>
-        ${cell(pct(r.sc.rp, stc.rp), pct(r.sp.rp, stp.rp), fp)}${cell(r.sc.rp, r.sp.rp, rp)}${cell(r.sc.n, r.sp.n, fn)}
-        ${cell(cu.visitors, pv.visitors, fn)}${cell(cu.views, pv.views, fn)}${cell(cu.cart, pv.cart, fn)}${cell(cu.wa, pv.wa, fn)}${cell(cu.checkout, pv.checkout, fn)}${cell(cr, pr, fp)}</tr>`;
-    }).join('');
     const note = haveSrc ? '' : '<p style="font-size:12.5px;color:var(--muted);margin:0 0 12px">Rp per sumber belum aktif: jalankan langkah SQL "sumber pesanan" di Supabase.</p>';
+    const arrow = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>`;
     el.innerHTML = `${note}
       <div class="src-band"><h4>Rincian Kontribusi Penjualan Toko</h4>
-        <div class="src-car"><button type="button" class="src-arr l" hidden aria-label="Sebelumnya" onclick="srcSlide(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="src-track" onscroll="srcArrows(this.parentNode)"><div class="kv-card tot"><div class="kc-l">Total Penjualan ${kvHint('Jumlah nilai pesanan di periode ini, semua sumber. Pesanan lama sebelum fitur ini aktif masuk ke "Tidak tercatat".')}</div><div class="kc-v">${rp(stc.rp)}</div><div class="kc-s">100% dari penjualan${kvDelta(stc.rp, stp.rp)}</div></div>${cards}</div><button type="button" class="src-arr r" hidden aria-label="Berikutnya" onclick="srcSlide(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button></div>
+        <div class="src-car"><button type="button" class="src-arr l" hidden aria-label="Sebelumnya" onclick="srcSlide(this,-1)">${arrow('M15 5l-7 7 7 7')}</button><div class="src-track" onscroll="srcArrows(this.parentNode)"><div class="kv-card tot"><div class="kc-l">Total Penjualan ${kvHint('Jumlah nilai pesanan di periode ini, semua sumber. Pesanan lama sebelum fitur ini aktif masuk ke "Tidak tercatat".')}</div><div class="kc-v">${rp(stc.rp)}</div><div class="kc-s">100% dari penjualan${kvDelta(stc.rp, stp.rp)}</div></div>${cards}</div><button type="button" class="src-arr r" hidden aria-label="Berikutnya" onclick="srcSlide(this,1)">${arrow('M9 5l7 7-7 7')}</button></div>
       </div>
-      <div class="src-scroll"><table class="kv-ptbl"><thead><tr>
-        <th style="text-align:left">Sumber Kunjungan</th>${th('Rasio Penjualan', 'Bagian penjualan dari sumber ini terhadap total penjualan.')}${th('Penjualan')}${th('Pesanan')}${th('Pengunjung')}${th('Produk Dilihat')}${th('Masuk Keranjang')}${th('Klik WhatsApp')}${th('Checkout Dibuat')}${th('Konversi Checkout', 'Checkout dibuat dibagi pengunjung dari sumber yang sama.')}
-      </tr></thead><tbody>${body}</tbody></table></div>`;
+      <div class="src-scroll" id="perf-src-tbl"></div>`;
+    perfSrcDrawTable();
     srcArrows(el.querySelector('.src-car'));
   } catch (e) {
     el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Gagal memuat sumber kunjungan.</p>';
