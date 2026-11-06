@@ -7449,7 +7449,7 @@ async function promoFormOpen(key) {
     promoActionBusy = false;
   }
   if (!adminProductsData.length) { showToast('Produk belum termuat, coba lagi'); return; }
-  const f = { key: key || null, name: '', items: new Map(), selected: new Set(), bulkOpen: false, bulkPct: '', dirty: false, saving: false };
+  const f = { key: key || null, name: '', items: new Map(), selected: new Set(), bulkOpen: false, bulkPct: '', bulkPrice: '', dirty: false, saving: false };
   if (key) {
     const g = promoGroups.get(key);
     if (!g) { showToast('Promo tidak ditemukan'); return; }
@@ -7512,6 +7512,7 @@ function dkRenderProducts() {
   const bulk = `<div class="dk-bulk ${f.bulkOpen ? 'open' : ''}" id="dk-bulk">
       <div><div class="dk-bulk-t">Perubahan massal</div><div class="dk-bulk-s"><span id="dk-sel-count">${f.selected.size}</span> produk dipilih</div></div>
       <div class="dk-bulk-f"><label>Diskon</label><div class="dk-pctbox"><input id="dk-bulk-pct" inputmode="decimal" value="${chatEsc(f.bulkPct)}" oninput="dkBulkPctInput(this)"/><span>%DISKON</span></div></div>
+      <div class="dk-bulk-f"><label>Harga Diskon Tetap</label><div class="dk-pctbox"><input id="dk-bulk-rp" inputmode="numeric" value="${chatEsc(f.bulkPrice)}" oninput="dkBulkPriceInput(this)" style="width:110px"/><span>Rp</span></div></div>
       <div class="dk-bulk-btns">
         <button class="dk-btn" id="dk-bulk-apply" onclick="dkBulkApply()" disabled>Ubah Semua</button>
         <button class="dk-btn" id="dk-bulk-del" onclick="dkBulkDelete()" disabled>Hapus</button>
@@ -7623,6 +7624,14 @@ function dkBulkPctInput(inp) {
   const raw = inp.value.replace(/[^\d.]/g, '');
   if (inp.value !== raw) inp.value = raw;
   dkForm.bulkPct = raw;
+  if (raw) { dkForm.bulkPrice = ''; const r = document.getElementById('dk-bulk-rp'); if (r) r.value = ''; }
+  dkSelRefresh();
+}
+function dkBulkPriceInput(inp) {
+  const raw = inp.value.replace(/\D/g, '');
+  if (inp.value !== raw) inp.value = raw;
+  dkForm.bulkPrice = raw;
+  if (raw) { dkForm.bulkPct = ''; const p = document.getElementById('dk-bulk-pct'); if (p) p.value = ''; }
   dkSelRefresh();
 }
 function dkSelRefresh() {
@@ -7635,12 +7644,25 @@ function dkSelRefresh() {
   if (all) { all.checked = n > 0 && n === f.items.size; all.indeterminate = n > 0 && n < f.items.size; }
   const pct = parseFloat(f.bulkPct);
   const a = document.getElementById('dk-bulk-apply'), d = document.getElementById('dk-bulk-del');
-  if (a) a.disabled = !(n > 0 && pct > 0 && pct < 100);
+  const fix = parseInt(f.bulkPrice) || 0;
+  if (a) a.disabled = !(n > 0 && ((pct > 0 && pct < 100) || fix > 0));
   if (d) d.disabled = !(n > 0);
 }
 function dkBulkApply() {
   const f = dkForm;
   const pct = parseFloat(f.bulkPct);
+  const fix = parseInt(f.bulkPrice) || 0;
+  if (fix > 0) {
+    let n = 0, skip = 0;
+    f.selected.forEach(pid => {
+      const it = f.items.get(pid);
+      if (it) it.variants.forEach(v => { if (fix < v.normal) { v.price = fix; n++; } else skip++; });
+    });
+    f.dirty = true;
+    dkRenderProducts();
+    showToast(`Harga diskon Rp${fix.toLocaleString('id-ID')} diterapkan ke ${n} varian` + (skip ? ` (${skip} varian dilewati: harga awal lebih rendah)` : ''));
+    return;
+  }
   if (!f.selected.size || !(pct > 0 && pct < 100)) return;
   f.selected.forEach(pid => {
     const it = f.items.get(pid);
