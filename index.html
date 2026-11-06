@@ -1587,6 +1587,66 @@
     /* ===== Tingkat Kunjungan ala Shopee ===== */
     .kv-split{display:grid;grid-template-columns:minmax(0,1fr);gap:0 16px;align-items:start}
     @media (min-width:861px){.kv-split{grid-template-columns:minmax(0,7fr) minmax(0,3fr)}}
+    .sx-hd{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:4px 0 12px}
+    .sx-hd h4{margin:0;font-size:16px;font-weight:700;color:#111114}
+    .sx-tg{display:inline-flex;gap:0}
+    .sx-tg button{padding:7px 16px;border:1px solid rgba(17,17,20,.18);background:#fff;font:inherit;font-size:13px;color:#111114;cursor:pointer}
+    .sx-tg button:first-child{border-radius:4px 0 0 4px}.sx-tg button:last-child{border-radius:0 4px 4px 0;border-left:0}
+    .sx-tg button.on{border:1px solid #41434D;color:#41434D;font-weight:700;background:#F1F1F3}
+    .sx-tg button.on:last-child{border-left:1px solid #41434D}
+    .kv-ptbl td.act,.kv-ptbl th.act{position:sticky;right:0;z-index:1;text-align:center;white-space:nowrap;box-shadow:-1px 0 0 rgba(17,17,20,.08)}
+    .kv-ptbl td.act{background:#fff;min-width:96px}.kv-ptbl th.act{background:#F1F1F3}
+    .kv-ptbl td.act a{display:block;color:#2563eb;cursor:pointer;text-decoration:none;font-size:13px;line-height:1.9}
+    .kv-ptbl td.act a:hover{text-decoration:underline}
+    .sx-more{text-align:center;padding:12px 0 0}
+    .sx-more a{color:#2563eb;cursor:pointer;font-size:13px;text-decoration:none}
+    .sx-ov{position:fixed;inset:0;background:rgba(17,17,20,.5);z-index:660;display:flex;align-items:center;justify-content:center;padding:16px}
+    .sx-box{background:#fff;border-radius:10px;width:min(880px,100%);max-height:94vh;overflow:auto;padding:22px 26px}
+    .sx-box h3{margin:0;font-size:20px;font-weight:700;color:#111114}
+    .sx-x{border:0;background:none;font-size:26px;line-height:1;cursor:pointer;color:rgba(41,42,49,.55);padding:0 4px}
+    .sx-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .sx-crit{border:1px solid rgba(17,17,20,.12);border-radius:6px;overflow:hidden}
+    .sx-cr{display:flex;gap:14px;padding:12px 16px;border-bottom:1px solid rgba(17,17,20,.08);align-items:flex-start}
+    .sx-cr:last-of-type{border-bottom:0}
+    .sx-cr > span{flex:0 0 96px;text-align:right;color:rgba(41,42,49,.65);font-size:13px;padding-top:1px}
+    .sx-cr > div{display:flex;flex-wrap:wrap;gap:8px 24px;flex:1}
+    .sx-cr label{display:inline-flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;min-width:150px}
+    .sx-cr label.dis{opacity:.45;cursor:not-allowed}
+    .sx-cr input{accent-color:#41434D;width:15px;height:15px;margin:0}
+    .sx-foot{background:#F1F1F3;padding:8px 16px;font-size:12px;color:rgba(41,42,49,.65)}
+    .sx-foot b{color:#41434D}
+    .sx-btn{background:#41434D;color:#fff;border:0;border-radius:4px;padding:10px 26px;font:inherit;font-weight:600;cursor:pointer}
+    .sx-btn.ghost{background:#fff;color:#41434D;border:1px solid #41434D}
+    .sx-page{position:fixed;inset:0;background:#F1F1F3;z-index:650;overflow:auto}
+    .sx-pw{max-width:1180px;margin:0 auto;padding:16px}
+    .sx-card{background:#fff;border-radius:8px;padding:16px 20px;margin-bottom:16px}
+    .sx-ph{display:flex;align-items:center;gap:14px}
+    .sx-ph img,.sx-ph .ph{width:60px;height:70px;object-fit:cover;border-radius:6px;background:#f0ede8;flex:0 0 auto}
+    .sx-ph b{display:block;font-size:15px;color:#111114}
+    .sx-ph span{font-size:12.5px;color:rgba(41,42,49,.65)}
+    .sx-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .sx-back{border:0;background:none;color:#2563eb;cursor:pointer;font:inherit;font-size:14px;padding:0}
+    .sx-tabs{display:flex;gap:28px;border-bottom:1px solid rgba(17,17,20,.12);margin-bottom:16px}
+    .sx-tabs button{border:0;background:none;font:inherit;font-size:15px;padding:12px 0;cursor:pointer;color:#111114;border-bottom:2px solid transparent;margin-bottom:-1px}
+    .sx-tabs button.on{color:#41434D;font-weight:700;border-bottom-color:#41434D}
+    .sx-grid2{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+    @media (min-width:861px){.sx-grid2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+    .sx-pan{border:1px solid rgba(17,17,20,.12);border-radius:8px;padding:18px 20px;min-height:280px}
+    .sx-pan h5{margin:0 0 14px;font-size:14px;font-weight:700;color:#111114}
+    .sx-fun{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 190px 84px;align-items:stretch;height:276px}
+    .sx-fl>div{height:92px;padding:10px 12px;border:1px solid rgba(17,17,20,.08);border-bottom:0;font-size:12.5px;color:rgba(41,42,49,.75)}
+    .sx-fl>div:last-child{border-bottom:1px solid rgba(17,17,20,.08)}
+    .sx-fl b{display:block;font-size:22px;color:#111114;margin:4px 0 2px}
+    .sx-fr{display:flex;flex-direction:column;align-items:center}
+    .sx-fr div{height:92px;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 12px}
+    .sx-fp{position:relative;font-size:11.5px;color:rgba(41,42,49,.7)}
+    .sx-fp div{position:absolute;left:8px;line-height:1.3}
+    .sx-fp b{display:block;font-size:17px;color:#41434D}
+    .sx-donut{display:flex;align-items:center;gap:22px;justify-content:center;flex-wrap:wrap;min-height:210px}
+    .sx-dl{font-size:12.5px;display:flex;flex-direction:column;gap:6px;min-width:150px}
+    .sx-dl div{display:flex;align-items:center;gap:8px}.sx-dl i{width:9px;height:9px;border-radius:50%}
+    .sx-dl em{margin-left:auto;font-style:normal;color:rgba(41,42,49,.65);padding-left:12px}
+    @media (max-width:860px){.sx-box{padding:16px}.sx-cr{flex-direction:column;gap:6px}.sx-cr > span{text-align:left;flex:none}.sx-fun{grid-template-columns:minmax(0,1fr);height:auto;gap:12px}.sx-fl>div{height:auto}.sx-fr div{height:64px}.sx-fp{display:flex;gap:28px}.sx-fp div{position:static!important}}
     .src-band{background:#F1F1F3;border-radius:8px;padding:14px;margin-bottom:16px}
     .src-band h4{margin:0 0 10px;font-size:13px;font-weight:700;color:#111114}
     .kv-cards,.kv-src{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
@@ -4323,8 +4383,8 @@ function perfSrcDrawTable() {
     return r || (b.sc.rp - a.sc.rp) || (b.cu.visitors - a.cu.visitors);
   });
   const head = M.map(m => `<th class="srt${m.k === st.k ? ' on' : ''}" onclick="perfSrcSort('${m.k}')">${m.l}${m.tip ? ' ' + kvHint(m.tip) : ''}<span class="srt-i"><i class="u${m.k === st.k && st.dir === 'asc' ? ' on' : ''}"></i><i class="d${m.k === st.k && st.dir === 'desc' ? ' on' : ''}"></i></span></th>`).join('');
-  const body = sorted.map(r => `<tr><td class="nm"><b>${chatEsc(r.c.label)}</b></td>${M.map(m => `<td>${m.f(mk === m ? m.v(r, 0) : m.v(r, 0))}<small>${kvDelta(m.v(r, 0), m.v(r, 1))}</small></td>`).join('')}</tr>`).join('');
-  host.innerHTML = `<table class="kv-ptbl stk"><thead><tr><th style="text-align:left">Sumber Kunjungan</th>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  const body = sorted.map(r => `<tr><td class="nm"><b>${chatEsc(r.c.label)}</b></td>${M.map(m => `<td>${m.f(m.v(r, 0))}<small>${kvDelta(m.v(r, 0), m.v(r, 1))}</small></td>`).join('')}<td class="act"><a href="javascript:void(0)" onclick="sxOpenTrend('${r.c.k}', null)">Lihat Grafik</a></td></tr>`).join('');
+  host.innerHTML = `<table class="kv-ptbl stk"><thead><tr><th style="text-align:left">Sumber Kunjungan</th>${head}<th class="act"></th></tr></thead><tbody>${body}</tbody></table>`;
 }
 async function perfLoadSources(period, start, end, prevStart, prevEnd) {
   const el = document.getElementById('perf-src');
@@ -4334,7 +4394,7 @@ async function perfLoadSources(period, start, end, prevStart, prevEnd) {
     let pe = prevEnd;
     if (period === 'today') pe = new Date(prevStart.getTime() + Math.max(0, Date.now() - new Date(start).getTime()));
     const scope = document.getElementById('perf-scope')?.value || 'dibuat';
-    const ordQ = (a, b2) => { let q = sb.from('orders').select('total, source, status, user_id, items').gte('created_at', a).lt('created_at', b2); if (scope === 'siap_kirim') q = q.eq('status', 'diproses'); return q; };
+    const ordQ = (a, b2) => { let q = sb.from('orders').select('total, source, status, user_id, items, created_at').gte('created_at', a).lt('created_at', b2); if (scope === 'siap_kirim') q = q.eq('status', 'diproses'); return q; };
     const [cur, prev, oc, op] = await Promise.all([
       kvFetch(start, end), kvFetch(prevStart.toISOString(), pe.toISOString()),
       ordQ(start, end), ordQ(prevStart.toISOString(), pe.toISOString()),
@@ -4378,11 +4438,11 @@ async function perfLoadSources(period, start, end, prevStart, prevEnd) {
       { k: 'vis', l: 'Pengunjung', f: fn, v: (r, i) => side(r, i).vis.visitors },
       { k: 'views', l: 'Jumlah Produk Dilihat', tip: 'Berapa kali halaman produk dibuka.', f: fn, v: (r, i) => side(r, i).vis.views },
       { k: 'clicked', l: 'Produk Diklik', tip: 'Pengunjung unik yang membuka halaman produk.', f: fn, v: (r, i) => side(r, i).vis.clicked },
-      { k: 'ctr', l: 'Persentase Klik', tip: 'Pengunjung yang membuka produk dibagi pengunjung toko.', f: fp, v: (r, i) => { const x = side(r, i); return pct(x.vis.clicked, x.vis.visitors); } },
+      { k: 'ctr', l: 'Persentase Klik', tip: 'Produk Diklik dibagi Jumlah Produk Dilihat.', f: fp, v: (r, i) => { const x = side(r, i); return pct(x.vis.clicked, x.vis.views); } },
       { k: 'cart', l: 'Masuk Keranjang', f: fn, v: (r, i) => side(r, i).vis.cart },
       { k: 'wa', l: 'Klik WhatsApp', f: fn, v: (r, i) => side(r, i).vis.wa },
       { k: 'co', l: 'Checkout Dibuat', f: fn, v: (r, i) => side(r, i).vis.checkout },
-      { k: 'cvr', l: 'Tingkat Konversi Pesanan', tip: 'Pesanan dibagi pengunjung dari sumber yang sama.', f: fp, v: (r, i) => { const x = side(r, i); return pct(x.sal.n, x.vis.visitors); } },
+      { k: 'cvr', l: 'Tingkat Konversi Pesanan', tip: 'Pesanan dibagi Produk Diklik.', f: fp, v: (r, i) => { const x = side(r, i); return pct(x.sal.n, x.vis.clicked); } },
     ];
     perfSrcData = { rows, M };
     const cards = rows.map(r => `<div class="kv-card"><div class="kc-l">${chatEsc(r.c.label)}</div><div class="kc-v">${rp(r.sc.rp)}</div><div class="kc-s">${fp(pct(r.sc.rp, stc.rp))} dari penjualan${kvDelta(r.sc.rp, r.sp.rp)}</div></div>`).join('');
@@ -4392,12 +4452,264 @@ async function perfLoadSources(period, start, end, prevStart, prevEnd) {
       <div class="src-band"><h4>Rincian Kontribusi Penjualan Toko</h4>
         <div class="src-car"><button type="button" class="src-arr l" hidden aria-label="Sebelumnya" onclick="srcSlide(this,-1)">${arrow('M15 5l-7 7 7 7')}</button><div class="src-track" onscroll="srcArrows(this.parentNode)"><div class="kv-card tot"><div class="kc-l">Total Penjualan ${kvHint('Jumlah nilai pesanan di periode ini, semua sumber. Pesanan lama sebelum fitur ini aktif masuk ke "Tidak tercatat".')}</div><div class="kc-v">${rp(stc.rp)}</div><div class="kc-s">100% dari penjualan${kvDelta(stc.rp, stp.rp)}</div></div>${cards}</div><button type="button" class="src-arr r" hidden aria-label="Berikutnya" onclick="srcSlide(this,1)">${arrow('M9 5l7 7-7 7')}</button></div>
       </div>
-      <div class="src-scroll" id="perf-src-tbl"></div>`;
-    perfSrcDrawTable();
+      <div class="sx-hd"><h4>Sumber Kunjungan dari Halaman Produk ${kvHint('Rincian kunjungan dan penjualan. Asal Penjualan: per sumber (Instagram, TikTok, dst). Kontribusi Produk: per produk.')}</h4>
+        <div class="sx-tg"><button type="button" id="sx-tg-asal" onclick="sxSetView('asal')">Asal Penjualan</button><button type="button" id="sx-tg-prod" onclick="sxSetView('prod')">Kontribusi Produk</button></div></div>
+      <div class="src-scroll" id="perf-src-tbl"></div><div id="sx-more"></div>`;
+    sxD = { period, cur, prev, cm, pm, oCur, oPrev, cols, cache: new Map() };
+    sxRender();
     srcArrows(el.querySelector('.src-car'));
   } catch (e) {
     el.innerHTML = '<p style="font-size:13px;color:var(--muted)">Gagal memuat sumber kunjungan.</p>';
   }
+}
+
+// ================= Sumber Kunjungan: Lihat Grafik, Kontribusi Produk, Rincian Produk =================
+let sxD = null, sxView = 'asal', sxAll = false;
+const sxSortS = { prod: { k: 'rp', dir: 'desc' }, det: { k: 'rp', dir: 'desc' } };
+let sxTrendSel = ['views', 'rp'];
+const sxPct = (a, b) => b ? (a / b * 100) : 0;
+const sxFp = v => v.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+const sxFn = v => Math.round(v).toLocaleString('id-ID');
+const sxRp = v => 'Rp' + Math.round(v).toLocaleString('id-ID');
+const sxOrdKey = o => o.source ? kvGrp(o.source) : '_none';
+
+function sxMetrics(evs, ords, pid) {
+  let views = 0, cart = 0; const cs = new Set();
+  evs.forEach(e => {
+    if (pid && e.product_id !== pid) return;
+    if (e.event_type === 'view_product') { views++; cs.add(e.session_id); }
+    else if (e.event_type === 'add_to_cart') cart++;
+  });
+  let rp = 0, n = 0, qty = 0; const b = new Set();
+  ords.forEach(o => {
+    if (pid) {
+      let hit = false;
+      (o.items || []).forEach(it => { if (it.productId === pid) { hit = true; rp += (Number(it.price) || 0) * (Number(it.qty) || 0); qty += Number(it.qty) || 0; } });
+      if (hit) { n++; if (o.user_id) b.add(o.user_id); }
+    } else {
+      rp += Number(o.total) || 0; n++;
+      (o.items || []).forEach(it => { qty += Number(it.qty) || 0; });
+      if (o.user_id) b.add(o.user_id);
+    }
+  });
+  return { views, clicked: cs.size, cart, rp, n, qty, buyers: b.size };
+}
+// side 0 = periode ini, 1 = periode sebelumnya. src = kunci sumber atau null. pid = id produk atau null.
+function sxSlice(side, src, pid) {
+  const key = side + '|' + (src || '') + '|' + (pid || '');
+  if (sxD.cache.has(key)) return sxD.cache.get(key);
+  const evAll = side ? sxD.prev : sxD.cur, map = side ? sxD.pm : sxD.cm, ordAll = side ? sxD.oPrev : sxD.oCur;
+  const ev = src ? kvFilter(evAll, map, src) : evAll;
+  const ords = src ? ordAll.filter(o => sxOrdKey(o) === src) : ordAll;
+  const m = sxMetrics(ev, ords, pid);
+  sxD.cache.set(key, m);
+  return m;
+}
+const SX_M = [
+  { k: 'ratio', l: 'Rasio Penjualan', tip: 'Bagian penjualan ini terhadap total penjualan.', f: sxFp, get: (m, t) => sxPct(m.rp, t.rp) },
+  { k: 'rp', l: 'Penjualan', f: sxRp, get: m => m.rp },
+  { k: 'views', l: 'Jumlah Produk Dilihat', tip: 'Berapa kali halaman produk dibuka.', f: sxFn, get: m => m.views },
+  { k: 'clicked', l: 'Produk Diklik', tip: 'Pengunjung unik yang membuka halaman produk.', f: sxFn, get: m => m.clicked },
+  { k: 'n', l: 'Pesanan', f: sxFn, get: m => m.n },
+  { k: 'qty', l: 'Produk', tip: 'Jumlah produk (item) yang terjual.', f: sxFn, get: m => m.qty },
+  { k: 'ctr', l: 'Persentase Klik', tip: 'Produk Diklik dibagi Jumlah Produk Dilihat.', f: sxFp, get: m => sxPct(m.clicked, m.views) },
+  { k: 'cvr', l: 'Tingkat Konversi Pesanan', tip: 'Pesanan dibagi Produk Diklik.', f: sxFp, get: m => sxPct(m.n, m.clicked) },
+  { k: 'buyers', l: 'Pembeli', tip: 'Jumlah pembeli unik.', f: sxFn, get: m => m.buyers },
+];
+function sxProd(pid) {
+  const p = (typeof adminProductsData !== 'undefined' ? adminProductsData : []).find(x => x.id === pid);
+  return { id: pid, name: p ? p.name : '(produk sudah dihapus)', img: p && p.image_url };
+}
+function sxShortId(id) { return String(id || '').slice(0, 8); }
+function sxProdCell(P) {
+  const img = P.img ? `<img src="${chatEsc(P.img)}" style="width:50px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0">` : `<div style="width:50px;height:60px;border-radius:6px;background:#f0ede8;flex-shrink:0"></div>`;
+  return `<div class="kv-pn">${img}<div><b>${chatEsc(P.name)}</b><span>ID Produk: ${chatEsc(sxShortId(P.id))}</span></div></div>`;
+}
+function sxSetView(v) {
+  sxView = v; sxAll = false; sxRender();
+}
+function sxRender() {
+  if (!sxD) return;
+  const a = document.getElementById('sx-tg-asal'), b = document.getElementById('sx-tg-prod');
+  if (a) a.classList.toggle('on', sxView === 'asal');
+  if (b) b.classList.toggle('on', sxView === 'prod');
+  const more = document.getElementById('sx-more'); if (more) more.innerHTML = '';
+  if (sxView === 'asal') perfSrcDrawTable(); else sxDrawProd();
+}
+// tabel generik (Kontribusi Produk dan Rincian Produk)
+function sxDrawGeneric(hostId, rows, cols, st, firstHead, firstCell, actCell, sortFn) {
+  const host = document.getElementById(hostId); if (!host) return;
+  const mk = cols.find(c => c.k === st.k) || cols[1];
+  const val = (r, i) => mk.get(r.m[i], r.t[i]);
+  const sorted = rows.slice().sort((x, y) => {
+    const d = st.dir === 'desc' ? val(y, 0) - val(x, 0) : val(x, 0) - val(y, 0);
+    return d || (y.m[0].rp - x.m[0].rp) || (y.m[0].views - x.m[0].views);
+  });
+  const head = cols.map(m => `<th class="srt${m.k === st.k ? ' on' : ''}" onclick="${sortFn}('${m.k}')">${m.l}${m.tip ? ' ' + kvHint(m.tip) : ''}<span class="srt-i"><i class="u${m.k === st.k && st.dir === 'asc' ? ' on' : ''}"></i><i class="d${m.k === st.k && st.dir === 'desc' ? ' on' : ''}"></i></span></th>`).join('');
+  const lim = (hostId === 'perf-src-tbl' && !sxAll) ? 10 : sorted.length;
+  const body = sorted.slice(0, lim).map(r => `<tr><td class="nm">${firstCell(r)}</td>${cols.map(m => `<td>${m.f(m.get(r.m[0], r.t[0]))}<small>${kvDelta(m.get(r.m[0], r.t[0]), m.get(r.m[1], r.t[1]))}</small></td>`).join('')}<td class="act">${actCell(r)}</td></tr>`).join('');
+  host.innerHTML = `<table class="kv-ptbl stk"><thead><tr><th style="text-align:left">${firstHead}</th>${head}<th class="act"></th></tr></thead><tbody>${body}</tbody></table>`;
+  return sorted.length;
+}
+function sxProdSort(k) { const s = sxSortS.prod; if (s.k === k) s.dir = s.dir === 'desc' ? 'asc' : 'desc'; else { s.k = k; s.dir = 'desc'; } sxDrawProd(); }
+function sxDrawProd() {
+  const ids = [];
+  const add = id => { if (id && !ids.includes(id)) ids.push(id); };
+  [...(typeof adminProductsData !== 'undefined' ? adminProductsData : [])].sort((x, y) => new Date(y.created_at) - new Date(x.created_at)).forEach(p => add(p.id));
+  sxD.cur.forEach(e => { if (e.product_id) add(e.product_id); });
+  sxD.oCur.forEach(o => (o.items || []).forEach(it => add(it.productId)));
+  const t = [sxSlice(0, null, null), sxSlice(1, null, null)];
+  const rows = ids.map(id => ({ id, P: sxProd(id), m: [sxSlice(0, null, id), sxSlice(1, null, id)], t }));
+  const cols = SX_M.filter(m => ['ratio', 'rp', 'views', 'clicked', 'n', 'qty'].includes(m.k));
+  const total = sxDrawGeneric('perf-src-tbl', rows, cols, sxSortS.prod, 'Informasi Produk', r => sxProdCell(r.P), r => `<a href="javascript:void(0)" onclick="sxOpenDetail('${chatEsc(String(r.id))}')">Lihat Rincian</a>`, 'sxProdSort');
+  const more = document.getElementById('sx-more');
+  if (more && total > 10) more.innerHTML = `<div class="sx-more"><a onclick="sxAll=!sxAll;sxDrawProd()">${sxAll ? 'Tampilkan lebih sedikit' : 'Lihat Semua Produk'} ${sxAll ? '‹' : '›'}</a></div>`;
+}
+
+// ---- overlay umum
+function sxCloseTop() {
+  const els = document.querySelectorAll('.sx-ov, .sx-page');
+  const last = els[els.length - 1];
+  if (last) last.remove();
+  if (!document.querySelector('.sx-ov, .sx-page')) document.removeEventListener('keydown', sxKey);
+}
+function sxKey(e) { if (e.key === 'Escape') sxCloseTop(); }
+function sxMount(el) { document.body.appendChild(el); document.addEventListener('keydown', sxKey); }
+
+// ---- Tren Kriteria (popup dan tab grafik)
+const SX_CR = [
+  { g: 'Impresi', items: [['views', 'Jumlah Produk Dilihat', ''], ['ctr', 'Persentase Klik', 'Produk Diklik dibagi Jumlah Produk Dilihat.']] },
+  { g: 'Jumlah Klik', items: [['clicked', 'Produk Diklik', 'Pengunjung unik yang membuka halaman produk.'], ['cvr', 'Tingkat Konversi Pesanan', 'Pesanan dibagi Produk Diklik.']] },
+  { g: 'Pesanan', items: [['ratio', 'Rasio Penjualan', 'Bagian penjualan terhadap total.'], ['rp', 'Penjualan', ''], ['n', 'Pesanan', ''], ['qty', 'Produk', 'Jumlah produk (item) yang terjual.'], ['buyers', 'Total Pembeli', '']] },
+];
+const SX_FMT = { views: sxFn, clicked: sxFn, n: sxFn, qty: sxFn, buyers: sxFn, rp: sxRp, ctr: sxFp, cvr: sxFp, ratio: sxFp };
+const SX_LAB = {}; SX_CR.forEach(g => g.items.forEach(i => { SX_LAB[i[0]] = i[1]; }));
+function sxTrendSeries(ctx, keys) {
+  const spec = perfBucketSpec(sxD.period), labels = spec.labels;
+  const grp = (src, pid) => {
+    const ev = src ? kvFilter(sxD.cur, sxD.cm, src) : sxD.cur;
+    const ords = src ? sxD.oCur.filter(o => sxOrdKey(o) === src) : sxD.oCur;
+    const evB = {}, orB = {}; labels.forEach(l => { evB[l] = []; orB[l] = []; });
+    ev.forEach(e => { const k = spec.keyOf(e.created_at); if (evB[k]) evB[k].push(e); });
+    ords.forEach(o => { const k = spec.keyOf(o.created_at); if (orB[k]) orB[k].push(o); });
+    return labels.map(l => sxMetrics(evB[l], orB[l], pid));
+  };
+  const per = grp(ctx.src, ctx.pid), den = ctx.src ? grp(null, ctx.pid) : per;
+  const get = { views: m => m.views, clicked: m => m.clicked, n: m => m.n, qty: m => m.qty, buyers: m => m.buyers, rp: m => m.rp, ctr: m => sxPct(m.clicked, m.views), cvr: m => sxPct(m.n, m.clicked) };
+  return { spec, series: keys.map((k, i) => ({ k, label: SX_LAB[k], color: KV_COLORS[i % KV_COLORS.length], fmt: SX_FMT[k], vals: per.map((m, j) => k === 'ratio' ? sxPct(m.rp, den[j].rp) : get[k](m)) })) };
+}
+function sxDrawLines(host, spec, series) {
+  const labels = spec.labels, n = labels.length;
+  const W = Math.max(300, Math.floor(host.clientWidth) || 760), H = isPerfMobile() ? 210 : 230;
+  const pl = 10, pr = 10, pt = 12, pb = 28, iw = W - pl - pr, ih = H - pt - pb;
+  const x = i => pl + (n <= 1 ? iw / 2 : i * iw / (n - 1));
+  series.forEach(s => { s.mx = Math.max(0, ...s.vals); });
+  const y = (v, mx) => pt + ih - (mx > 0 ? v / mx * ih * 0.94 : 0);
+  const axis = l => { if (spec.mode === 'hour') return String(l).padStart(2, '0') + ':00'; const p = String(l).split('-'); return spec.mode === 'day' ? p[2] + '/' + p[1] : (PDD_MONTHS_S[+p[1] - 1] || l); };
+  const title = l => { if (spec.mode === 'hour') return String(l).padStart(2, '0') + ':00 ~ ' + String((+l + 1) % 24).padStart(2, '0') + ':00'; const p = String(l).split('-'); return spec.mode === 'day' ? p[2] + '-' + p[1] + '-' + p[0] : p[1] + '-' + p[0]; };
+  const step = spec.mode === 'hour' ? (isPerfMobile() ? 6 : 3) : Math.max(1, Math.ceil(n / (isPerfMobile() ? 5 : 9)));
+  let grid = '';
+  for (let g = 0; g <= 4; g++) { const yy = pt + ih - g * ih / 4; grid += `<line x1="${pl}" x2="${W - pr}" y1="${yy}" y2="${yy}" stroke="rgba(17,17,20,.08)" stroke-dasharray="${g ? '3 4' : '0'}"/>`; }
+  const xl = labels.map((l, i) => (i % step === 0) ? `<text x="${x(i)}" y="${H - 8}" font-size="11" fill="rgba(41,42,49,.6)" text-anchor="${i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle')}">${axis(l)}</text>` : '').join('');
+  const lines = series.map(s => `<polyline points="${s.vals.map((v, i) => x(i) + ',' + y(v, s.mx)).join(' ')}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` + (n <= 31 ? s.vals.map((v, i) => `<circle cx="${x(i)}" cy="${y(v, s.mx)}" r="2.6" fill="${s.color}"/>`).join('') : '')).join('');
+  host.innerHTML = `<div class="kv-chartwrap"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${grid}${xl}${lines}<line class="kv-guide" y1="${pt}" y2="${pt + ih}" stroke="rgba(17,17,20,.35)" stroke-dasharray="3 3" style="display:none"/>${series.map(s => `<circle class="kv-hd" r="4.5" fill="#fff" stroke="${s.color}" stroke-width="2" style="display:none"/>`).join('')}</svg><div class="kv-tip"></div></div>`;
+  const svg = host.querySelector('svg'), tip = host.querySelector('.kv-tip'), guide = svg.querySelector('.kv-guide'), hd = [...svg.querySelectorAll('.kv-hd')];
+  const show = e => {
+    const r = svg.getBoundingClientRect();
+    let i = n <= 1 ? 0 : Math.round((e.clientX - r.left - pl) / iw * (n - 1)); i = Math.max(0, Math.min(n - 1, i));
+    guide.setAttribute('x1', x(i)); guide.setAttribute('x2', x(i)); guide.style.display = '';
+    hd.forEach((d, si) => { d.setAttribute('cx', x(i)); d.setAttribute('cy', y(series[si].vals[i], series[si].mx)); d.style.display = ''; });
+    tip.innerHTML = `<div class="t">${title(labels[i])}</div>` + series.map(s => `<div class="r"><i style="background:${s.color}"></i>${s.label}<b>${s.fmt(s.vals[i])}</b></div>`).join('');
+    tip.style.display = 'block';
+    const tw = tip.offsetWidth; let left = x(i) + 14; if (left + tw > W) left = x(i) - tw - 14;
+    tip.style.left = Math.max(0, left) + 'px'; tip.style.top = '6px';
+  };
+  const hide = () => { tip.style.display = 'none'; guide.style.display = 'none'; hd.forEach(d => { d.style.display = 'none'; }); };
+  svg.addEventListener('pointermove', show); svg.addEventListener('pointerdown', show); svg.addEventListener('pointerleave', hide);
+}
+function sxTrendBox(root, ctx) {
+  const sel = sxTrendSel;
+  const full = sel.length >= 4;
+  root.innerHTML = `<div class="sx-crit">${SX_CR.map(g => `<div class="sx-cr"><span>${g.g}:</span><div>${g.items.map(([k, l, tip]) => { const on = sel.includes(k); const dis = full && !on; return `<label class="${dis ? 'dis' : ''}"><input type="checkbox" data-k="${k}" ${on ? 'checked' : ''} ${dis ? 'disabled' : ''}>${l}${tip ? ' ' + kvHint(tip) : ''}</label>`; }).join('')}</div></div>`).join('')}
+    <div class="sx-foot">Kriteria Dipilih: <b>${sel.length}</b> /4</div></div>
+    <div class="sx-ch" style="margin-top:16px"></div>`;
+  root.querySelectorAll('input[data-k]').forEach(i => i.addEventListener('change', () => {
+    const k = i.dataset.k;
+    if (i.checked) { if (sxTrendSel.length < 4) sxTrendSel.push(k); } else sxTrendSel = sxTrendSel.filter(x => x !== k);
+    sxTrendBox(root, ctx);
+  }));
+  const host = root.querySelector('.sx-ch');
+  if (!sel.length) { host.innerHTML = '<p style="font-size:12.5px;color:var(--muted)">Pilih minimal satu kriteria untuk menampilkan grafik.</p>'; return; }
+  const r = sxTrendSeries(ctx, sel);
+  sxDrawLines(host, r.spec, r.series);
+  host.insertAdjacentHTML('beforeend', `<div style="display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px;font-size:12px;color:rgba(41,42,49,.75)">${r.series.map(s => `<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:9px;height:9px;border-radius:50%;background:${s.color};display:inline-block"></i>${s.label}</span>`).join('')}</div>`);
+}
+function sxOpenTrend(src, pid) {
+  if (!sxD) return;
+  const ov = document.createElement('div'); ov.className = 'sx-ov';
+  const srcLabel = src ? ((sxD.cols.find(c => c.k === src) || {}).label || src) : '';
+  ov.innerHTML = `<div class="sx-box" role="dialog" aria-label="Tren Kriteria"><div class="sx-top"><h3>Tren Kriteria${srcLabel ? ' <span style="font-weight:500;font-size:14px;color:rgba(41,42,49,.65)">· ' + chatEsc(srcLabel) + '</span>' : ''}</h3><button class="sx-x" aria-label="Tutup">×</button></div><div class="sx-root"></div><div style="text-align:right;margin-top:18px"><button class="sx-btn">Mengerti</button></div></div>`;
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  ov.querySelector('.sx-x').onclick = () => ov.remove();
+  ov.querySelector('.sx-btn').onclick = () => ov.remove();
+  sxMount(ov);
+  sxTrendBox(ov.querySelector('.sx-root'), { src: src || null, pid: pid || null });
+}
+
+// ---- Rincian Produk
+function sxDetSort(k) { const s = sxSortS.det; if (s.k === k) s.dir = s.dir === 'desc' ? 'asc' : 'desc'; else { s.k = k; s.dir = 'desc'; } sxDetTable(sxDetPid); }
+let sxDetPid = null;
+function sxDetTable(pid) {
+  const t = [sxSlice(0, null, pid), sxSlice(1, null, pid)];
+  const rows = sxD.cols.map(c => ({ id: c.k, label: c.label, m: [sxSlice(0, c.k, pid), sxSlice(1, c.k, pid)], t }));
+  const cols = SX_M.filter(m => ['ratio', 'rp', 'views', 'clicked', 'n', 'qty', 'ctr', 'cvr'].includes(m.k));
+  sxDrawGeneric('sx-det-tbl', rows, cols, sxSortS.det, 'Sumber Kunjungan', r => `<b>${chatEsc(r.label)}</b>`, r => `<a href="javascript:void(0)" onclick="sxOpenTrend('${r.id}', '${chatEsc(String(pid))}')">Lihat Grafik</a>`, 'sxDetSort');
+}
+function sxDetBody(pid, tab, root) {
+  if (tab === 'grafik') {
+    root.innerHTML = '<div class="sx-card"><h4 style="margin:0 0 12px;font-size:16px">Grafik Kriteria</h4><div class="sx-tr"></div></div>';
+    sxTrendBox(root.querySelector('.sx-tr'), { src: null, pid });
+    return;
+  }
+  const t = [sxSlice(0, null, pid), sxSlice(1, null, pid)];
+  const cards = sxD.cols.map(c => { const m = sxSlice(0, c.k, pid), pm = sxSlice(1, c.k, pid); return `<div class="kv-card"><div class="kc-l">${chatEsc(c.label)}</div><div class="kc-v">${sxRp(m.rp)}</div><div class="kc-s">${sxFp(sxPct(m.rp, t[0].rp))} dari penjualan${kvDelta(m.rp, pm.rp)}</div></div>`; }).join('');
+  const a = t[0], b = t[1];
+  const stat = (l, v, pv, f) => `<div>${l}<b>${f(v)}</b><span style="font-size:11.5px">vs periode lalu ${kvDelta(v, pv)}</span></div>`;
+  const ctr = sxPct(a.clicked, a.views), cvr = sxPct(a.n, a.clicked);
+  const fun = `<div class="sx-fun"><div class="sx-fl">${stat('Jumlah Produk Dilihat', a.views, b.views, sxFn)}${stat('Produk Diklik', a.clicked, b.clicked, sxFn)}${stat('Pesanan', a.n, b.n, sxFn)}</div>
+    <div class="sx-fr"><div style="width:100%;background:#41434D;clip-path:polygon(0 0,100% 0,90% 100%,10% 100%)">Jumlah Produk Dilihat</div><div style="width:80%;background:#7B7E8C;clip-path:polygon(0 0,100% 0,88% 100%,12% 100%)">Produk Diklik</div><div style="width:64%;background:#B9BBC6;color:#111114;clip-path:polygon(0 0,100% 0,86% 100%,14% 100%)">Pesanan</div></div>
+    <div class="sx-fp"><div style="top:58px">Persentase Klik<b>${sxFp(ctr)}</b></div><div style="top:150px">Tingkat Konversi<b>${sxFp(cvr)}</b></div></div></div>`;
+  const segs = sxD.cols.map((c, i) => ({ label: c.label, v: sxSlice(0, c.k, pid).rp, color: KV_COLORS[i % KV_COLORS.length] })).filter(x => x.v > 0);
+  const tot = segs.reduce((q, x) => q + x.v, 0);
+  let off = 25, ring = '';
+  segs.forEach(x => { const pc = x.v / tot * 100; ring += `<circle cx="21" cy="21" r="15.9155" fill="none" stroke="${x.color}" stroke-width="6" stroke-dasharray="${pc} ${100 - pc}" stroke-dashoffset="${off}"/>`; off -= pc; });
+  const donut = `<div class="sx-donut"><svg width="190" height="190" viewBox="0 0 42 42"><circle cx="21" cy="21" r="15.9155" fill="none" stroke="#ebebee" stroke-width="6"/>${ring}<text x="21" y="22.2" text-anchor="middle" font-size="${tot ? 3.6 : 3.4}" fill="#41434D" font-weight="600">${tot ? sxRp(tot) : 'NO DATA'}</text></svg>
+    ${tot ? `<div class="sx-dl">${segs.map(x => `<div><i style="background:${x.color}"></i>${chatEsc(x.label)}<em>${sxFp(x.v / tot * 100)}</em></div>`).join('')}</div>` : ''}</div>`;
+  root.innerHTML = `<div class="sx-card" style="background:#F6F6F8"><h4 style="margin:0 0 12px;font-size:14px">Rincian Kontribusi Penjualan Toko</h4>
+      <div class="src-car"><button type="button" class="src-arr l" hidden onclick="srcSlide(this,-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><div class="src-track" onscroll="srcArrows(this.parentNode)"><div class="kv-card tot"><div class="kc-l">Total Penjualan</div><div class="kc-v">${sxRp(a.rp)}</div><div class="kc-s">100% dari penjualan${kvDelta(a.rp, b.rp)}</div></div>${cards}</div><button type="button" class="src-arr r" hidden onclick="srcSlide(this,1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button></div></div>
+    <div class="sx-card"><h4 style="margin:0 0 14px;font-size:16px">Metrik Halaman Produk Keseluruhan</h4>
+      <div class="sx-grid2"><div class="sx-pan"><h5>Efisiensi Konversi</h5>${fun}</div><div class="sx-pan"><h5>Komposisi Penjualan</h5>${donut}</div></div></div>
+    <div class="sx-card"><h4 style="margin:0 0 12px;font-size:16px">Sumber Kunjungan dari Halaman Produk</h4><div class="src-scroll" id="sx-det-tbl"></div></div>`;
+  sxDetTable(pid);
+  srcArrows(root.querySelector('.src-car'));
+}
+function sxOpenDetail(pid) {
+  if (!sxD) return;
+  sxDetPid = pid;
+  const P = sxProd(pid);
+  const pg = document.createElement('div'); pg.className = 'sx-page';
+  const periode = (document.getElementById('perf-dd-name')?.textContent || '') + ' ' + (document.getElementById('perf-dd-range')?.textContent || '');
+  pg.innerHTML = `<div class="sx-pw">
+    <div class="sx-card sx-bar"><button class="sx-back">‹ Kembali</button><span style="color:rgba(41,42,49,.6);font-size:13px">Performa Toko › Sumber Kunjungan dari Halaman Produk</span></div>
+    <div class="sx-card"><div class="sx-ph">${P.img ? `<img src="${chatEsc(P.img)}" alt="">` : '<div class="ph"></div>'}<div><b>${chatEsc(P.name)}</b><span>Kode Produk: ${chatEsc(sxShortId(pid))}</span></div></div></div>
+    <div class="sx-card" style="font-size:13.5px"><span style="color:rgba(41,42,49,.6)">Periode Data</span> &nbsp;<b>${chatEsc(periode.trim())}</b></div>
+    <div class="sx-card" style="padding-bottom:4px"><div class="sx-tabs"><button class="on" data-t="sumber">Sumber Kunjungan</button><button data-t="grafik">Grafik Kriteria</button></div><div class="sx-body"></div></div></div>`;
+  const body = pg.querySelector('.sx-body');
+  const go = t => { pg.querySelectorAll('.sx-tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t)); sxDetBody(pid, t, body); };
+  pg.querySelectorAll('.sx-tabs button').forEach(b => b.onclick = () => go(b.dataset.t));
+  pg.querySelector('.sx-back').onclick = () => pg.remove();
+  sxMount(pg);
+  go('sumber');
 }
 
 // Corong pembelian (kolom kanan di Tinjauan): pengunjung unik per tahap
@@ -5015,7 +5327,7 @@ function kvDelta(cur, prev, goodDir) {
 async function kvFetch(start, end) {
   const out = [], size = 1000;
   for (let from = 0; from < 60000; from += size) {
-    const r = await sb.from('analytics_events').select('session_id, event_type, source, created_at')
+    const r = await sb.from('analytics_events').select('session_id, event_type, source, created_at, product_id')
       .in('event_type', ['view_store', 'view_product', 'add_to_cart', 'begin_checkout', 'click_whatsapp'])
       .gte('created_at', start).lt('created_at', end)
       .order('created_at', { ascending: true }).range(from, from + size - 1);
