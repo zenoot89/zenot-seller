@@ -262,6 +262,28 @@ function resetVariantSystem() {
   if (hexInput) hexInput.value = '#1A1A1A';
 }
 
+// Pertajam ringan (unsharp mask sederhana). amount 0.3 = halus, 0.6 = lebih terasa.
+function _sharpenCanvas(canvas, amount) {
+  const w = canvas.width, h = canvas.height;
+  const ctx = canvas.getContext('2d');
+  const src = ctx.getImageData(0, 0, w, h);
+  const out = ctx.createImageData(w, h);
+  const a = src.data, o = out.data;
+  const k = amount;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      if (x === 0 || y === 0 || x === w - 1 || y === h - 1) { o[i]=a[i]; o[i+1]=a[i+1]; o[i+2]=a[i+2]; o[i+3]=a[i+3]; continue; }
+      for (let c = 0; c < 3; c++) {
+        const v = a[i+c] * (1 + 4*k) - k * (a[i+c-4] + a[i+c+4] + a[i+c-w*4] + a[i+c+w*4]);
+        o[i+c] = v < 0 ? 0 : v > 255 ? 255 : v;
+      }
+      o[i+3] = a[i+3];
+    }
+  }
+  ctx.putImageData(out, 0, 0);
+}
+
 function compressImage(file, maxDim = 1200, quality = 0.82) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -273,9 +295,20 @@ function compressImage(file, maxDim = 1200, quality = 0.82) {
         if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
         else { width = Math.round(width * maxDim / height); height = maxDim; }
       }
+      // Google Merchant: sisi terpendek minimal 500px (aturan 31 Jan 2027). Target aman 800px.
+      const minDim = 800;
+      const shortSide = Math.min(width, height);
+      let upscaled = false;
+      if (shortSide < minDim) {
+        upscaled = true;
+        const up = minDim / shortSide;
+        width = Math.round(width * up); height = Math.round(height * up);
+        try { showToast('Foto kecil diperbesar ke 800px dan dipertajam otomatis. Hasil terbaik tetap foto asli minimal 800x800.'); } catch (_) {}
+      }
       const canvas = document.createElement('canvas');
       canvas.width = width; canvas.height = height;
-      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      const cx = canvas.getContext('2d'); cx.imageSmoothingQuality = 'high'; cx.drawImage(img, 0, 0, width, height);
+      try { _sharpenCanvas(canvas, upscaled ? 0.6 : 0.35); } catch (_) {}
       canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', quality);
     };
     reader.readAsDataURL(file);
