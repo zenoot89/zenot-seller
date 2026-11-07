@@ -284,6 +284,17 @@
     .prod-table tbody tr:last-child td{border-bottom:none}
     .prod-cell-main{display:flex;gap:14px;align-items:flex-start;min-width:280px}
     .prod-name{font-weight:700;font-size:16px;color:var(--text);margin-bottom:4px;line-height:1.3}
+    /* judul produk maksimal 2 baris (gaya Shopee), sisanya dipotong dengan "..." */
+    .prod-table .prod-cell-main{max-width:440px}
+    .prod-info{min-width:0;flex:1}
+    .prod-name-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;word-break:break-word}
+    .prod-sub .badge-lowstock,.prod-sub .badge-promo{margin-left:6px}
+    /* kolom Link SEO */
+    .seo-cell{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+    .seo-share-btn,.seo-copy-btn{font-family:inherit;font-size:12px;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+    .seo-share-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .seo-share-btn:hover,.seo-copy-btn:hover{background:var(--bg)}
+    .seo-copy-btn{border:none;background:none;padding:0 2px;color:var(--sec);text-decoration:underline}
     .prod-sub{font-size:13px;color:var(--sec)}
     .prod-price-net{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:16px;color:#1a7a3c}
     .prod-price-old{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);text-decoration:line-through;display:block}
@@ -2110,6 +2121,7 @@
                 <tr>
                   <th style="width:34px" class="hidden" id="col-check-th"><input type="checkbox" class="prod-check" onchange="toggleSelectAll(this.checked)"/></th>
                   <th>Produk</th>
+                  <th>Link SEO</th>
                   <th>Kategori</th>
                   <th>Harga</th>
                   <th>Stok</th>
@@ -7035,6 +7047,9 @@ async function loadSuppliers() {
     filt.innerHTML = '<option value="">Suplier</option>' + allSuppliers.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
     if (cur) filt.value = cur;
   }
+  // Daftar produk digambar sebelum supplier selesai dimuat (lihat showDashboard), jadi kolom Supplier
+  // kosong kalau tidak digambar ulang di sini.
+  if (typeof renderAdminProductList === 'function' && typeof adminProductsData !== 'undefined' && adminProductsData.length) renderAdminProductList();
 }
 
 function loadAdminSuppliers() {

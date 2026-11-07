@@ -712,6 +712,45 @@ function seoLinkOpenPage() {
   const url = seoLinkValue();
   if (url) window.open(url, '_blank', 'noopener');
 }
+// ----- Link SEO per produk di daftar produk -----
+function seoProductUrl(p) {
+  if (!p) return '';
+  const s = String(p.slug || '').trim().toLowerCase() || seoSlugify(p.name);
+  return s ? 'https://zenoot.web.id/produk/' + s + '/' : '';
+}
+function seoCopyText(text) {
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;left:-9999px';
+    document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    ta.remove();
+    return ok;
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text).then(() => true, () => fallback());
+  }
+  return Promise.resolve(fallback());
+}
+function seoCopyProduct(id) {
+  const p = adminProductsData.find(x => x.id === id);
+  const url = seoProductUrl(p);
+  if (!url) { showToast('Produk ini belum punya alamat halaman (slug)'); return; }
+  seoCopyText(url).then(ok => showToast(ok ? 'Link SEO disalin ✓' : 'Gagal menyalin: ' + url));
+}
+function seoShareProduct(id) {
+  const p = adminProductsData.find(x => x.id === id);
+  const url = seoProductUrl(p);
+  if (!url) { showToast('Produk ini belum punya alamat halaman (slug)'); return; }
+  if (navigator.share) {
+    navigator.share({ title: p.name, text: p.name + ' - Zenoot', url }).catch(err => {
+      if (err && err.name !== 'AbortError') seoCopyProduct(id);
+    });
+  } else {
+    seoCopyProduct(id);
+  }
+}
 function seoAutofill() {
   const c = seoFormContext();
   if (!c.name) { showToast('Isi nama produk dulu'); return; }
@@ -1182,7 +1221,7 @@ function renderAdminProductList() {
   const el = document.getElementById('admin-products-render');
   if (!el) return;
   renderStatusTabs();
-  if (!adminProductsData.length) { el.innerHTML=`<tr><td colspan="${selectModeOn?9:8}" style="color:var(--muted);font-size:13px;padding:20px">Belum ada produk.</td></tr>`; updateBulkBar(); return; }
+  if (!adminProductsData.length) { el.innerHTML=`<tr><td colspan="${selectModeOn?10:9}" style="color:var(--muted);font-size:13px;padding:20px">Belum ada produk.</td></tr>`; updateBulkBar(); return; }
 
   const q = (document.getElementById('pf-search')?.value || '').trim().toLowerCase();
   const genderF = document.getElementById('pf-gender')?.value || '';
@@ -1208,7 +1247,7 @@ function renderAdminProductList() {
   else if (sortF === 'supplier') list = list.slice().sort((a,b)=>supplierName(a.supplier_id).localeCompare(supplierName(b.supplier_id)));
   // 'newest' sudah urutan default dari query (created_at desc)
 
-  if (!list.length) { el.innerHTML=`<tr><td colspan="${selectModeOn?9:8}" style="color:var(--muted);font-size:13px;padding:20px">Nggak ada produk yang cocok dengan filter.</td></tr>`; updateBulkBar(); return; }
+  if (!list.length) { el.innerHTML=`<tr><td colspan="${selectModeOn?10:9}" style="color:var(--muted);font-size:13px;padding:20px">Nggak ada produk yang cocok dengan filter.</td></tr>`; updateBulkBar(); return; }
 
   el.innerHTML = list.map(p => {
     const vars = p.variants || [];
@@ -1244,13 +1283,21 @@ function renderAdminProductList() {
       <td class="pt-main">
         <div class="prod-cell-main">
           <div class="admin-product-img">${p.image_url?`<img src="${p.image_url}"/>`:`<div style="width:100%;height:100%;background:#f0ede8"></div>`}</div>
-          <div>
-            <div class="prod-name">${p.name}${isLow?`<span class="badge-lowstock">Stok menipis</span>`:''}${productHasPromo(p)?`<span class="badge-promo">Promo</span>`:''}</div>
-            <div class="prod-sub">${capitalize(p.gender)} · ${vars.length} varian</div>
+          <div class="prod-info">
+            <div class="prod-name"><span class="prod-name-text" title="${seoEsc(p.name)}">${p.name}</span></div>
+            <div class="prod-sub">${capitalize(p.gender)} · ${vars.length} varian${isLow?`<span class="badge-lowstock">Stok menipis</span>`:''}${productHasPromo(p)?`<span class="badge-promo">Promo</span>`:''}</div>
             ${vars.length ? `<button class="variant-toggle" onclick="toggleVariantBreakdown('${p.id}')">${isOpen?'Sembunyikan varian':'Lihat stok per varian'}</button>` : ''}
           </div>
         </div>
         ${pmCard}
+      </td>
+      <td class="pt-x">
+        <div class="seo-cell">
+          <button type="button" class="seo-share-btn" onclick="seoShareProduct('${p.id}')" title="${seoEsc(seoProductUrl(p))}">
+            <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Bagikan
+          </button>
+          <button type="button" class="seo-copy-btn" onclick="seoCopyProduct('${p.id}')">Salin link</button>
+        </div>
       </td>
       <td class="pt-x">${p.category||'-'}</td>
       <td class="pt-x">${hasDiscount?`<span class="prod-price-old">${jualStr}</span>`:''}<span class="prod-price-net">${netStr}</span></td>
@@ -1281,6 +1328,7 @@ function renderAdminProductList() {
             <div class="variant-sub-label">${v.color_name} · ${v.size}</div>
           </div>
         </td>
+        <td></td>
         <td></td>
         <td>${v.original_price!=null?`<span class="prod-price-old">${fRp(v.original_price)}</span>`:''}<span class="prod-price-net">${fRp(v.price)}</span></td>
         <td class="prod-stock-num ${low?'variant-stock-low':''}">${v.stock??0}</td>
