@@ -1217,10 +1217,31 @@ function productTotalStock(p) {
   return (p.variants || []).reduce((sum,v) => sum + (v.stock ?? 0), 0);
 }
 
+// Tombol urut Stok / Terjual: tiap klik pindah netral -> naik -> turun -> netral.
+// Nilainya disimpan di dropdown #pf-sort, jadi dropdown dan tombol selalu sinkron.
+function prodSortCycle(col) {
+  const sel = document.getElementById('pf-sort');
+  if (!sel) return;
+  const asc = col + '-asc', desc = col + '-desc';
+  sel.value = sel.value === asc ? desc : (sel.value === desc ? 'newest' : asc);
+  renderAdminProductList();
+}
+function prodSortSync() {
+  const cur = (document.getElementById('pf-sort') || {}).value || 'newest';
+  document.querySelectorAll('.prod-sort-btn[data-col]').forEach(btn => {
+    const col = btn.dataset.col;
+    const state = cur === col + '-asc' ? 'asc' : (cur === col + '-desc' ? 'desc' : '');
+    btn.dataset.state = state;
+    const nama = col === 'stock' ? 'stok' : 'terjual';
+    btn.setAttribute('aria-label', 'Urutkan ' + nama + (state === 'asc' ? ' (naik)' : state === 'desc' ? ' (turun)' : ''));
+  });
+}
+
 function renderAdminProductList() {
   const el = document.getElementById('admin-products-render');
   if (!el) return;
   renderStatusTabs();
+  prodSortSync();
   if (!adminProductsData.length) { el.innerHTML=`<tr><td colspan="${selectModeOn?10:9}" style="color:var(--muted);font-size:13px;padding:20px">Belum ada produk.</td></tr>`; updateBulkBar(); return; }
 
   const q = (document.getElementById('pf-search')?.value || '').trim().toLowerCase();
@@ -1244,6 +1265,7 @@ function renderAdminProductList() {
   else if (sortF === 'stock-asc') list = list.slice().sort((a,b)=>productTotalStock(a)-productTotalStock(b));
   else if (sortF === 'stock-desc') list = list.slice().sort((a,b)=>productTotalStock(b)-productTotalStock(a));
   else if (sortF === 'sold-desc') list = list.slice().sort((a,b)=>(productSalesMap[b.id]||0)-(productSalesMap[a.id]||0));
+  else if (sortF === 'sold-asc') list = list.slice().sort((a,b)=>(productSalesMap[a.id]||0)-(productSalesMap[b.id]||0));
   else if (sortF === 'supplier') list = list.slice().sort((a,b)=>supplierName(a.supplier_id).localeCompare(supplierName(b.supplier_id)));
   // 'newest' sudah urutan default dari query (created_at desc)
 

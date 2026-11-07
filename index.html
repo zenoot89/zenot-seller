@@ -289,6 +289,13 @@
     .prod-info{min-width:0;flex:1}
     .prod-name-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;word-break:break-word}
     .prod-sub .badge-lowstock,.prod-sub .badge-promo{margin-left:6px}
+    /* tombol urut Stok / Terjual (netral -> naik -> turun -> netral) */
+    .prod-sort-btn{background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+    .prod-sort-btn svg{flex:none}
+    .prod-sort-btn .su,.prod-sort-btn .sd{fill:#c3c3c8}
+    .prod-sort-btn[data-state="asc"] .su,.prod-sort-btn[data-state="desc"] .sd{fill:var(--text)}
+    .prod-sort-btn[data-state="asc"],.prod-sort-btn[data-state="desc"]{color:var(--text)}
+    .prod-sortbar{display:none}
     /* kolom Link SEO */
     .seo-cell{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
     .seo-share-btn,.seo-copy-btn{font-family:inherit;font-size:12px;border:1px solid var(--border);background:#fff;color:var(--text);border-radius:8px;padding:6px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
@@ -858,6 +865,9 @@
       .pm-btn{flex:1;height:38px;border:1px solid rgba(17,17,20,.2);border-radius:8px;background:#fff;font:600 13px 'Inter',sans-serif;color:var(--sc-ink);cursor:pointer}
       .pm-btn.pm-more{flex:0 0 46px;font-size:18px;line-height:1}
       .pm-btn.pm-share{flex:0 0 46px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+      .prod-sortbar{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;color:var(--sc-mute)}
+      .prod-sortbar .prod-sort-btn{height:32px;padding:0 12px;border:1px solid rgba(17,17,20,.2);border-radius:16px;background:#fff;font:600 13px 'Inter',sans-serif;color:var(--sc-ink)}
+      .prod-sortbar .prod-sort-btn[data-state="asc"],.prod-sortbar .prod-sort-btn[data-state="desc"]{border-color:var(--sc-ink)}
       .pm-btn.pri{border-color:var(--sc-ink)}
       .prod-table tr:not(.variant-row):has(+ tr.variant-row){border-radius:12px 12px 0 0;margin-bottom:0}
       .prod-table tr.variant-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;background:#fff;border-top:1px solid var(--sc-line);border-radius:0;margin:0;padding:10px 14px}
@@ -2102,6 +2112,7 @@
                 <option value="stock-asc">Stok Tersedikit</option>
                 <option value="stock-desc">Stok Terbanyak</option>
                 <option value="sold-desc">Terjual Terbanyak</option>
+                <option value="sold-asc">Terjual Tersedikit</option>
                 <option value="supplier">Supplier A-Z</option>
               </select>
             </div>
@@ -2116,6 +2127,12 @@
           <div class="pf-sheet-foot"><button type="button" class="btn-primary" onclick="closeProdFilterSheet()">Selesai</button></div>
           </div>
 
+          <div class="prod-sortbar">
+            <span class="prod-sortbar-label">Urutkan</span>
+            <button type="button" class="prod-sort-btn" data-col="stock" onclick="prodSortCycle('stock')" aria-label="Urutkan stok">Stok <svg viewBox="0 0 10 14" width="9" height="13" aria-hidden="true"><path class="su" d="M5 1L9 6H1Z"/><path class="sd" d="M5 13L9 8H1Z"/></svg></button>
+            <button type="button" class="prod-sort-btn" data-col="sold" onclick="prodSortCycle('sold')" aria-label="Urutkan terjual">Terjual <svg viewBox="0 0 10 14" width="9" height="13" aria-hidden="true"><path class="su" d="M5 1L9 6H1Z"/><path class="sd" d="M5 13L9 8H1Z"/></svg></button>
+          </div>
+
           <div class="admin-card admin-product-list" style="padding:0;overflow-x:auto">
             <table class="prod-table">
               <thead>
@@ -2125,8 +2142,8 @@
                   <th>Link SEO</th>
                   <th>Kategori</th>
                   <th>Harga</th>
-                  <th>Stok</th>
-                  <th>Terjual</th>
+                  <th><button type="button" class="prod-sort-btn" data-col="stock" onclick="prodSortCycle('stock')" aria-label="Urutkan stok">Stok <svg viewBox="0 0 10 14" width="9" height="13" aria-hidden="true"><path class="su" d="M5 1L9 6H1Z"/><path class="sd" d="M5 13L9 8H1Z"/></svg></button></th>
+                  <th><button type="button" class="prod-sort-btn" data-col="sold" onclick="prodSortCycle('sold')" aria-label="Urutkan terjual">Terjual <svg viewBox="0 0 10 14" width="9" height="13" aria-hidden="true"><path class="su" d="M5 1L9 6H1Z"/><path class="sd" d="M5 13L9 8H1Z"/></svg></button></th>
                   <th>Supplier</th>
                   <th>Status</th>
                   <th>Aksi</th>
