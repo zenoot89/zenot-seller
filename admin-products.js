@@ -673,8 +673,44 @@ function seoFormChanged() {
   document.getElementById('seo-title-count').textContent = t.value ? `(${t.value.length}/60 disarankan)` : '(otomatis)';
   document.getElementById('seo-desc-count').textContent = d.value ? `(${d.value.length}/160 disarankan)` : '(otomatis)';
   document.getElementById('seo-prev-url').textContent = 'zenoot.web.id › produk › ' + slug;
+  const linkEl = document.getElementById('seo-link-url');
+  if (linkEl) {
+    linkEl.value = 'https://zenoot.web.id/produk/' + slug + '/';
+    const note = document.getElementById('seo-link-note');
+    if (note) note.textContent = editingProductId
+      ? 'Halaman ini dibuat otomatis oleh GitHub Actions tiap 4 jam. Kalau baru disimpan, tunggu sampai workflow berikutnya selesai sebelum minta pengindeksan.'
+      : 'Simpan produk dulu. Halaman ini baru ada setelah GitHub Actions berikutnya selesai (maksimal sekitar 4 jam).';
+  }
   document.getElementById('seo-prev-title').textContent = seoCutWords(title, 62);
   document.getElementById('seo-prev-desc').textContent = seoCutWords(desc, 160);
+}
+// ----- Link SEO siap pakai (salin, buka Search Console, buka halaman) -----
+function seoLinkValue() {
+  const el = document.getElementById('seo-link-url');
+  return el ? el.value : '';
+}
+function seoLinkCopy() {
+  const url = seoLinkValue();
+  if (!url) return Promise.resolve(false);
+  const fallback = () => {
+    const el = document.getElementById('seo-link-url');
+    if (el) { el.focus(); el.select(); try { return document.execCommand('copy'); } catch (e) { return false; } }
+    return false;
+  };
+  const done = ok => { showToast(ok ? 'Link SEO disalin ✓' : 'Gagal menyalin, salin manual dari kolom'); return ok; };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(url).then(() => done(true), () => done(fallback()));
+  }
+  return Promise.resolve(done(fallback()));
+}
+function seoLinkOpenGsc() {
+  // Search Console tidak punya tombol "minta indeks" dari luar, jadi link disalin dulu lalu tinggal ditempel di kolom Inspeksi URL.
+  seoLinkCopy();
+  window.open('https://search.google.com/search-console', '_blank', 'noopener');
+}
+function seoLinkOpenPage() {
+  const url = seoLinkValue();
+  if (url) window.open(url, '_blank', 'noopener');
 }
 function seoAutofill() {
   const c = seoFormContext();

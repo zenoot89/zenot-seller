@@ -2277,6 +2277,18 @@
                   </div>
                   <p style="font-size:11px;color:var(--muted);margin-top:6px">Huruf kecil, angka, dan tanda hubung. <strong>Jangan diubah setelah produk muncul di Google</strong>, karena alamat lama akan mati.</p>
                   <button type="button" class="btn-pf-back" style="padding:6px 12px;font-size:12px;margin-top:8px" onclick="seoAutofill()">Isi otomatis semua</button>
+
+                  <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-top:16px;background:#fff">
+                    <label class="form-label" style="margin-bottom:6px">Link SEO produk</label>
+                    <p style="font-size:11px;color:var(--muted);margin-bottom:8px">Pakai link ini untuk Inspeksi URL di Search Console dan untuk dibagikan ke Instagram, WhatsApp, atau Story. Jangan pakai link yang berakhiran <code>?p=</code>.</p>
+                    <input class="form-input" id="seo-link-url" readonly onclick="this.select()" style="font-family:'IBM Plex Mono',monospace;font-size:12px;margin-bottom:8px"/>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                      <button type="button" class="btn-pf-back" style="padding:6px 12px;font-size:12px" onclick="seoLinkCopy()">Salin link</button>
+                      <button type="button" class="btn-pf-back" style="padding:6px 12px;font-size:12px" onclick="seoLinkOpenGsc()">Salin &amp; buka Search Console</button>
+                      <button type="button" class="btn-pf-back" style="padding:6px 12px;font-size:12px" onclick="seoLinkOpenPage()">Buka halaman</button>
+                    </div>
+                    <p id="seo-link-note" style="font-size:11px;color:var(--muted);margin-top:8px"></p>
+                  </div>
                 </div>
 
                 <div class="pf-footer">
