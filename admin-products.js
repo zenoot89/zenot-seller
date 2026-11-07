@@ -1273,6 +1273,9 @@ function renderAdminProductList() {
           <div class="pm-stats"><span>Penjualan<b>${sold}</b></span><span>Stok<b>${productTotalStock(p)}</b></span><span>${vars.length} varian</span></div>
           <div class="pm-actions">
             <button type="button" class="pm-btn pm-more" onclick="openProductSheet('${p.id}')" aria-label="Lainnya">&#8943;</button>
+            <button type="button" class="pm-btn pm-share" onclick="seoShareProduct('${p.id}')" aria-label="Bagikan link SEO">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+            </button>
             ${vars.length ? `<button type="button" class="pm-btn" onclick="toggleVariantBreakdown('${p.id}')">${isOpen?'Sembunyikan varian':'Lihat varian'}</button>` : ''}
             <button type="button" class="pm-btn pri" onclick="editProduct('${p.id}')">Ubah</button>
           </div>
@@ -1527,6 +1530,12 @@ async function openProductSheet(id) {
     </div>
     <h4 style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Performa Produk</h4>
     <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Memuat data 30 hari terakhir...</p>
+    <h4 style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Link SEO</h4>
+    <div style="font-size:11.5px;color:var(--muted);word-break:break-all;margin-bottom:8px">${seoEsc(seoProductUrl(p)) || 'Belum ada alamat halaman (slug)'}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <button class="btn-edit" onclick="seoShareProduct('${p.id}')">Bagikan</button>
+      <button class="btn-edit" onclick="seoCopyProduct('${p.id}')">Salin link</button>
+    </div>
     <h4 style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Aksi</h4>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn-edit" onclick="toggleProductActiveById('${p.id}')">${status === 'aktif' ? 'Arsipkan' : 'Aktifkan'}</button>
