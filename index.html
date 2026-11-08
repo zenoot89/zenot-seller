@@ -1094,6 +1094,13 @@
     .od-cost-add{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--sc-line)}
     .od-cost-add input{flex:1 1 140px;min-width:0;height:38px;padding:0 12px;border:none;border-radius:8px;background:var(--sc-bg);font-size:13px;color:var(--sc-ink)}
     .od-cost-add button{height:38px;padding:0 16px;border:none;border-radius:8px;background:var(--sc-ink);color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+    .od-actions{margin:4px 0 28px;padding:16px 18px;border-radius:12px;background:#fff}
+    .od-act-note{margin-bottom:12px;font-size:13px;line-height:1.5;color:var(--sc-mute)}
+    .od-act-note b{color:var(--sc-ink)}
+    .od-act-btns{display:flex;gap:10px}
+    .od-act-btn{flex:1;height:46px;border:1px solid rgba(17,17,20,.2);border-radius:10px;background:#fff;font:600 14px 'Inter',sans-serif;color:var(--sc-ink);cursor:pointer}
+    .od-act-btn.pri{background:var(--sc-ink);border-color:var(--sc-ink);color:#fff}
+    .od-act-btn:disabled{opacity:.5;cursor:default}
 
     /* ---------- DESKTOP ---------- */
     @media(min-width:861px){
@@ -6321,30 +6328,29 @@ function renderOrderRow(o) {
   const confirmPay = (o.payment_method === 'midtrans' && o.payment_status === 'pending')
     ? "if(confirm('Pembeli sedang dalam proses bayar online. Konfirmasi manual hanya kalau uang sudah masuk. Lanjut?'))"
     : '';
+  // Pesanan online (Midtrans): pembayaran terkonfirmasi OTOMATIS oleh sistem saat pembeli membayar, jadi tidak ada tombol konfirmasi manual.
+  const isOnline = o.payment_method === 'midtrans' || !!o.midtrans_order_id;
+  const onlineWaitText = (o.payment_status === 'expired' || o.payment_status === 'failed')
+    ? 'Pembayaran terakhir kedaluwarsa. Menunggu pembeli bayar ulang; pesanan batal otomatis setelah 24 jam.'
+    : 'Menunggu pembayaran pembeli. Terkonfirmasi otomatis saat dibayar.';
   if (o.status === 'menunggu_pembayaran') {
-    actions = `<div style="display:flex;flex-direction:column;gap:5px">
+    actions = isOnline ? `<div style="display:flex;flex-direction:column;gap:5px">
+      <span style="font-size:11.5px;color:var(--muted);line-height:1.4">${onlineWaitText}</span>
+      ${btnBatal}
+    </div>` : `<div style="display:flex;flex-direction:column;gap:5px">
       <button onclick="${confirmPay}updateOrderStatus('${o.id}','diproses')" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Konfirmasi Bayar</button>
       ${btnCetak}
       ${btnBatal}
     </div>`;
   } else if (o.status === 'diproses') {
-    if (o.resi) {
-      // Step 2: resi udah diinput, tinggal tandai dikirim
-      actions = `<div style="display:flex;flex-direction:column;gap:5px">
-        ${btnCetak}
-        <span style="font-size:11px;color:var(--muted)">${o.courier||'Kurir'}: ${o.resi}</span>
-        <button onclick="orderResiOpenId='${o.id}';renderOrdersAdminTable()" style="padding:4px 0;font-size:11px;background:none;color:var(--ink);border:none;text-decoration:underline;cursor:pointer;text-align:left">Ubah resi</button>
-        <button onclick="updateOrderStatus('${o.id}','dikirim')" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Tandai Dikirim</button>
-        ${btnBatal}
-      </div>`;
-    } else {
-      // Step 1: input resi dulu
-      actions = `<div style="display:flex;flex-direction:column;gap:5px">
-        ${btnCetak}
-        <button onclick="orderResiOpenId='${o.id}';renderOrdersAdminTable()" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Proses Pesanan</button>
-        ${btnBatal}
-      </div>`;
-    }
+    // Sudah dibayar: Proses Pesanan membuka halaman rincian (alamat, pembayaran, penghasilan) berisi tombol Siap Kirim dan Cetak Label
+    actions = `<div style="display:flex;flex-direction:column;gap:5px">
+      <button onclick="goOrderDetail('${o.id}')" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Proses Pesanan</button>
+      ${btnCetak}
+      ${o.resi ? `<span style="font-size:11px;color:var(--muted)">${chatEsc(o.courier || 'Kurir')}: ${chatEsc(o.resi)}</span>
+      <button onclick="orderResiOpenId='${o.id}';renderOrdersAdminTable()" style="padding:4px 0;font-size:11px;background:none;color:var(--ink);border:none;text-decoration:underline;cursor:pointer;text-align:left">Ubah resi</button>` : ''}
+      ${btnBatal}
+    </div>`;
   } else if (o.status === 'dikirim') {
     actions = `<div style="display:flex;flex-direction:column;gap:5px">
       <button onclick="updateOrderStatus('${o.id}','selesai')" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Tandai Selesai</button>
@@ -6366,19 +6372,18 @@ function renderOrderRow(o) {
   const omPrint = omBtn('Cetak Label', `printLabel('${o.id}')`);
   let omNote = '', omPrimary = '', omSecondary = '';
   if (o.status === 'menunggu_pembayaran') {
-    omNote = `${payMethod} · ${payStatus}`;
-    omPrimary = omBtn('Konfirmasi Bayar', `${confirmPay}updateOrderStatus('${o.id}','diproses')`, 'pri');
-    omSecondary = omPrint + omCancel;
-  } else if (o.status === 'diproses') {
-    if (o.resi) {
-      omNote = `${chatEsc(o.courier || 'Kurir')}: ${chatEsc(o.resi)}`;
-      omPrimary = omBtn('Tandai Dikirim', `updateOrderStatus('${o.id}','dikirim')`, 'pri');
-      omSecondary = omPrint + omBtn('Ubah resi', `orderResiOpenId='${o.id}';renderOrdersAdminTable()`) + omCancel;
+    if (isOnline) {
+      omNote = onlineWaitText;
+      omSecondary = omCancel;
     } else {
-      omNote = 'Input resi untuk memproses pesanan.';
-      omPrimary = omBtn('Proses Pesanan', `orderResiOpenId='${o.id}';renderOrdersAdminTable()`, 'pri');
+      omNote = `${payMethod} &middot; ${payStatus}`;
+      omPrimary = omBtn('Konfirmasi Bayar', `${confirmPay}updateOrderStatus('${o.id}','diproses')`, 'pri');
       omSecondary = omPrint + omCancel;
     }
+  } else if (o.status === 'diproses') {
+    omNote = o.resi ? `${chatEsc(o.courier || 'Kurir')}: ${chatEsc(o.resi)}` : 'Pembayaran sudah dikonfirmasi.';
+    omPrimary = omBtn('Proses Pesanan', `goOrderDetail('${o.id}')`, 'pri');
+    omSecondary = omPrint + (o.resi ? omBtn('Ubah resi', `orderResiOpenId='${o.id}';renderOrdersAdminTable()`) : '') + omCancel;
   } else if (o.status === 'dikirim') {
     omNote = `${chatEsc(o.courier || 'Kurir')}: ${chatEsc(o.resi || '-')}`;
     omPrimary = omBtn('Tandai Selesai', `updateOrderStatus('${o.id}','selesai')`, 'pri');
@@ -6445,6 +6450,35 @@ function setOrdersFilterTab(status) {
   document.querySelectorAll('.orders-tab').forEach(t => {
     t.classList.toggle('active', (t.dataset.status || '') === status);
   });
+}
+
+// Buka halaman rincian pesanan dari tombol "Proses Pesanan" (alamat URL ikut sama seperti klik nomor pesanan)
+function goOrderDetail(orderId) {
+  const o = ordersAdminData.find(x => x.id === orderId);
+  if (!o) return;
+  openOrderDetail(orderId);
+  history.pushState(null, '', '#tab=orders&order=' + encodeURIComponent(o.order_number || makeOrderNumber(o)));
+}
+
+// Siap Kirim: pesanan langsung berstatus Dikirim. Kurir diambil dari layanan yang dipilih pembeli (tanpa isian manual).
+// Stok dikurangi oleh trigger database saat status berubah jadi Dikirim; kalau stok tidak cukup, perubahan ditolak.
+let siapKirimBusy = false;
+async function siapKirimOrder(orderId) {
+  if (siapKirimBusy) return;
+  const o = ordersAdminData.find(x => x.id === orderId);
+  if (!o || o.status !== 'diproses') { showToast('Pesanan ini sudah tidak berstatus Perlu Dikirim'); loadOrdersAdmin(); return; }
+  if (!confirm('Tandai pesanan ' + (o.order_number || '') + ' siap kirim?\nStatus jadi Dikirim dan stok produk dikurangi.')) return;
+  siapKirimBusy = true;
+  const patch = { status: 'dikirim' };
+  if (!o.courier && o.shipping_service) patch.courier = o.shipping_service;
+  const { data, error } = await sb.from('orders').update(patch).eq('id', orderId).eq('status', 'diproses').select();
+  siapKirimBusy = false;
+  if (error) { showToast('Gagal: ' + error.message, 5000); return; }
+  if (!data || data.length === 0) { showToast('Status tidak berubah. Muat ulang halaman pesanan.'); loadOrdersAdmin(); return; }
+  setOrdersFilterTab('dikirim');
+  closeOrderDetail();
+  showToast('Pesanan siap kirim. Pindah ke tab Dikirim');
+  loadOrdersAdmin();
 }
 
 async function updateOrderStatus(orderId, newStatus) {
@@ -6540,6 +6574,30 @@ function openOrderDetail(orderId) {
     </div>`).join('');
   const toggleJs = id => `const b=document.getElementById('${id}');const c=this.querySelector('.chev');const open=b.style.display!=='none';b.style.display=open?'none':'block';c.textContent=open?'▾':'▴'`;
 
+  // Tombol aksi di bawah rincian. Kurir mengikuti layanan yang dipilih pembeli (shipping_service), tidak diisi manual.
+  const odIsOnline = o.payment_method === 'midtrans' || !!o.midtrans_order_id;
+  const odCourier = o.courier || o.shipping_service || '';
+  let odActions = '';
+  if (o.status === 'diproses') {
+    odActions = `<div class="od-actions">
+      <div class="od-act-note">Dikirim lewat <b>${chatEsc(odCourier || 'kurir pilihan pembeli')}</b>. Nomor pesanan <b>${chatEsc(orderNum)}</b> dipakai sebagai referensi pengiriman.</div>
+      <div class="od-act-btns">
+        <button type="button" class="od-act-btn pri" onclick="siapKirimOrder('${o.id}')">Siap Kirim</button>
+        <button type="button" class="od-act-btn" onclick="printLabel('${o.id}')">Cetak Label</button>
+      </div>
+    </div>`;
+  } else if (o.status === 'dikirim') {
+    odActions = `<div class="od-actions">
+      <div class="od-act-note">Dikirim lewat <b>${chatEsc(odCourier || 'kurir')}</b>${o.resi ? ' &middot; Resi: <b>' + chatEsc(o.resi) + '</b>' : ''}.</div>
+      <div class="od-act-btns">
+        <button type="button" class="od-act-btn pri" onclick="updateOrderStatus('${o.id}','selesai')">Tandai Selesai</button>
+        <button type="button" class="od-act-btn" onclick="printLabel('${o.id}')">Cetak Label</button>
+      </div>
+    </div>`;
+  } else if (o.status === 'menunggu_pembayaran' && odIsOnline) {
+    odActions = `<div class="od-actions"><div class="od-act-note" style="margin:0">${(o.payment_status === 'expired' || o.payment_status === 'failed') ? 'Pembayaran terakhir kedaluwarsa. Menunggu pembeli bayar ulang; pesanan batal otomatis setelah 24 jam.' : 'Menunggu pembayaran pembeli. Terkonfirmasi otomatis saat dibayar.'}</div></div>`;
+  }
+
   const el = document.getElementById('order-detail-view');
   el.innerHTML = `
     <div class="od-wrap">
@@ -6619,7 +6677,8 @@ function openOrderDetail(orderId) {
           </div>
         </div>
       </div>
-    </div>
+    ${odActions}
+  </div>
   `;
 
   document.getElementById('orders-list-view').style.display = 'none';
@@ -6633,8 +6692,8 @@ function printLabel(orderId) {
   const date = new Date(o.created_at).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'});
   const orderNum = o.order_number || makeOrderNumber(o);
   const items = (o.items||[]).map(i => `<tr><td style="padding:3px 6px;border:1px solid #ccc">${chatEsc(i.name)}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${chatEsc(i.color)}, ${chatEsc(i.size)}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:center">${Number(i.qty)||0}</td><td style="padding:3px 6px;border:1px solid #ccc;text-align:right">Rp ${(i.price*i.qty).toLocaleString('id-ID')}</td></tr>`).join('');
-  const payMethod = {'cod':'COD (Bayar di Tempat)','transfer_bca':'Transfer / QRIS BCA','gopay':'GoPay'}[o.payment_method] || o.payment_method || '-';
-  const resiInfo = o.resi ? `${o.courier||'Kurir'}: <strong>${o.resi}</strong>` : '<em style="color:#999">Resi belum diinput</em>';
+  const payMethod = {'cod':'COD (Bayar di Tempat)','transfer_bca':'Transfer / QRIS BCA','gopay':'GoPay','midtrans':'Online (Midtrans)','wa_manual':'WhatsApp (Manual)'}[o.payment_method] || o.payment_method || '-';
+  const resiInfo = o.resi ? `${chatEsc(o.courier||'Kurir')}: <strong>${chatEsc(o.resi)}</strong>` : `${chatEsc(o.courier || o.shipping_service || 'Kurir')} &middot; Ref <strong>${chatEsc(orderNum)}</strong>`;
 
   const labelHTML = `<!DOCTYPE html><html><head><meta charset="utf-8">
   <title>AWB - ${chatEsc(orderNum)}</title>
@@ -6702,7 +6761,7 @@ function printLabel(orderId) {
       <span>Total: <strong>Rp ${(o.total||0).toLocaleString('id-ID')}</strong></span>
     </div>
     <div class="footer-row">
-      <span>Resi: ${resiInfo}</span>
+      <span>${o.resi ? 'Resi' : 'Pengiriman'}: ${resiInfo}</span>
     </div>
   </div>
   <script>window.onload = () => { setTimeout(() => window.print(), 400); }<\/script>
