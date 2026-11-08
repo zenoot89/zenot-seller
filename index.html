@@ -376,6 +376,15 @@
     .cat-add-row{display:flex;gap:6px;padding:8px;border-top:1px solid var(--border);background:var(--bg)}
     .cat-add-row input{flex:1;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:12px;outline:none;font-family:'Inter',sans-serif;min-width:0}
     .cat-add-row button{background:var(--accent);color:#fff;border:none;border-radius:6px;width:28px;flex-shrink:0;font-size:16px;cursor:pointer}
+    .std-cat{margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+    .std-cat-title{font-size:14px;font-weight:700;margin-bottom:4px}
+    .std-cat-hint{font-size:12px;color:var(--muted);margin-bottom:14px}
+    .std-grp{margin-bottom:14px}
+    .std-grp-name{font-size:12px;font-weight:700;margin-bottom:8px}
+    .std-chips{display:flex;flex-wrap:wrap;gap:8px}
+    .std-chip{border:1px solid var(--border);background:#fff;color:inherit;border-radius:999px;padding:6px 14px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif}
+    .std-chip:hover:not(:disabled){border-color:#111}
+    .std-chip:disabled,.std-chip.on{background:var(--bg);color:var(--muted);cursor:default}
     .cat-empty-hint{padding:14px 12px;font-size:12px;color:var(--muted);font-style:italic}
 
     /* ===== CATEGORY PICKER (dipakai di form produk) ===== */
@@ -3058,6 +3067,11 @@
                 <div class="cat-col-list" id="catcol-3"></div>
                 <div class="cat-add-row"><input id="catnew-3" placeholder="Sub-kategori (opsional)" onkeydown="if(event.key==='Enter')addCategory(3)"/><button onclick="addCategory(3)">+</button></div>
               </div>
+            </div>
+            <div class="std-cat">
+              <h4 class="std-cat-title">Pilih dari daftar standar</h4>
+              <p class="std-cat-hint">Klik untuk menambahkan, tidak perlu mengetik. Yang sudah ada ditandai &#10003;. Kategori yang belum ada produknya tidak tampil di toko.</p>
+              <div id="std-cat-list"></div>
             </div>
           </div>
 
@@ -6949,6 +6963,9 @@ async function loadCategories() {
   populateGenderOptions();
   // Update dropdown di promosi (flash sale masih pakai dropdown single-produk)
   if (adminProductsData.length) refreshFlashOptions();
+  // Data Master: gambar ulang setelah data masuk (kalau tab ini dibuka sebelum kategori selesai dimuat, tadinya tampil kosong)
+  if (document.getElementById('catcol-1')) { renderCatCol(1); renderCatCol(2); renderCatCol(3); }
+  renderStdCats();
 }
 
 function populateCategoryFilter() {
@@ -6999,6 +7016,8 @@ let catTreeSelected = [null, null]; // [id terpilih di kolom 1, id terpilih di k
 function loadAdminCategories() {
   catTreeSelected = [null, null];
   renderCatCol(1); renderCatCol(2); renderCatCol(3);
+  renderStdCats();
+  if (!allCategories.length) loadCategories().catch(() => {}); // belum termuat: muat dulu, nanti digambar ulang otomatis
 }
 
 function renderCatCol(colNum) {
@@ -7045,6 +7064,44 @@ async function deleteCategory(id, name) {
   else if (catTreeSelected[1] === id) catTreeSelected[1] = null;
   await loadCategories();
   renderCatCol(1); renderCatCol(2); renderCatCol(3);
+}
+
+// ---- Daftar kategori standar (pilih, tidak mengetik) ----
+const STD_GENDERS = ['Wanita', 'Pria', 'Anak'];
+const STD_CATS = {
+  wanita: ['Sweater', 'Cardigan', 'Polo Knit', 'Turtleneck', 'Rompi Rajut', 'Outer', 'Kaos Rajut', 'Kemeja', 'Celana', 'Rok', 'Dress', 'Aksesoris'],
+  pria:   ['Sweater', 'Cardigan', 'Polo Knit', 'Turtleneck', 'Rompi Rajut', 'Kaos Rajut', 'Kemeja', 'Celana', 'Aksesoris'],
+  anak:   ['Sweater', 'Cardigan', 'Polo Knit', 'Turtleneck', 'Kaos Rajut', 'Celana', 'Aksesoris']
+};
+function renderStdCats() {
+  const box = document.getElementById('std-cat-list');
+  if (!box) return;
+  box.innerHTML = STD_GENDERS.map(g => {
+    const root = allCategories.find(c => !c.parent_id && c.name.toLowerCase() === g.toLowerCase());
+    const have = root ? catChildren(root.id).map(c => c.name.toLowerCase()) : [];
+    return `<div class="std-grp"><div class="std-grp-name">${g}</div><div class="std-chips">` +
+      STD_CATS[g.toLowerCase()].map(n => {
+        const on = have.includes(n.toLowerCase());
+        return `<button type="button" class="std-chip${on ? ' on' : ''}"${on ? ' disabled' : ''} onclick="addStdCategory('${g}','${n}')">${on ? '&#10003; ' : '+ '}${n}</button>`;
+      }).join('') + `</div></div>`;
+  }).join('');
+}
+let stdCatBusy = false;
+async function addStdCategory(gender, name) {
+  if (stdCatBusy) return;
+  stdCatBusy = true;
+  try {
+    let root = allCategories.find(c => !c.parent_id && c.name.toLowerCase() === gender.toLowerCase());
+    if (!root) {
+      const r = await sb.from('categories').insert({ name: gender, parent_id: null }).select().single();
+      if (r.error) { showToast('Gagal tambah: ' + r.error.message); return; }
+      root = r.data;
+    }
+    const { error } = await sb.from('categories').insert({ name, parent_id: root.id });
+    if (error) showToast(error.message.includes('duplicate') || error.message.includes('unique') ? 'Kategori ini sudah ada' : 'Gagal tambah: ' + error.message);
+    else showToast(`${gender} > ${name} ditambahkan ✓`);
+    await loadCategories();
+  } finally { stdCatBusy = false; }
 }
 
 // ---- Category picker modal (dipakai saat pilih kategori produk) ----
