@@ -6441,7 +6441,7 @@ function renderOrderRow(o) {
   const cancelMsg = o.payment_status === 'paid'
     ? 'Pesanan ini SUDAH DIBAYAR online. Kalau dibatalkan, kamu harus refund manual ke pembeli. Lanjut batalkan?'
     : 'Batalkan pesanan ini?';
-  const btnBatal = `<button onclick="if(confirm('${cancelMsg}'))updateOrderStatus('${o.id}','dibatalkan')" style="padding:6px 10px;font-size:11.5px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Batalkan</button>`;
+  const btnBatal = `<button onclick="if(confirm('${cancelMsg}'))cancelOrderAdmin('${o.id}')" style="padding:6px 10px;font-size:11.5px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Batalkan</button>`;
   const btnCetak = `<button onclick="printLabel('${o.id}')" style="padding:6px 10px;font-size:11.5px;background:#f0f0f0;color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer">🖨️ Cetak Label</button>`;
   // Pembeli sedang bayar lewat Midtrans: konfirmasi manual hanya boleh kalau uangnya memang sudah masuk
   const confirmPay = (o.payment_method === 'midtrans' && o.payment_status === 'pending')
@@ -6487,7 +6487,7 @@ function renderOrderRow(o) {
   const omVar = it => chatEsc([it.color, it.size].filter(Boolean).join(', '));
   const omPrice = it => 'Rp' + (Number(it.price) || 0).toLocaleString('id-ID');
   const omBtn = (label, onclick, kind) => `<button type="button" class="om-btn ${kind || ''}" onclick="${onclick}">${label}</button>`;
-  const omCancel = omBtn('Batalkan', `if(confirm('${cancelMsg}'))updateOrderStatus('${o.id}','dibatalkan')`);
+  const omCancel = omBtn('Batalkan', `if(confirm('${cancelMsg}'))cancelOrderAdmin('${o.id}')`);
   const omPrint = omBtn('Cetak Label', `printLabel('${o.id}')`);
   let omNote = '', omPrimary = '', omSecondary = '';
   if (o.status === 'menunggu_pembayaran') {
@@ -6569,6 +6569,36 @@ function setOrdersFilterTab(status) {
   document.querySelectorAll('.orders-tab').forEach(t => {
     t.classList.toggle('active', (t.dataset.status || '') === status);
   });
+}
+
+// Batalkan pesanan lewat server (order-cancel): nomor VA atau QR Midtrans yang masih menunggu ikut dimatikan, baru status diubah.
+// Pesanan yang sudah dibayar online tetap bisa dibatalkan di sini (tanpa menyentuh Midtrans); refund dilakukan manual.
+let cancelOrderBusy = false;
+async function cancelOrderAdmin(orderId) {
+  if (cancelOrderBusy) return;
+  cancelOrderBusy = true;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { showToast('Sesi habis, silakan masuk lagi'); return; }
+    const res = await fetch(SUPABASE_URL + '/functions/v1/order-cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+      body: JSON.stringify({ order_id: orderId })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!(res.ok && data.cancelled === true)) {
+      showToast(data.error || 'Gagal membatalkan pesanan', 5000);
+      loadOrdersAdmin();
+      return;
+    }
+    setOrdersFilterTab('dibatalkan');
+    showToast('Pesanan dibatalkan. Pindah ke tab Dibatalkan');
+    loadOrdersAdmin();
+  } catch (e) {
+    showToast('Koneksi bermasalah, coba lagi');
+  } finally {
+    cancelOrderBusy = false;
+  }
 }
 
 // Buka halaman rincian pesanan dari tombol "Proses Pesanan" (alamat URL ikut sama seperti klik nomor pesanan)
