@@ -725,6 +725,56 @@
     .chat-notify-btn.on{border-color:#128c4a;color:#128c4a}
     .push-bell{width:36px;height:36px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;color:var(--sec);display:flex;align-items:center;justify-content:center;cursor:pointer}
     .push-bell.on{color:#128c4a;border-color:#128c4a}
+    .push-bell{position:relative}
+    .np-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;border-radius:9px;background:#E5484D;color:#fff;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff;box-sizing:content-box;line-height:1}
+    .np-scrim{display:none;position:fixed;inset:0;background:rgba(17,17,20,.28);z-index:480}
+    .np-scrim.open{display:block}
+    .np{position:fixed;top:0;right:0;bottom:0;width:400px;max-width:100vw;background:#fff;box-shadow:-10px 0 34px rgba(17,17,20,.16);z-index:490;transform:translateX(105%);transition:transform .22s ease;display:flex;flex-direction:column;visibility:hidden}
+    .np.open{transform:none;visibility:visible}
+    .np-head{display:flex;align-items:center;gap:6px;padding:16px 18px 6px}
+    .np-title{font-size:17px;font-weight:700;color:#111114;flex:1}
+    .np-ic{width:32px;height:32px;border:none;background:none;border-radius:8px;color:rgba(41,42,49,.7);cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .np-ic:hover{background:#F1F1F3;color:#111114}
+    .np-ic svg{width:18px;height:18px}
+    .np-ic.spin svg{animation:npspin .8s linear infinite}
+    @keyframes npspin{to{transform:rotate(360deg)}}
+    .np-tabs{display:flex;gap:4px;padding:0 12px;border-bottom:1px solid rgba(17,17,20,.08)}
+    .np-tab{border:none;background:none;padding:10px 10px 11px;font-size:13.5px;font-weight:600;color:rgba(41,42,49,.58);cursor:pointer;border-bottom:2px solid transparent;font-family:inherit;display:flex;align-items:center;gap:6px}
+    .np-tab.active{color:#111114;border-bottom-color:#111114}
+    .np-tab i{font-style:normal;background:#E5484D;color:#fff;border-radius:8px;min-width:16px;height:16px;font-size:10px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px}
+    .np-banner{margin:12px 16px 0;padding:11px 13px;background:#F1F1F3;border-radius:10px;font-size:12.5px;color:#292A31;display:none;align-items:center;gap:10px}
+    .np-banner span{flex:1;line-height:1.4}
+    .np-banner button{border:none;background:#111114;color:#fff;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+    .np-list{flex:1;overflow-y:auto;margin-top:6px}
+    .np-item{display:flex;gap:12px;width:100%;text-align:left;border:none;background:none;border-bottom:1px solid rgba(17,17,20,.07);padding:14px 18px;cursor:pointer;font-family:inherit;color:#111114}
+    .np-item:hover{background:#FAFAFB}
+    .np-item.unread{background:#F7F7F9}
+    .np-ico{width:36px;height:36px;border-radius:50%;background:#F1F1F3;display:flex;align-items:center;justify-content:center;flex:none;color:#292A31}
+    .np-ico svg{width:17px;height:17px}
+    .np-main{flex:1;min-width:0}
+    .np-it-title{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px}
+    .np-dot{width:7px;height:7px;border-radius:50%;background:#E5484D;flex:none}
+    .np-it-desc{font-size:12.5px;color:rgba(41,42,49,.72);margin-top:3px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .np-it-time{font-size:11.5px;color:rgba(41,42,49,.5);margin-top:5px}
+    .np-empty{padding:56px 24px;text-align:center;color:rgba(41,42,49,.55);font-size:13px;line-height:1.6}
+    .np-foot{display:flex;justify-content:space-between;gap:10px;padding:12px 18px;border-top:1px solid rgba(17,17,20,.08)}
+    .np-foot button{border:none;background:none;font-size:12.5px;font-weight:600;color:#111114;cursor:pointer;font-family:inherit;padding:6px 4px}
+    .np-foot button:hover{text-decoration:underline}
+    .st-card-hint{font-size:12.5px;color:rgba(41,42,49,.6);margin:-2px 0 6px;line-height:1.5}
+    .st-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-top:1px solid rgba(17,17,20,.08)}
+    .st-row:first-of-type{border-top:none}
+    .st-row-main{flex:1;min-width:0}
+    .st-row-title{font-size:14px;font-weight:600}
+    .st-row-sub{font-size:12.5px;color:rgba(41,42,49,.6);margin-top:3px;line-height:1.45}
+    .st-btn{border:1.5px solid #111114;background:#fff;color:#111114;border-radius:999px;padding:8px 18px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+    .st-btn.on{background:#111114;color:#fff}
+    .st-sw{position:relative;width:42px;height:24px;flex:none;display:inline-block}
+    .st-sw input{opacity:0;width:0;height:0;position:absolute}
+    .st-sw span{position:absolute;inset:0;background:#C9CAD1;border-radius:999px;transition:background .15s;cursor:pointer}
+    .st-sw span:before{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .15s}
+    .st-sw input:checked + span{background:#111114}
+    .st-sw input:checked + span:before{transform:translateX(18px)}
+    .st-group-title{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:rgba(41,42,49,.5);margin:22px 0 2px}
     .admin-bn-item[data-bn="more"]{position:relative}
     .admin-bn-item[data-bn="more"].has-unread::after{content:'';position:absolute;top:8px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#e74c3c}
     .admin-bn-item[data-bn="chat"]{position:relative}
@@ -1871,6 +1921,10 @@
         Pelanggan
       </a>
       <p class="admin-nav-group-label">Lainnya</p>
+      <a href="#tab=settings" class="admin-nav-item" data-tab="settings" onclick="event.preventDefault();switchTab('settings',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Pengaturan
+      </a>
       <a href="#tab=shipping" class="admin-nav-item" data-tab="shipping" onclick="event.preventDefault();switchTab('shipping',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
         Pengaturan Pengiriman
@@ -1909,11 +1963,27 @@
         <span class="admin-topbar-title" id="admin-topbar-title">Produk</span>
       </div>
       <div class="admin-topbar-actions">
-        <button class="push-bell" id="push-bell" onclick="pushToggle()" aria-label="Notifikasi" title="Notifikasi">
+        <button class="push-bell" id="push-bell" onclick="toggleNotifPanel()" aria-label="Notifikasi" title="Notifikasi"><span class="np-badge" id="np-badge"></span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         </button>
       </div>
     </div>
+
+    <div class="np-scrim" id="np-scrim" onclick="closeNotifPanel()"></div>
+    <aside class="np" id="np" role="dialog" aria-label="Notifikasi" aria-hidden="true">
+      <div class="np-head">
+        <span class="np-title">Notifikasi</span>
+        <button type="button" class="np-ic" id="np-refresh" onclick="npRefresh(true)" aria-label="Muat ulang" title="Muat ulang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>
+        <button type="button" class="np-ic" onclick="closeNotifPanel()" aria-label="Tutup" title="Tutup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 17l5-5-5-5"/><path d="M6 17l5-5-5-5"/></svg></button>
+      </div>
+      <div class="np-tabs" id="np-tabs"></div>
+      <div class="np-banner" id="np-banner"><span>Notifikasi di perangkat ini belum aktif, jadi pesanan dan chat baru tidak berbunyi saat aplikasi ditutup.</span><button type="button" onclick="pushToggle()">Aktifkan</button></div>
+      <div class="np-list" id="np-list"></div>
+      <div class="np-foot">
+        <button type="button" onclick="npMarkAllRead()">Tandai semua dibaca</button>
+        <button type="button" onclick="closeNotifPanel();switchTab('settings', document.querySelector('.admin-nav-item[data-tab=settings]'))">Pengaturan notifikasi</button>
+      </div>
+    </aside>
 
     <div class="admin-content" id="admin-content-scroll">
       <div id="ptr-indicator" class="ptr-indicator"><span class="ptr-spinner"></span></div>
@@ -1929,6 +1999,7 @@
           <button type="button" class="me-row" onclick="switchTab('categories', document.querySelector('.admin-nav-item[data-tab=categories]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Data Master</span><span class="chev">&#8250;</span></button>
           <button type="button" class="me-row" onclick="switchTab('reviews', document.querySelector('.admin-nav-item[data-tab=reviews]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.3 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.3 9 9"/></svg><span>Ulasan</span><span class="chev">&#8250;</span></button>
           <button type="button" class="me-row" onclick="switchTab('customers', document.querySelector('.admin-nav-item[data-tab=customers]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M1 21c0-4 3.6-7 8-7s8 3 8 7"/><path d="M17 4a4 4 0 0 1 0 8M23 21c0-3-2-5.5-5-6.5"/></svg><span>Pelanggan</span><span class="chev">&#8250;</span></button>
+          <button type="button" class="me-row" onclick="switchTab('settings', document.querySelector('.admin-nav-item[data-tab=settings]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Pengaturan</span><span class="chev">&#8250;</span></button>
           <button type="button" class="me-row" onclick="switchTab('shipping', document.querySelector('.admin-nav-item[data-tab=shipping]'))"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><span>Pengaturan Pengiriman</span><span class="chev">&#8250;</span></button>
           </div>
           <div class="me-group">
@@ -1939,6 +2010,39 @@
           </div>
           <div class="me-group">
           <button type="button" class="me-row" onclick="doLogout()"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span>Keluar</span><span class="chev">&#8250;</span></button>
+          </div>
+        </div>
+
+        <!-- TAB: PENGATURAN (notifikasi, dst) -->
+        <div class="admin-section" id="tab-settings">
+          <div class="admin-card">
+            <h3 class="admin-card-title">Notifikasi</h3>
+            <p class="st-card-hint">Atur notifikasi pesanan, chat, ulasan, dan stok. Pengaturan di halaman ini berlaku untuk perangkat yang sedang dipakai.</p>
+            <div class="st-row">
+              <div class="st-row-main"><div class="st-row-title">Notifikasi di perangkat ini</div><div class="st-row-sub" id="st-push-sub">Pesanan dan chat baru berbunyi walau aplikasi ditutup.</div></div>
+              <button type="button" class="st-btn" id="st-push-btn" onclick="pushToggle()">Aktifkan</button>
+            </div>
+            <div class="st-row">
+              <div class="st-row-main"><div class="st-row-title">Suara chat</div><div class="st-row-sub">Bunyi singkat saat ada pesan baru dari pembeli.</div></div>
+              <button type="button" class="st-btn" id="st-sound-btn" onclick="chatToggleSound()">Aktif</button>
+            </div>
+            <div class="st-group-title">Tampilkan di panel notifikasi</div>
+            <div class="st-row">
+              <div class="st-row-main"><div class="st-row-title">Pesanan</div><div class="st-row-sub">Pesanan baru, menunggu pembayaran, dibatalkan, perlu refund.</div></div>
+              <label class="st-sw"><input type="checkbox" id="st-t-orders" onchange="npSetType('orders',this.checked)"><span></span></label>
+            </div>
+            <div class="st-row">
+              <div class="st-row-main"><div class="st-row-title">Chat</div><div class="st-row-sub">Pesan pembeli yang belum dibaca.</div></div>
+              <label class="st-sw"><input type="checkbox" id="st-t-chat" onchange="npSetType('chat',this.checked)"><span></span></label>
+            </div>
+            <div class="st-row">
+              <div class="st-row-main"><div class="st-row-title">Ulasan</div><div class="st-row-sub">Ulasan baru dari pembeli.</div></div>
+              <label class="st-sw"><input type="checkbox" id="st-t-reviews" onchange="npSetType('reviews',this.checked)"><span></span></label>
+            </div>
+            <div class="st-row">
+              <div class="st-row-main"><div class="st-row-title">Stok menipis</div><div class="st-row-sub">Produk yang stoknya hampir habis atau sudah habis.</div></div>
+              <label class="st-sw"><input type="checkbox" id="st-t-stock" onchange="npSetType('stock',this.checked)"><span></span></label>
+            </div>
           </div>
         </div>
 
@@ -3621,7 +3725,7 @@ function toggleSidebar(open) {
   document.getElementById('admin-scrim').classList.toggle('open', open);
 }
 
-const TAB_TITLES = { me: 'Saya', home: 'Beranda', products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', 'promo-hub': 'Pusat Promosi', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan', 'bio-link': 'Link Toko', shipping: 'Pengaturan Pengiriman', chat: 'Chat' };
+const TAB_TITLES = { me: 'Saya', home: 'Beranda', products: 'Produk', performance: 'Performa Toko', orders: 'Pesanan', vouchers: 'Voucher', reviews: 'Ulasan', promotions: 'Diskon Produk', 'promo-hub': 'Pusat Promosi', categories: 'Data Master', bundling: 'Bundling', reseller: 'Program Reseller', dropshipper: 'Program Dropshipper', customers: 'Pelanggan', 'bio-link': 'Link Toko', shipping: 'Pengaturan Pengiriman', settings: 'Pengaturan', chat: 'Chat' };
 
 // Bottom nav (mobile) cuma punya 4 tab langsung; sisanya (vouchers/categories/reviews/dst) dianggap "Saya"/lainnya, dibuka lewat drawer sidebar yang sama
 const BOTTOM_NAV_TABS = ['home', 'chat', 'performance', 'orders'];
@@ -3965,6 +4069,7 @@ function renderTab(tab, el) {
   syncBottomNav(tab);
   chatSyncConvClass();
   if (tab === 'categories') { loadAdminCategories(); loadAdminSuppliers(); }
+  if (tab === 'settings') npRenderSettings();
   if (tab === 'products') loadAdminProducts();
   if (tab === 'promotions') { dkAutoCloseForm(); loadPromotions(); }
   if (tab === 'customers') loadAdminCustomers();
@@ -8083,6 +8188,7 @@ function chatUpdateBadges() {
   if (bnb) { bnb.textContent = n > 99 ? '99+' : String(n); bnb.style.display = n > 0 ? 'flex' : 'none'; }
   document.title = (n > 0 ? '(' + n + ') ' : '') + chatBaseTitle;
   chatDockRenderPill();
+  try { npUpdateBadge(); } catch (e) { /* abaikan */ }
   const fu = document.getElementById('chat-filter-unread');
   if (fu) {
     const nt = chatThreads.filter(x => x.staff_unread > 0).length;
@@ -8315,8 +8421,8 @@ function chatRenderNotify() {
   const st = pushState();
   const n = document.getElementById('chat-notif-btn');
   if (n) { n.textContent = st.text; n.classList.toggle('on', st.on); }
-  const bell = document.getElementById('push-bell');
-  if (bell) { bell.classList.toggle('on', st.on); bell.title = st.text; bell.setAttribute('aria-label', st.text); }
+  npRenderSettings();
+  npRenderBanner();
 }
 function chatToggleSound() {
   chatSoundOn = !chatSoundOn;
@@ -8488,6 +8594,7 @@ async function pushToggle() {
 }
 // Dipanggil setiap masuk dashboard: pasang sw.js, dan bila izin sudah diberikan, perbarui langganan perangkat ini
 async function pushInit() {
+  try { npStart(); } catch (e) { console.error('np start', e); }
   chatRenderNotify();
   if (!pushSupported()) return;
   try {
@@ -8517,6 +8624,215 @@ async function pushDetach() {
   }
   pushActive = false;
 }
+// ===================== PANEL NOTIFIKASI (lonceng kanan atas) + PENGATURAN NOTIFIKASI =====================
+// Isi panel dibuat dari data toko yang sudah ada: pesanan, chat (live), ulasan, stok menipis. Tidak ada tabel baru.
+// Status "sudah dibaca" dan pilihan jenis notifikasi disimpan di perangkat ini (localStorage), jadi tidak ikut ke perangkat lain.
+const NP_SEEN_KEY = 'zs_notif_seen', NP_READ_KEY = 'zs_notif_read', NP_TYPES_KEY = 'zs_notif_types';
+let npIsOpen = false, npTab = 'all', npRemote = [], npTimer = null, npBusy = false, npLoaded = false;
+function npLsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function npLsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* abaikan */ } }
+function npSeenAt() { const v = Number(npLsGet(NP_SEEN_KEY)); return Number.isFinite(v) && v > 0 ? v : 0; }
+function npReadSet() { try { return new Set(JSON.parse(npLsGet(NP_READ_KEY) || '[]')); } catch (e) { return new Set(); } }
+function npTypes() {
+  const t = { orders: true, chat: true, reviews: true, stock: true };
+  try { Object.assign(t, JSON.parse(npLsGet(NP_TYPES_KEY) || '{}')); } catch (e) { /* abaikan */ }
+  return t;
+}
+function npSetType(k, on) {
+  const t = npTypes(); t[k] = !!on;
+  npLsSet(NP_TYPES_KEY, JSON.stringify(t));
+  npRenderAll();
+}
+const NP_ICONS = {
+  orders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+  chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  reviews: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+  stock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'
+};
+const NP_TABS = [['all', 'Semua'], ['orders', 'Pesanan'], ['chat', 'Chat'], ['shop', 'Toko']];
+function npTabOf(type) { return type === 'orders' ? 'orders' : (type === 'chat' ? 'chat' : 'shop'); }
+function npRp(n) { return 'Rp' + (Number(n) || 0).toLocaleString('id-ID'); }
+function npAgo(ts) {
+  if (!ts) return '';
+  const ms = Date.now() - ts;
+  if (ms < 60000) return 'baru saja';
+  if (ms < 3600000) return Math.floor(ms / 60000) + ' menit lalu';
+  if (ms < 86400000) return Math.floor(ms / 3600000) + ' jam lalu';
+  const d = new Date(ts), z = n => String(n).padStart(2, '0');
+  return `${z(d.getDate())}/${z(d.getMonth() + 1)}/${d.getFullYear()} ${z(d.getHours())}:${z(d.getMinutes())}`;
+}
+function npChatItems() {
+  if (typeof chatThreads === 'undefined') return [];
+  return chatThreads.filter(t => t.staff_unread > 0).slice(0, 10).map(t => ({
+    type: 'chat', key: 'chat:' + t.id + ':' + t.last_message_at, ts: new Date(t.last_message_at).getTime() || 0, alwaysUnread: true,
+    title: 'Pesan baru dari ' + (t.buyer_name || 'Pembeli'),
+    desc: t.last_message_preview || 'Pesan baru', go: { kind: 'chat', id: t.id }
+  }));
+}
+function npVisible() {
+  const ty = npTypes(), seen = npSeenAt(), read = npReadSet();
+  return npRemote.concat(npChatItems()).filter(it => ty[it.type]).map(it => {
+    const unread = it.noUnread ? false : (it.alwaysUnread ? true : (it.ts > seen && !read.has(it.key)));
+    return Object.assign({}, it, { unread });
+  }).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+}
+function npUnreadCount() { return npVisible().filter(i => i.unread).length; }
+function npUpdateBadge() {
+  const b = document.getElementById('np-badge');
+  if (!b) return;
+  const n = npUnreadCount();
+  b.textContent = n > 99 ? '99+' : String(n);
+  b.style.display = n > 0 ? 'inline-flex' : 'none';
+}
+function npRenderAll() { npUpdateBadge(); npRenderPanel(); npRenderSettings(); }
+function npRenderBanner() {
+  const el = document.getElementById('np-banner');
+  if (!el) return;
+  let show = false;
+  try { show = pushSupported() && Notification.permission !== 'denied' && !pushState().on; } catch (e) { show = false; }
+  el.style.display = show ? 'flex' : 'none';
+}
+function npRenderPanel() {
+  const tabsEl = document.getElementById('np-tabs'), listEl = document.getElementById('np-list');
+  if (!tabsEl || !listEl) return;
+  const items = npVisible();
+  tabsEl.innerHTML = NP_TABS.map(([k, label]) => {
+    const n = items.filter(i => i.unread && (k === 'all' || npTabOf(i.type) === k)).length;
+    return `<button type="button" class="np-tab${npTab === k ? ' active' : ''}" onclick="npSetTab('${k}')">${label}${n ? `<i>${n > 99 ? '99+' : n}</i>` : ''}</button>`;
+  }).join('');
+  const rows = items.filter(i => npTab === 'all' || npTabOf(i.type) === npTab);
+  if (!rows.length) {
+    listEl.innerHTML = `<div class="np-empty">${npLoaded ? 'Belum ada notifikasi di sini.' : 'Memuat notifikasi...'}</div>`;
+  } else {
+    listEl.innerHTML = rows.map(i => `<button type="button" class="np-item${i.unread ? ' unread' : ''}" onclick="npOpenItem('${chatEsc(i.key)}')">
+      <span class="np-ico">${NP_ICONS[i.type] || ''}</span>
+      <span class="np-main"><span class="np-it-title">${chatEsc(i.title)}${i.unread ? '<span class="np-dot"></span>' : ''}</span>
+      <span class="np-it-desc">${chatEsc(i.desc)}</span>${i.ts ? `<span class="np-it-time" style="display:block">${npAgo(i.ts)}</span>` : ''}</span>
+    </button>`).join('');
+  }
+  npRenderBanner();
+}
+function npSetTab(k) { npTab = k; npRenderPanel(); }
+function npMarkAllRead() {
+  npLsSet(NP_SEEN_KEY, String(Date.now()));
+  npLsSet(NP_READ_KEY, '[]');
+  npRenderAll();
+}
+function npOpenItem(key) {
+  const it = npVisible().find(i => i.key === key);
+  if (!it) return;
+  const read = npReadSet(); read.add(it.key);
+  npLsSet(NP_READ_KEY, JSON.stringify([...read].slice(-300)));
+  closeNotifPanel();
+  npUpdateBadge();
+  const g = it.go || {};
+  if (g.kind === 'chat') { chatOpenFromNotification(g.id); return; }
+  if (g.kind === 'order') {
+    history.pushState(null, '', '#tab=orders&order=' + encodeURIComponent(g.id));
+    applyHashRoute();
+    return;
+  }
+  if (g.kind === 'reviews') { switchTab('reviews', document.querySelector('.admin-nav-item[data-tab=reviews]')); return; }
+  if (g.kind === 'stock') { goToLowStock(); }
+}
+function toggleNotifPanel() { npIsOpen ? closeNotifPanel() : openNotifPanel(); }
+function openNotifPanel() {
+  npIsOpen = true;
+  document.getElementById('np').classList.add('open');
+  document.getElementById('np').setAttribute('aria-hidden', 'false');
+  document.getElementById('np-scrim').classList.add('open');
+  npRenderPanel();
+  npRefresh(false);
+}
+function closeNotifPanel() {
+  npIsOpen = false;
+  const p = document.getElementById('np'), s = document.getElementById('np-scrim');
+  if (p) { p.classList.remove('open'); p.setAttribute('aria-hidden', 'true'); }
+  if (s) s.classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && npIsOpen) closeNotifPanel(); });
+
+// Ambil data terbaru: pesanan, ulasan, stok. Chat sudah live dari chatThreads.
+async function npRefresh(manual) {
+  if (npBusy) return;
+  if (typeof adminUser === 'undefined' || !adminUser) return;
+  npBusy = true;
+  const rb = document.getElementById('np-refresh');
+  if (manual && rb) rb.classList.add('spin');
+  try {
+    const out = [];
+    const [ord, rev, prod] = await Promise.all([
+      sb.from('orders').select('*').order('created_at', { ascending: false }).limit(25),
+      sb.from('reviews').select('*,products(name)').order('created_at', { ascending: false }).limit(10),
+      sb.from('products').select('id,name,image_url,variants(id,color_name,size,stock,is_active)').eq('is_active', true)
+    ]);
+    (ord.data || []).forEach(o => {
+      const addr = o.shipping_address || {};
+      const who = addr.recipient_name || 'Pembeli';
+      const num = o.order_number || makeOrderNumber(o);
+      const created = new Date(o.created_at).getTime() || 0;
+      const upd = new Date(o.updated_at || o.created_at).getTime() || created;
+      let title = '', ts = created;
+      if (o.status === 'diproses') title = 'Pesanan baru, perlu dikirim';
+      else if (o.status === 'menunggu_pembayaran') title = 'Menunggu pembayaran';
+      else if (o.status === 'dibatalkan') { title = 'Pesanan dibatalkan'; ts = upd; }
+      else return;
+      let desc = `${who} · ${npRp(o.total)} · ${num}`;
+      if (typeof orderNeedsRefund === 'function' && orderNeedsRefund(o)) { title = 'Perlu refund: pesanan dibatalkan'; desc = `${who} · ${npRp(o.total)} · ${num}`; ts = upd; }
+      out.push({ type: 'orders', key: 'order:' + o.id + ':' + o.status, ts, title, desc, go: { kind: 'order', id: num } });
+    });
+    (rev.data || []).forEach(r => {
+      out.push({ type: 'reviews', key: 'review:' + r.id, ts: new Date(r.created_at).getTime() || 0,
+        title: `Ulasan ${r.rating || ''}★ dari ${r.buyer_name || 'Pembeli'}`,
+        desc: `${(r.products && r.products.name) || 'Produk'}${r.comment ? ': ' + r.comment : ''}`, go: { kind: 'reviews' } });
+    });
+    const thr = (typeof LOW_STOCK_THRESHOLD !== 'undefined') ? LOW_STOCK_THRESHOLD : 5;
+    const low = [];
+    (prod.data || []).forEach(p => {
+      const lv = (p.variants || []).filter(v => v.is_active !== false && (v.stock ?? 0) <= thr);
+      if (!lv.length) return;
+      low.push({ p, lv, min: Math.min(...lv.map(v => v.stock ?? 0)), out: lv.filter(v => (v.stock ?? 0) <= 0).length });
+    });
+    low.sort((a, b) => a.min - b.min).slice(0, 5).forEach(r => {
+      const chips = r.lv.slice(0, 3).map(v => `${v.color_name || ''} ${v.size || ''}`.trim() + ((v.stock ?? 0) <= 0 ? ' (habis)' : ` (sisa ${v.stock})`)).join(', ');
+      out.push({ type: 'stock', key: 'stock:' + r.p.id, ts: 0, noUnread: true,
+        title: (r.out ? 'Stok habis: ' : 'Stok menipis: ') + r.p.name, desc: chips + (r.lv.length > 3 ? ` +${r.lv.length - 3} varian` : ''), go: { kind: 'stock' } });
+    });
+    npRemote = out;
+    npLoaded = true;
+  } catch (e) {
+    console.warn('notif refresh', e && e.message);
+    npLoaded = true;
+  } finally {
+    npBusy = false;
+    if (rb) rb.classList.remove('spin');
+    npRenderAll();
+  }
+}
+function npStart() {
+  if (!npLsGet(NP_SEEN_KEY)) npLsSet(NP_SEEN_KEY, String(Date.now() - 24 * 3600 * 1000)); // pertama kali: 24 jam terakhir dianggap baru
+  npRefresh(false);
+  if (npTimer) clearInterval(npTimer);
+  npTimer = setInterval(() => { if (!document.hidden) npRefresh(false); }, 60000);
+}
+// Halaman Pengaturan
+function npRenderSettings() {
+  const pb = document.getElementById('st-push-btn');
+  if (pb) {
+    let st = { text: '', on: false };
+    try { st = pushState(); } catch (e) { /* abaikan */ }
+    pb.textContent = st.on ? 'Matikan' : 'Aktifkan';
+    pb.classList.toggle('on', !!st.on);
+    const sub = document.getElementById('st-push-sub');
+    if (sub) sub.textContent = st.on ? 'Aktif: pesanan dan chat baru berbunyi walau aplikasi ditutup.'
+      : (st.text === 'Aktifkan notifikasi' ? 'Belum aktif di perangkat ini. Aktifkan supaya pesanan dan chat baru berbunyi walau aplikasi ditutup.' : st.text);
+  }
+  const sb2 = document.getElementById('st-sound-btn');
+  if (sb2 && typeof chatSoundOn !== 'undefined') { sb2.textContent = chatSoundOn ? 'Aktif' : 'Mati'; sb2.classList.toggle('on', !!chatSoundOn); }
+  const ty = npTypes();
+  ['orders', 'chat', 'reviews', 'stock'].forEach(k => { const c = document.getElementById('st-t-' + k); if (c) c.checked = !!ty[k]; });
+}
+
 // Ketukan pada notifikasi saat aplikasi sudah terbuka: sw.js mengirim tautan, halaman berpindah tanpa muat ulang
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('message', e => {
