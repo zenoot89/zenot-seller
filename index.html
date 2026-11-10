@@ -3970,9 +3970,9 @@ function shipStartEdit() {
   renderShipping();
 }
 
-function shipCancelEdit() {
+async function shipCancelEdit() {
   if (shipSaving) return;
-  if (shipChanges().length && !confirm('Batalkan perubahan yang belum disimpan?')) return;
+  if (shipChanges().length && !(await uiConfirm('Perubahan yang belum disimpan akan hilang.', { title: 'Batalkan perubahan?', okText: 'Batalkan perubahan', cancelText: 'Kembali mengedit', danger: true }))) return;
   shippingDraft = null;
   renderShipping();
 }
@@ -4005,7 +4005,8 @@ async function shipSave() {
   if (on.length) msg += `\n\nDiaktifkan:\n${names(on)}`;
   if (off.length) msg += `\n\nDimatikan:\n${names(off)}`;
   if (wt.length) msg += `\n\nBerat minimal diubah: ${wt.length} layanan`;
-  if (!confirm(msg)) return;
+  const msgBody = msg.replace(/^Simpan perubahan\?\n*/, '') || 'Perubahan akan disimpan ke Pengaturan Pengiriman.';
+  if (!(await uiConfirm(msgBody, { title: 'Simpan perubahan?', okText: 'Simpan', cancelText: 'Periksa lagi' }))) return;
 
   shipSaving = true;
   renderShippingButtons();
@@ -4022,7 +4023,7 @@ async function discoverShipping() {
   if (shipEditing()) { showToast('Simpan atau batalkan edit dulu'); return; }
   const btn = document.getElementById('ship-discover-btn');
   if (!btn || btn.disabled) return;
-  const dest = prompt('Kota contoh untuk memeriksa layanan (kosongkan untuk Jakarta Selatan):', '');
+  const dest = await uiPrompt('Kosongkan untuk memakai Jakarta Selatan.', { title: 'Kota contoh untuk memeriksa layanan', placeholder: 'Jakarta Selatan', okText: 'Periksa' });
   if (dest === null) return;
   const old = btn.textContent;
   btn.disabled = true;
@@ -6440,13 +6441,16 @@ function renderOrderRow(o) {
   let actions = '';
   const cancelMsg = o.payment_status === 'paid'
     ? 'Pesanan ini SUDAH DIBAYAR online. Kalau dibatalkan, kamu harus refund manual ke pembeli. Lanjut batalkan?'
-    : 'Batalkan pesanan ini?';
-  const btnBatal = `<button onclick="if(confirm('${cancelMsg}'))cancelOrderAdmin('${o.id}')" style="padding:6px 10px;font-size:11.5px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Batalkan</button>`;
+    : 'Pesanan tidak bisa dibayar lagi setelah dibatalkan.';
+  const cancelTitle = o.payment_status === 'paid' ? 'Pesanan sudah dibayar' : 'Batalkan pesanan ini?';
+  const cancelClick = `uiConfirm('${cancelMsg}',{title:'${cancelTitle}',okText:'Batalkan pesanan',cancelText:'Kembali',danger:true}).then(function(ok){if(ok)cancelOrderAdmin('${o.id}')})`;
+  const btnBatal = `<button onclick="${cancelClick}" style="padding:6px 10px;font-size:11.5px;background:#fff;color:#a83232;border:1px solid #e0b8b8;border-radius:5px;cursor:pointer">Batalkan</button>`;
   const btnCetak = `<button onclick="printLabel('${o.id}')" style="padding:6px 10px;font-size:11.5px;background:#f0f0f0;color:var(--ink);border:1px solid var(--border);border-radius:5px;cursor:pointer">🖨️ Cetak Label</button>`;
   // Pembeli sedang bayar lewat Midtrans: konfirmasi manual hanya boleh kalau uangnya memang sudah masuk
-  const confirmPay = (o.payment_method === 'midtrans' && o.payment_status === 'pending')
-    ? "if(confirm('Pembeli sedang dalam proses bayar online. Konfirmasi manual hanya kalau uang sudah masuk. Lanjut?'))"
-    : '';
+  const needPayConfirm = (o.payment_method === 'midtrans' && o.payment_status === 'pending');
+  const withPayConfirm = (stmt) => needPayConfirm
+    ? `uiConfirm('Pembeli sedang dalam proses bayar online. Konfirmasi manual hanya kalau uang sudah masuk. Lanjut?',{title:'Konfirmasi manual',okText:'Uang sudah masuk',cancelText:'Kembali'}).then(function(ok){if(ok){${stmt}}})`
+    : stmt;
   // Pesanan online (Midtrans): pembayaran terkonfirmasi OTOMATIS oleh sistem saat pembeli membayar, jadi tidak ada tombol konfirmasi manual.
   const isOnline = o.payment_method === 'midtrans' || !!o.midtrans_order_id;
   const onlineWaitText = (o.payment_status === 'expired' || o.payment_status === 'failed')
@@ -6457,7 +6461,7 @@ function renderOrderRow(o) {
       <span style="font-size:11.5px;color:var(--muted);line-height:1.4">${onlineWaitText}</span>
       ${btnBatal}
     </div>` : `<div style="display:flex;flex-direction:column;gap:5px">
-      <button onclick="${confirmPay}updateOrderStatus('${o.id}','diproses')" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Konfirmasi Bayar</button>
+      <button onclick="${withPayConfirm(`updateOrderStatus('${o.id}','diproses')`)}" style="padding:6px 10px;font-size:11.5px;background:var(--ink);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:500">Konfirmasi Bayar</button>
       ${btnCetak}
       ${btnBatal}
     </div>`;
@@ -6487,7 +6491,7 @@ function renderOrderRow(o) {
   const omVar = it => chatEsc([it.color, it.size].filter(Boolean).join(', '));
   const omPrice = it => 'Rp' + (Number(it.price) || 0).toLocaleString('id-ID');
   const omBtn = (label, onclick, kind) => `<button type="button" class="om-btn ${kind || ''}" onclick="${onclick}">${label}</button>`;
-  const omCancel = omBtn('Batalkan', `if(confirm('${cancelMsg}'))cancelOrderAdmin('${o.id}')`);
+  const omCancel = omBtn('Batalkan', cancelClick);
   const omPrint = omBtn('Cetak Label', `printLabel('${o.id}')`);
   let omNote = '', omPrimary = '', omSecondary = '';
   if (o.status === 'menunggu_pembayaran') {
@@ -6496,7 +6500,7 @@ function renderOrderRow(o) {
       omSecondary = omCancel;
     } else {
       omNote = `${payMethod} &middot; ${payStatus}`;
-      omPrimary = omBtn('Konfirmasi Bayar', `${confirmPay}updateOrderStatus('${o.id}','diproses')`, 'pri');
+      omPrimary = omBtn('Konfirmasi Bayar', withPayConfirm(`updateOrderStatus('${o.id}','diproses')`), 'pri');
       omSecondary = omPrint + omCancel;
     }
   } else if (o.status === 'diproses') {
@@ -6616,7 +6620,7 @@ async function siapKirimOrder(orderId) {
   if (siapKirimBusy) return;
   const o = ordersAdminData.find(x => x.id === orderId);
   if (!o || o.status !== 'diproses') { showToast('Pesanan ini sudah tidak berstatus Perlu Dikirim'); loadOrdersAdmin(); return; }
-  if (!confirm('Tandai pesanan ' + (o.order_number || '') + ' siap kirim?\nStatus jadi Dikirim dan stok produk dikurangi.')) return;
+  if (!(await uiConfirm('Pesanan ' + (o.order_number || '') + ' akan ditandai siap kirim.\nStatus jadi Dikirim dan stok produk dikurangi.', { title: 'Siap kirim?', okText: 'Siap Kirim', cancelText: 'Kembali' }))) return;
   siapKirimBusy = true;
   const patch = { status: 'dikirim' };
   if (!o.courier && o.shipping_service) patch.courier = o.shipping_service;
@@ -7192,7 +7196,7 @@ async function addCategory(level) {
 }
 
 async function deleteCategory(id, name) {
-  if (!confirm(`Hapus kategori "${name}"? Sub-kategori di bawahnya ikut terhapus. Produk dengan kategori ini tidak terhapus.`)) return;
+  if (!(await uiConfirm(`Hapus kategori "${name}"? Sub-kategori di bawahnya ikut terhapus. Produk dengan kategori ini tidak terhapus.`, { title: 'Hapus kategori', okText: 'Hapus', cancelText: 'Batal', danger: true }))) return;
   await sb.from('categories').delete().eq('id', id);
   showToast('Kategori dihapus');
   if (catTreeSelected[0] === id) catTreeSelected = [null, null];
@@ -7345,7 +7349,7 @@ async function addSupplier() {
 }
 
 async function deleteSupplier(id, name) {
-  if (!confirm(`Hapus supplier "${name}"? Produk yang pakai supplier ini nggak ikut kehapus, tapi field supplier-nya jadi kosong.`)) return;
+  if (!(await uiConfirm(`Hapus supplier "${name}"? Produk yang pakai supplier ini nggak ikut kehapus, tapi field supplier-nya jadi kosong.`, { title: 'Hapus supplier', okText: 'Hapus', cancelText: 'Batal', danger: true }))) return;
   await sb.from('suppliers').delete().eq('id', id);
   showToast('Supplier dihapus');
   await loadSuppliers();
@@ -8610,7 +8614,7 @@ async function pushToggle() {
   pushBusy = true;
   try {
     if (pushActive) {
-      if (confirm('Matikan notifikasi di perangkat ini?')) await pushDisable();
+      if (await uiConfirm('Kamu tidak akan menerima notifikasi pesanan di perangkat ini sampai dinyalakan lagi.', { title: 'Matikan notifikasi?', okText: 'Matikan', cancelText: 'Biarkan menyala' })) await pushDisable();
     } else {
       await pushEnable();
     }
@@ -9075,5 +9079,112 @@ sb.auth.onAuthStateChange((event, session) => {
     </div>
   </div>
 </div>
+<style id="ui-dlg-css">
+.ui-dlg-ov{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(17,17,20,.5);animation:uiDlgFade .15s ease-out}
+.ui-dlg{background:var(--surface,#fff);width:100%;max-width:400px;max-height:calc(100vh - 40px);overflow:auto;border-radius:var(--radius,12px);padding:26px 24px 20px;box-shadow:0 20px 60px rgba(0,0,0,.28);animation:uiDlgPop .18s ease-out;font-family:inherit;color:var(--ink,#111114)}
+.ui-dlg-t{font-size:17px;font-weight:700;line-height:1.3;color:var(--ink,#111114);margin:0 0 8px}
+.ui-dlg-m{font-size:14px;line-height:1.55;color:var(--sec,#555);margin:0;white-space:pre-line;word-break:break-word;font-weight:400}
+.ui-dlg-in{display:block;width:100%;margin-top:14px;padding:11px 12px;border:1px solid var(--border,#ddd);border-radius:var(--radius-sm,8px);font:inherit;font-size:14px;background:#fff;color:var(--ink,#111114)}
+.ui-dlg-in:focus{outline:none;border-color:var(--ink,#111114)}
+.ui-dlg-btns{display:flex;gap:10px;margin-top:22px}
+.ui-dlg-btn{flex:1;min-height:44px;padding:0 14px;border-radius:10px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--border,#ddd);background:#fff;color:var(--ink,#111114)}
+.ui-dlg-btn.pri{background:var(--ink,#111114);border-color:var(--ink,#111114);color:#fff}
+.ui-dlg-btn.danger{background:#a83232;border-color:#a83232;color:#fff}
+.ui-dlg-btn:focus-visible{outline:2px solid var(--ink,#111114);outline-offset:2px}
+@keyframes uiDlgFade{from{opacity:0}to{opacity:1}}
+@keyframes uiDlgPop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.ui-dlg-ov,.ui-dlg{animation:none}}
+</style>
+<script>
+// ===================== DIALOG KONFIRMASI DAN ISIAN =====================
+// Pengganti confirm() dan prompt() bawaan browser (yang menampilkan nama domain "... menyatakan" dan tidak bisa ditata).
+//   uiConfirm(pesan, { title, okText, cancelText, danger }) -> Promise<boolean>   (true = lanjut)
+//   uiPrompt(pesan, { title, okText, cancelText, placeholder, value }) -> Promise<string | null>   (null = dibatalkan)
+// Pesan dan judul dipasang sebagai teks biasa (aman untuk nama kategori, supplier, dan sejenisnya). Baris baru (\n) dipertahankan.
+// Bisa ditutup dengan Esc, klik di luar kotak, atau tombol batal. Dialog baru menggantikan yang sedang tampil (yang lama dianggap dibatalkan).
+(function () {
+  var current = null;
+  function open(kind, message, opts) {
+    opts = opts || {};
+    return new Promise(function (resolve) {
+      if (current) current.finish(kind === 'prompt' ? null : false);
+      var lastFocus = document.activeElement;
+      var ov = document.createElement('div');
+      ov.className = 'ui-dlg-ov';
+      var box = document.createElement('div');
+      box.className = 'ui-dlg';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-modal', 'true');
+      var title = opts.title ? String(opts.title) : '';
+      if (title) {
+        var h = document.createElement('h2');
+        h.className = 'ui-dlg-t'; h.id = 'ui-dlg-t'; h.textContent = title;
+        box.appendChild(h);
+        box.setAttribute('aria-labelledby', 'ui-dlg-t');
+      }
+      if (message) {
+        var p = document.createElement('p');
+        p.className = 'ui-dlg-m'; p.id = 'ui-dlg-m'; p.textContent = String(message);
+        box.appendChild(p);
+        box.setAttribute('aria-describedby', 'ui-dlg-m');
+      }
+      var input = null;
+      if (kind === 'prompt') {
+        input = document.createElement('input');
+        input.type = 'text'; input.className = 'ui-dlg-in';
+        input.value = opts.value != null ? String(opts.value) : '';
+        if (opts.placeholder) input.placeholder = String(opts.placeholder);
+        input.autocomplete = 'off';
+        box.appendChild(input);
+      }
+      var row = document.createElement('div');
+      row.className = 'ui-dlg-btns';
+      var bCancel = document.createElement('button');
+      bCancel.type = 'button'; bCancel.className = 'ui-dlg-btn';
+      bCancel.textContent = opts.cancelText || 'Batal';
+      var bOk = document.createElement('button');
+      bOk.type = 'button'; bOk.className = 'ui-dlg-btn ' + (opts.danger ? 'danger' : 'pri');
+      bOk.textContent = opts.okText || (kind === 'prompt' ? 'Simpan' : 'Ya, lanjut');
+      row.appendChild(bCancel); row.appendChild(bOk);
+      box.appendChild(row);
+      ov.appendChild(box);
+
+      var done = false;
+      function finish(value) {
+        if (done) return;
+        done = true;
+        document.removeEventListener('keydown', onKey, true);
+        if (ov.parentNode) ov.parentNode.removeChild(ov);
+        if (current && current.ov === ov) current = null;
+        try { if (lastFocus && lastFocus.focus) lastFocus.focus(); } catch (_) {}
+        resolve(value);
+      }
+      function ok() { finish(kind === 'prompt' ? input.value : true); }
+      function cancel() { finish(kind === 'prompt' ? null : false); }
+      function onKey(e) {
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); cancel(); return; }
+        if (e.key === 'Enter' && input && e.target === input) { e.preventDefault(); ok(); return; }
+        if (e.key === 'Tab') {   // fokus tetap di dalam kotak
+          var f = [input, bCancel, bOk].filter(Boolean);
+          var i = f.indexOf(document.activeElement);
+          if (e.shiftKey) { if (i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } }
+          else if (i === -1 || i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+        }
+      }
+      bOk.addEventListener('click', ok);
+      bCancel.addEventListener('click', cancel);
+      ov.addEventListener('mousedown', function (e) { if (e.target === ov) cancel(); });
+      document.addEventListener('keydown', onKey, true);
+      document.body.appendChild(ov);
+      current = { ov: ov, finish: finish };
+      // Tindakan yang merusak: fokus awal di tombol batal. Selain itu di tombol lanjut (atau kolom isian).
+      (input || (opts.danger ? bCancel : bOk)).focus();
+      if (input) input.select();
+    });
+  }
+  window.uiConfirm = function (message, opts) { return open('confirm', message, opts); };
+  window.uiPrompt = function (message, opts) { return open('prompt', message, opts); };
+})();
+</script>
 </body>
 </html>
