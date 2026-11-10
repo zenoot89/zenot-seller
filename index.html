@@ -2400,7 +2400,8 @@
                   <textarea class="form-input" id="p-desc" placeholder="Jelaskan produkmu: bahan, ukuran, keunggulan, cara pakai, dll." style="resize:vertical;min-height:280px;line-height:1.7"></textarea>
                   <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
                     <button type="button" class="btn-pf-back" style="padding:6px 12px;font-size:12px" onclick="pfCleanDesc()">Bersihkan simbol</button>
-                    <span style="font-size:11px;color:var(--muted)">Teks yang ditempel dari AI otomatis dibersihkan dari simbol #, ** dan *.</span>
+                    <button type="button" class="btn-pf-back" style="padding:6px 12px;font-size:12px" onclick="pfInsertSizeTable()">Sisipkan tabel ukuran</button>
+                    <span style="font-size:11px;color:var(--muted)">Teks yang ditempel dari AI otomatis dibersihkan dari simbol #, ** dan *. Tabel ukuran tampil seperti Panduan Ukuran Shopee: tiap baris diawali dan diakhiri tanda |, kolom dipisah |.</span>
                   </div>
                 </div>
 
@@ -3425,6 +3426,29 @@ function pfCleanDesc() {
   ta.value = clean;
   ta.dispatchEvent(new Event('input', { bubbles: true }));
   showToast('Simbol dibersihkan ✓');
+}
+
+// Tabel ukuran di deskripsi (tampil seperti Panduan Ukuran Shopee di toko dan halaman produk).
+// Format: baris pertama = judul kolom, baris berikutnya = isi; tiap baris diawali dan diakhiri |.
+// Angka Panjang Atasan dan Lingkar Dada diambil dari tab Spesifikasi kalau sudah diisi; Panjang Lengan harus diisi sendiri.
+function pfInsertSizeTable() {
+  const ta = document.getElementById('p-desc');
+  if (!ta) return;
+  if (/^[ \t]*\|.*\|[ \t]*$/m.test(ta.value)) { showToast('Tabel ukuran sudah ada di deskripsi, edit angkanya langsung'); return; }
+  const val = id => { const el = document.getElementById(id); return el && String(el.value).trim() ? String(el.value).trim() : ''; };
+  const panjang = val('p-panjang') || '-';
+  const dada = val('p-lingkar-dada') || '-';
+  const block = 'Panduan Ukuran:\n' +
+    '| Ukuran | Panjang Atasan (cm) | Lingkar Dada (cm) | Panjang Lengan (cm) |\n' +
+    '| All Size | ' + panjang + ' | ' + dada + ' | - |';
+  const pos = ta.selectionEnd != null && ta.value.length ? ta.selectionEnd : ta.value.length;
+  const before = ta.value.slice(0, pos), after = ta.value.slice(pos);
+  const pre = before && !before.endsWith('\n\n') ? (before.endsWith('\n') ? '\n' : '\n\n') : '';
+  const post = after && !after.startsWith('\n') ? '\n\n' : (after ? '\n' : '');
+  ta.value = before + pre + block + post + after;
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
+  ta.focus();
+  showToast('Tabel ditambahkan. Ganti tanda - dengan angka ukuran (cm)');
 }
 
 // Saat menempel ke kolom deskripsi: kalau ada simbol markdown, sisipkan versi bersihnya di posisi kursor.
