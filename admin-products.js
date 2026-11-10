@@ -35,7 +35,6 @@ function addColorTag(e) {
   renderColorTags();
 }
 
-// Sinkron manual: ketik/paste hex di kotak teks -> update swatch color picker
 function syncHexToPicker() {
   const hexInput = document.getElementById('v1-color-hex');
   const picker = document.getElementById('v1-color-picker');
@@ -43,7 +42,7 @@ function syncHexToPicker() {
   if (v && !v.startsWith('#')) v = '#' + v;
   if (/^#[0-9A-Fa-f]{6}$/.test(v)) picker.value = v;
 }
-// Sinkron balik: pilih warna lewat swatch -> update kotak teks hex
+
 function syncPickerToHex() {
   const hexInput = document.getElementById('v1-color-hex');
   const picker = document.getElementById('v1-color-picker');
@@ -59,7 +58,6 @@ const SIZE_OPTIONS = {
   'Celana (inch)': ['27','28','29','30','31','32','33','34','36','38','40'],
   'Lainnya': ['All Size','Free Size','Oversize','Jumbo']
 };
-// flatten for search
 const SIZE_FLAT = Object.entries(SIZE_OPTIONS).flatMap(([cat, items]) => items.map(v => ({cat, v})));
 
 let _sizeDropFocusIdx = -1;
@@ -72,16 +70,12 @@ function sizeDropdownFilter(query) {
   const dd = document.getElementById('size-dropdown');
   if (!dd) return;
   const q = query.trim().toLowerCase();
-  // filter
-  const filtered = q
-    ? SIZE_FLAT.filter(s => s.v.toLowerCase().includes(q))
-    : SIZE_FLAT;
+  const filtered = q ? SIZE_FLAT.filter(s => s.v.toLowerCase().includes(q)) : SIZE_FLAT;
 
   if (filtered.length === 0 && !q) { dd.style.display='none'; return; }
 
   let html = '';
   if (!q) {
-    // grouped by category
     let lastCat = null;
     SIZE_FLAT.forEach(({cat, v}) => {
       if (cat !== lastCat) {
@@ -96,7 +90,6 @@ function sizeDropdownFilter(query) {
       const sel = sizeTags.includes(v);
       html += `<div class="size-drop-item${sel?' selected':''}" onmousedown="sizeDropSelect('${v}')">${v}${sel?'<span class="size-check">✓</span>':''}</div>`;
     });
-    // jika tidak ada di list, tawarkan "Tambah custom"
     const exactMatch = SIZE_FLAT.some(s => s.v.toLowerCase() === q);
     if (!exactMatch) {
       html += `<div class="size-drop-item" style="color:var(--accent);font-style:italic" onmousedown="sizeDropSelect('${query.trim()}')">+ Tambah "${query.trim()}"</div>`;
@@ -111,7 +104,6 @@ function sizeDropdownFilter(query) {
 function sizeDropSelect(val) {
   if (!val) return;
   if (sizeTags.includes(val)) {
-    // toggle off
     sizeTags.splice(sizeTags.indexOf(val), 1);
   } else {
     sizeTags.push(val);
@@ -148,7 +140,6 @@ function sizeInputKeydown(e) {
   }
 }
 
-// tutup dropdown saat klik di luar
 document.addEventListener('click', (e) => {
   if (!e.target.closest('#v2-input') && !e.target.closest('#size-dropdown')) {
     const dd = document.getElementById('size-dropdown');
@@ -177,8 +168,8 @@ function removeSizeTag(i) { sizeTags.splice(i,1); renderSizeTags(); }
 
 function variantKey(colorName, size) { return `${colorName}__${size}`; }
 
-let variantData = {}; // key -> {price, orig, stock, image_url}
-let variantPhotoFiles = {}; // key -> File
+let variantData = {};
+let variantPhotoFiles = {};
 
 function rebuildVariantTable() {
   const wrap = document.getElementById('variant-table-wrap');
@@ -193,8 +184,8 @@ function rebuildVariantTable() {
       const key = variantKey(c.name, s);
       const d = variantData[key] || {};
       const existingImg = d.preview_url || d.image_url || '';
-      const showPhoto = si === 0; // hanya 1 foto per warna (baris pertama ukuran)
-      const isActive = d.active !== false; // default aktif kecuali eksplisit dimatikan
+      const showPhoto = si === 0;
+      const isActive = d.active !== false;
       rows.push(`
         <tr style="border-bottom:1px solid var(--border)" data-key="${key}">
           <td style="padding:10px 6px;white-space:nowrap">
@@ -213,7 +204,7 @@ function rebuildVariantTable() {
           <td style="padding:10px 6px"><input class="form-input vt-price" style="padding:7px 10px;font-size:12px" type="number" placeholder="Harga" value="${d.price||''}" oninput="updateVariantData('${key}','price',this.value)"/></td>
           <td style="padding:10px 6px"><input class="form-input vt-stock" style="padding:7px 10px;font-size:12px" type="number" placeholder="Stok" value="${d.stock||''}" oninput="updateVariantData('${key}','stock',this.value)"/></td>
           <td style="padding:10px 6px;text-align:center">
-            <label class="variant-active-toggle" title="${isActive?'Aktif — bisa dibeli':'Nonaktif — disembunyikan dari pilihan pembeli'}">
+            <label class="variant-active-toggle" title="${isActive?'Aktif':'Nonaktif'}">
               <input type="checkbox" ${isActive?'checked':''} onchange="updateVariantData('${key}','active',this.checked)"/>
               <span class="slider"></span>
             </label>
@@ -234,7 +225,7 @@ function previewVariantPhotoNew(input, key) {
   variantPhotoFiles[key] = input.files[0];
   const objUrl = URL.createObjectURL(input.files[0]);
   if (!variantData[key]) variantData[key] = {};
-  variantData[key].preview_url = objUrl; // simpan di state biar gak ilang pas tabel di-render ulang (nambah warna/ukuran)
+  variantData[key].preview_url = objUrl;
   const preview = document.getElementById(`vph-${key}`);
   if (preview) preview.style.backgroundImage = `url(${objUrl})`;
 }
@@ -262,7 +253,6 @@ function resetVariantSystem() {
   if (hexInput) hexInput.value = '#1A1A1A';
 }
 
-// Pertajam ringan (unsharp mask sederhana). amount 0.3 = halus, 0.6 = lebih terasa.
 function _sharpenCanvas(canvas, amount) {
   const w = canvas.width, h = canvas.height;
   const ctx = canvas.getContext('2d');
@@ -295,7 +285,6 @@ function compressImage(file, maxDim = 1200, quality = 0.82) {
         if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
         else { width = Math.round(width * maxDim / height); height = maxDim; }
       }
-      // Google Merchant: sisi terpendek minimal 500px (aturan 31 Jan 2027). Target aman 800px.
       const minDim = 800;
       const shortSide = Math.min(width, height);
       let upscaled = false;
@@ -303,7 +292,6 @@ function compressImage(file, maxDim = 1200, quality = 0.82) {
         upscaled = true;
         const up = minDim / shortSide;
         width = Math.round(width * up); height = Math.round(height * up);
-        try { showToast('Foto kecil diperbesar ke 800px dan dipertajam otomatis. Hasil terbaik tetap foto asli minimal 800x800.'); } catch (_) {}
       }
       const canvas = document.createElement('canvas');
       canvas.width = width; canvas.height = height;
@@ -315,12 +303,8 @@ function compressImage(file, maxDim = 1200, quality = 0.82) {
   });
 }
 
-// ===================== PHOTO STRIP SYSTEM =====================
-// photoSlots: array of {type:'url'|'file'|'cropped', url:string, file:File|null, blob:Blob|null}
 let photoSlots = [];
-let cropTargetIdx = null; // index in photoSlots being cropped
-
-// ---- Drag state ----
+let cropTargetIdx = null;
 let dragSrcIdx = null;
 
 function photoStripRender() {
@@ -369,7 +353,6 @@ function photoRemove(i) {
   photoStripRender();
 }
 
-// ---- Drag reorder ----
 function photoDragStart(e, i) {
   dragSrcIdx = i;
   e.dataTransfer.effectAllowed = 'move';
@@ -396,216 +379,8 @@ function photoDragEnd() {
   document.querySelectorAll('.photo-item').forEach(el => { el.classList.remove('dragging','drag-over'); });
 }
 
-// ---- Legacy compat wrappers (dipakai saveProduct & resetProductForm) ----
-function _photoGetExistingUrls() { return photoSlots.filter(s=>s.type==='url').map(s=>s.url); }
-
-// ===================== CROP ENGINE =====================
-let _cropImg = null;         // HTMLImageElement (source gambar asli)
-let _cropState = {};         // {scale, angle, flipH, flipV, offsetX, offsetY}
-let _cropInitState = {};     // untuk reset
-let _cropCanvas = null;
-let _cropCtx = null;
-let _cropPreviewCanvas = null;
-let _cropPreviewCtx = null;
-let _cropWrapW = 0;
-let _cropWrapH = 0;
-let _cropDragging = false;
-let _cropDragStart = {x:0, y:0};
-
-function photoOpenCrop(idx) {
-  cropTargetIdx = idx;
-  const slot = photoSlots[idx];
-  const overlay = document.getElementById('crop-overlay');
-  overlay.classList.add('open');
-
-  const img = new Image();
-  img.onload = () => {
-    _cropImg = img;
-    _cropCanvas = document.getElementById('crop-canvas');
-    _cropCtx = _cropCanvas.getContext('2d');
-    _cropPreviewCanvas = document.getElementById('crop-preview-canvas');
-    _cropPreviewCtx = _cropPreviewCanvas.getContext('2d');
-
-    const wrap = document.getElementById('crop-canvas-wrap');
-    _cropWrapW = wrap.clientWidth || 460;
-    _cropWrapH = wrap.clientHeight || 380;
-    _cropCanvas.width = _cropWrapW;
-    _cropCanvas.height = _cropWrapH;
-    _cropPreviewCanvas.width = 120;
-    _cropPreviewCanvas.height = 120;
-
-    // Init scale: fit image in canvas, then 1:1 crop box = min(W,H)*0.8
-    const fitScale = Math.min(_cropWrapW / img.naturalWidth, _cropWrapH / img.naturalHeight) * 0.85;
-    _cropState = {scale: fitScale, angle: 0, flipH: false, flipV: false, offsetX: 0, offsetY: 0};
-    _cropInitState = {..._cropState};
-    cropDraw();
-    cropDrawPreview();
-    _cropBindMouse();
-  };
-  const src = slot.type === 'url' ? slot.url : URL.createObjectURL(slot.blob || slot.file);
-  img.crossOrigin = 'anonymous';
-  img.src = src;
-}
-
-function cropDraw() {
-  if (!_cropCtx || !_cropImg) return;
-  const W = _cropWrapW, H = _cropWrapH;
-  const boxSize = Math.min(W, H) * 0.78;
-  const cx = W/2 + _cropState.offsetX;
-  const cy = H/2 + _cropState.offsetY;
-
-  _cropCtx.clearRect(0, 0, W, H);
-
-  // Draw image
-  _cropCtx.save();
-  _cropCtx.translate(cx, cy);
-  _cropCtx.rotate(_cropState.angle * Math.PI / 180);
-  _cropCtx.scale(_cropState.flipH ? -1 : 1, _cropState.flipV ? -1 : 1);
-  _cropCtx.scale(_cropState.scale, _cropState.scale);
-  _cropCtx.drawImage(_cropImg, -_cropImg.naturalWidth/2, -_cropImg.naturalHeight/2);
-  _cropCtx.restore();
-
-  // Dim outside crop box
-  _cropCtx.save();
-  _cropCtx.fillStyle = 'rgba(0,0,0,0.5)';
-  const bx = cx - boxSize/2, by = cy - boxSize/2;
-  _cropCtx.fillRect(0, 0, W, by);
-  _cropCtx.fillRect(0, by+boxSize, W, H - (by+boxSize));
-  _cropCtx.fillRect(0, by, bx, boxSize);
-  _cropCtx.fillRect(bx+boxSize, by, W-(bx+boxSize), boxSize);
-  _cropCtx.restore();
-
-  // Crop border
-  _cropCtx.save();
-  _cropCtx.strokeStyle = 'rgba(100,160,255,0.9)';
-  _cropCtx.lineWidth = 1.5;
-  _cropCtx.strokeRect(bx, by, boxSize, boxSize);
-  // Grid lines (thirds)
-  _cropCtx.strokeStyle = 'rgba(255,255,255,0.25)';
-  _cropCtx.lineWidth = 1;
-  for (let g=1; g<3; g++) {
-    _cropCtx.beginPath();
-    _cropCtx.moveTo(bx + boxSize*g/3, by);
-    _cropCtx.lineTo(bx + boxSize*g/3, by+boxSize);
-    _cropCtx.stroke();
-    _cropCtx.beginPath();
-    _cropCtx.moveTo(bx, by + boxSize*g/3);
-    _cropCtx.lineTo(bx+boxSize, by + boxSize*g/3);
-    _cropCtx.stroke();
-  }
-  _cropCtx.restore();
-
-  cropDrawPreview();
-}
-
-function cropDrawPreview() {
-  if (!_cropPreviewCtx || !_cropImg) return;
-  const W = _cropWrapW, H = _cropWrapH;
-  const boxSize = Math.min(W, H) * 0.78;
-  const cx = W/2 + _cropState.offsetX;
-  const cy = H/2 + _cropState.offsetY;
-  const bx = cx - boxSize/2, by = cy - boxSize/2;
-
-  // offscreen for crop area
-  const off = document.createElement('canvas');
-  off.width = boxSize; off.height = boxSize;
-  const offCtx = off.getContext('2d');
-  offCtx.drawImage(_cropCanvas, bx, by, boxSize, boxSize, 0, 0, boxSize, boxSize);
-
-  _cropPreviewCtx.clearRect(0,0,120,120);
-  _cropPreviewCtx.drawImage(off, 0, 0, boxSize, boxSize, 0, 0, 120, 120);
-}
-
-function _cropBindMouse() {
-  const c = _cropCanvas;
-  c.onmousedown = (e) => {
-    _cropDragging = true;
-    _cropDragStart = {x: e.clientX - _cropState.offsetX, y: e.clientY - _cropState.offsetY};
-    c.style.cursor = 'grabbing';
-  };
-  c.onmousemove = (e) => {
-    if (!_cropDragging) return;
-    _cropState.offsetX = e.clientX - _cropDragStart.x;
-    _cropState.offsetY = e.clientY - _cropDragStart.y;
-    cropDraw();
-  };
-  c.onmouseup = () => { _cropDragging = false; c.style.cursor = 'move'; };
-  c.onmouseleave = () => { _cropDragging = false; };
-  // Touch support
-  c.ontouchstart = (e) => {
-    const t = e.touches[0];
-    _cropDragging = true;
-    _cropDragStart = {x: t.clientX - _cropState.offsetX, y: t.clientY - _cropState.offsetY};
-  };
-  c.ontouchmove = (e) => {
-    e.preventDefault();
-    if (!_cropDragging) return;
-    const t = e.touches[0];
-    _cropState.offsetX = t.clientX - _cropDragStart.x;
-    _cropState.offsetY = t.clientY - _cropDragStart.y;
-    cropDraw();
-  };
-  c.ontouchend = () => { _cropDragging = false; };
-}
-
-function cropZoom(delta) {
-  _cropState.scale = Math.max(0.1, Math.min(8, _cropState.scale + delta * _cropState.scale));
-  cropDraw();
-}
-function cropRotate(deg) { _cropState.angle = (_cropState.angle + deg + 360) % 360; cropDraw(); }
-function cropFlipH() { _cropState.flipH = !_cropState.flipH; cropDraw(); }
-function cropFlipV() { _cropState.flipV = !_cropState.flipV; cropDraw(); }
-function cropReset() { _cropState = {..._cropInitState}; cropDraw(); }
-
-function cropClose() {
-  document.getElementById('crop-overlay').classList.remove('open');
-  _cropImg = null;
-  cropTargetIdx = null;
-  if (_cropCanvas) { _cropCanvas.onmousedown = null; _cropCanvas.onmousemove = null; _cropCanvas.onmouseup = null; }
-}
-
-function cropSave() {
-  if (cropTargetIdx === null || !_cropCanvas) return;
-  const W = _cropWrapW, H = _cropWrapH;
-  const boxSize = Math.min(W, H) * 0.78;
-  const cx = W/2 + _cropState.offsetX;
-  const cy = H/2 + _cropState.offsetY;
-  const bx = cx - boxSize/2, by = cy - boxSize/2;
-
-  // Extract crop area at native resolution
-  const out = document.createElement('canvas');
-  const outSize = 1200; // output square size
-  out.width = outSize; out.height = outSize;
-  const outCtx = out.getContext('2d');
-  outCtx.drawImage(_cropCanvas, bx, by, boxSize, boxSize, 0, 0, outSize, outSize);
-
-  out.toBlob((blob) => {
-    if (!blob) return;
-    photoSlots[cropTargetIdx] = {type:'cropped', blob, file:null, url:null, alt:(photoSlots[cropTargetIdx]||{}).alt||''};
-    photoStripRender();
-    cropClose();
-  }, 'image/jpeg', 0.88);
-}
-
-// ===================== RESET / PREFILL HELPERS =====================
-function resetUploadState() {
-  photoSlots = [];
-  photoStripRender();
-}
-
-function prefillPhotosFromProduct(p) {
-  const urls = (p.image_urls && p.image_urls.length) ? p.image_urls : (p.image_url ? [p.image_url] : []);
-  const alts = Array.isArray(p.image_alts) ? p.image_alts : [];
-  photoSlots = urls.map((url, i) => ({type:'url', url, file:null, blob:null, alt: alts[i] || ''}));
-  photoStripRender();
-}
-
 let editingProductId = null;
 let adminProductsData = [];
-
-// ===================== SEO, SPESIFIKASI TAMBAHAN, PENGIRIMAN =====================
-// Kolom baru (lihat 01-migrasi-supabase.sql). Kalau migrasi belum dijalankan, produk tetap
-// tersimpan tanpa kolom ini dan admin diberi tahu (lihat saveWithExtras).
 let slugTouched = false;
 
 function seoEsc(v) { return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -615,7 +390,7 @@ function seoSlugify(str) {
 }
 function seoGenderLabel(g) { return g === 'wanita' ? 'Wanita' : (g === 'pria' ? 'Pria' : ''); }
 function seoWordIn(word, text) {
-  return !!word && new RegExp('(^|[^a-z0-9])' + String(word).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z0-9]|$)', 'i').test(text);
+  return !!word && new RegExp('(^|[^a-z0-9])' + String(word).replace(/[.*+?^${}()|[\]\]/g, '\$&') + '([^a-z0-9]|$)', 'i').test(text);
 }
 function seoCutWords(s, max) {
   if (s.length <= max) return s;
@@ -638,27 +413,26 @@ function seoFormContext() {
     minPrice: prices.length ? Math.min.apply(null, prices) : 0
   };
 }
-// Rumus ini sama persis dengan generator halaman produk di GitHub Actions (build-static.py).
 function seoAutoTitle(c) {
   c = c || seoFormContext();
-  if (!c.name) return '';
-  const tail = [c.cat, c.gender].filter(x => x && !seoWordIn(x, c.name)).join(' ');
-  const t = tail ? `${c.name} | ${tail} | Zenoot` : `${c.name} | Zenoot`;
-  return t.length > 65 ? `${c.name} | Zenoot` : t;
+  if (!c['name']) return '';
+  const tail = [c['cat'], c['gender']].filter(x => x && !seoWordIn(x, c['name'])).join(' ');
+  const t = tail ? `${c['name']} | ${tail} | Zenoot` : `${c['name']} | Zenoot`;
+  return t.length > 65 ? `${c['name']} | Zenoot` : t;
 }
 function seoAutoDesc(c) {
   c = c || seoFormContext();
-  if (!c.name) return '';
-  const lead = [c.name, c.cat && !seoWordIn(c.cat, c.name) ? c.cat : '', c.gender && !seoWordIn(c.gender, c.name) ? c.gender : ''].filter(Boolean).join(' ');
+  if (!c['name']) return '';
+  const lead = [c['name'], c['cat'] && !seoWordIn(c['cat'], c['name']) ? c['cat'] : '', c['gender'] && !seoWordIn(c['gender'], c['name']) ? c['gender'] : ''].filter(Boolean).join(' ');
   const parts = [lead + ' dari Zenoot Bandung.'];
   const spec = [];
-  if (c.bahan) spec.push('Bahan ' + c.bahan);
-  if (c.gramasi) spec.push(c.gramasi + ' gr/m²');
-  if (c.ketebalan) spec.push('ketebalan ' + c.ketebalan.toLowerCase());
-  if (c.lengan) spec.push('lengan ' + c.lengan.toLowerCase());
+  if (c['bahan']) spec.push('Bahan ' + c['bahan']);
+  if (c['gramasi']) spec.push(c['gramasi'] + ' gr/m²');
+  if (c['ketebalan']) spec.push('ketebalan ' + c['ketebalan'].toLowerCase());
+  if (c['lengan']) spec.push('lengan ' + c['lengan'].toLowerCase());
   if (spec.length) parts.push(spec.join(', ') + '.');
-  if (c.colors.length) parts.push(c.colors.length + ' pilihan warna' + (c.colors.length <= 5 ? ': ' + c.colors.join(', ') : '') + '.');
-  if (c.minPrice) parts.push('Harga mulai ' + fRp(c.minPrice).replace('Rp', 'Rp ') + '.');
+  if (c['colors'].length) parts.push(c['colors'].length + ' pilihan warna' + (c['colors'].length <= 5 ? ': ' + c['colors'].join(', ') : '') + '.');
+  if (c['minPrice']) parts.push('Harga mulai ' + fRp(c['minPrice']).replace('Rp', 'Rp ') + '.');
   return seoCutWords(parts.join(' '), 158);
 }
 function seoFormChanged() {
@@ -678,13 +452,12 @@ function seoFormChanged() {
     linkEl.value = 'https://zenoot.web.id/produk/' + slug + '/';
     const note = document.getElementById('seo-link-note');
     if (note) note.textContent = editingProductId
-      ? 'Halaman ini dibuat otomatis oleh GitHub Actions tiap 4 jam. Kalau baru disimpan, tunggu sampai workflow berikutnya selesai sebelum minta pengindeksan.'
-      : 'Simpan produk dulu. Halaman ini baru ada setelah GitHub Actions berikutnya selesai (maksimal sekitar 4 jam).';
+      ? 'Halaman ini dibuat otomatis oleh GitHub Actions tiap 4 jam.'
+      : 'Simpan produk dulu.';
   }
   document.getElementById('seo-prev-title').textContent = seoCutWords(title, 62);
   document.getElementById('seo-prev-desc').textContent = seoCutWords(desc, 160);
 }
-// ----- Link SEO siap pakai (salin, buka Search Console, buka halaman) -----
 function seoLinkValue() {
   const el = document.getElementById('seo-link-url');
   return el ? el.value : '';
@@ -692,19 +465,9 @@ function seoLinkValue() {
 function seoLinkCopy() {
   const url = seoLinkValue();
   if (!url) return Promise.resolve(false);
-  const fallback = () => {
-    const el = document.getElementById('seo-link-url');
-    if (el) { el.focus(); el.select(); try { return document.execCommand('copy'); } catch (e) { return false; } }
-    return false;
-  };
-  const done = ok => { showToast(ok ? 'Link SEO disalin ✓' : 'Gagal menyalin, salin manual dari kolom'); return ok; };
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    return navigator.clipboard.writeText(url).then(() => done(true), () => done(fallback()));
-  }
-  return Promise.resolve(done(fallback()));
+  return navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(url).then(() => { showToast('Link SEO disalin ✓'); return true; }) : Promise.resolve(false);
 }
 function seoLinkOpenGsc() {
-  // Search Console tidak punya tombol "minta indeks" dari luar, jadi link disalin dulu lalu tinggal ditempel di kolom Inspeksi URL.
   seoLinkCopy();
   window.open('https://search.google.com/search-console', '_blank', 'noopener');
 }
@@ -712,44 +475,23 @@ function seoLinkOpenPage() {
   const url = seoLinkValue();
   if (url) window.open(url, '_blank', 'noopener');
 }
-// ----- Link SEO per produk di daftar produk -----
 function seoProductUrl(p) {
   if (!p) return '';
   const s = String(p.slug || '').trim().toLowerCase() || seoSlugify(p.name);
   return s ? 'https://zenoot.web.id/produk/' + s + '/' : '';
 }
-function seoCopyText(text) {
-  const fallback = () => {
-    const ta = document.createElement('textarea');
-    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;left:-9999px';
-    document.body.appendChild(ta); ta.select();
-    let ok = false;
-    try { ok = document.execCommand('copy'); } catch (e) {}
-    ta.remove();
-    return ok;
-  };
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    return navigator.clipboard.writeText(text).then(() => true, () => fallback());
-  }
-  return Promise.resolve(fallback());
-}
 function seoCopyProduct(id) {
   const p = adminProductsData.find(x => x.id === id);
   const url = seoProductUrl(p);
-  if (!url) { showToast('Produk ini belum punya alamat halaman (slug)'); return; }
-  seoCopyText(url).then(ok => showToast(ok ? 'Link SEO disalin ✓' : 'Gagal menyalin: ' + url));
+  if (!url) { showToast('Produk belum punya slug'); return; }
+  navigator.clipboard.writeText(url).then(() => showToast('Link disalin ✓'));
 }
 function seoShareProduct(id) {
   const p = adminProductsData.find(x => x.id === id);
   const url = seoProductUrl(p);
-  if (!url) { showToast('Produk ini belum punya alamat halaman (slug)'); return; }
-  if (navigator.share) {
-    navigator.share({ title: p.name, text: p.name + ' - Zenoot', url }).catch(err => {
-      if (err && err.name !== 'AbortError') seoCopyProduct(id);
-    });
-  } else {
-    seoCopyProduct(id);
-  }
+  if (!url) return;
+  if (navigator.share) navigator.share({ title: p.name, url }).catch(()=>{});
+  else seoCopyProduct(id);
 }
 function seoAutofill() {
   const c = seoFormContext();
@@ -758,7 +500,7 @@ function seoAutofill() {
   document.getElementById('p-seo-desc').value = seoAutoDesc(c);
   if (!editingProductId || !document.getElementById('p-slug').value) document.getElementById('p-slug').value = seoSlugify(c.name);
   seoFormChanged();
-  showToast('SEO terisi otomatis, silakan cek dan sesuaikan');
+  showToast('SEO terisi otomatis');
 }
 function photoAltsRender() {
   const box = document.getElementById('photo-alts-list');
@@ -768,17 +510,9 @@ function photoAltsRender() {
     const src = slot.type === 'url' ? slot.url : URL.createObjectURL(slot.blob || slot.file);
     return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
       <img src="${seoEsc(src)}" alt="" style="width:34px;height:34px;object-fit:cover;border-radius:4px;flex-shrink:0"/>
-      <input class="form-input" style="padding:7px 10px;font-size:13px" maxlength="125" placeholder="${i === 0 ? 'Foto cover: ' : 'Foto ' + (i + 1) + ': '}jelaskan isi foto" value="${seoEsc(slot.alt || '')}" oninput="photoSlots[${i}].alt=this.value"/>
+      <input class="form-input" style="padding:7px 10px;font-size:13px" maxlength="125" placeholder="${i === 0 ? 'Cover' : 'Foto ' + (i + 1)}" value="${seoEsc(slot.alt || '')}" oninput="photoSlots[${i}].alt=this.value"/>
     </div>`;
   }).join('');
-}
-function photoAltsAutofill() {
-  const c = seoFormContext();
-  if (!c.name) { showToast('Isi nama produk dulu'); return; }
-  const lead = [c.name, c.cat && !seoWordIn(c.cat, c.name) ? c.cat : '', c.gender && !seoWordIn(c.gender, c.name) ? c.gender : ''].filter(Boolean).join(' ');
-  photoSlots.forEach((s, i) => { if (!s.alt) s.alt = i === 0 ? lead : `${c.name} - foto ${i + 1}`; });
-  photoAltsRender();
-  showToast('Alt text terisi, sesuaikan dengan isi tiap foto');
 }
 function numOrNull(id) {
   const v = parseFloat((document.getElementById(id) || {}).value);
@@ -805,13 +539,11 @@ function collectExtraFields(imageAlts) {
   };
 }
 function isMissingColumnError(err) {
-  return !!err && (err.code === 'PGRST204' || err.code === '42703' || /column .* does not exist|Could not find the .* column/i.test(err.message || ''));
+  return !!err && (err.code === 'PGRST204' || err.code === '42703' || /column .* does not exist/i.test(err.message || ''));
 }
-// Simpan dengan kolom tambahan; kalau kolomnya belum ada di database, simpan tanpa kolom itu (produk tidak gagal tersimpan).
 async function saveWithExtras(write, base, extra) {
   let res = await write({ ...base, ...extra });
   if (res.error && isMissingColumnError(res.error)) {
-    console.warn('Kolom SEO/spesifikasi belum ada di database:', res.error.message);
     res = await write(base);
     res.extrasMissing = !res.error;
   }
@@ -824,7 +556,7 @@ function fillExtraFields(p) {
   set('p-weight', p.weight_gram); set('p-pkg-l', p.pkg_length_cm); set('p-pkg-w', p.pkg_width_cm); set('p-pkg-h', p.pkg_height_cm);
   set('p-seo-title', p.seo_title); set('p-seo-desc', p.seo_description);
   set('p-slug', p.slug || seoSlugify(p.name));
-  slugTouched = true; // produk lama: alamat halaman tidak ikut berubah kalau nama diedit
+  slugTouched = true;
   seoFormChanged();
 }
 function clearExtraFields() {
@@ -833,23 +565,13 @@ function clearExtraFields() {
   slugTouched = false;
   seoFormChanged();
 }
-(function bindSeoNameSync() {
-  const n = document.getElementById('p-name');
-  if (!n) return;
-  n.addEventListener('input', () => {
-    if (!slugTouched) document.getElementById('p-slug').value = seoSlugify(n.value);
-    seoFormChanged();
-  });
-})();
 
 async function saveProduct() {
   const name = document.getElementById('p-name').value.trim();
   const category_id = document.getElementById('p-cat-id').value || null;
-  const category = category_id ? catName(category_id) : null; // nama leaf, buat kompatibilitas filter toko lama
+  const category = category_id ? catName(category_id) : null;
   const gender = document.getElementById('p-gender').value;
   const supplier_id = document.getElementById('p-supplier').value || null;
-  // Nama supplier TIDAK lagi disalin ke products.supplier: kolom products bisa dibaca publik lewat API (RLS hanya per baris).
-  // Nama ada di tabel suppliers (khusus admin); produk cukup menyimpan supplier_id.
   const supplier = null;
   const description = document.getElementById('p-desc').value.trim();
   const bahan = document.getElementById('p-bahan').value.trim() || null;
@@ -860,142 +582,124 @@ async function saveProduct() {
   if (!name) { showToast('Nama produk wajib diisi'); return; }
   if (!category_id) { showToast('Kategori wajib dipilih'); return; }
 
-  // Validasi variant SEBELUM ada write apa pun ke DB: tiap warna wajib punya minimal 1
-  // kombinasi ukuran+harga terisi. Kalau tidak, warna itu bakal diam-diam nggak ke-save
-  // (bug lama) — sekarang di-block + dikasih tau warna mana yang belum diisi harganya.
   if (colorTags.length) {
-    if (!sizeTags.length) {
-      showToast('Isi minimal 1 ukuran dulu buat variasi warna');
-      return;
-    }
+    if (!sizeTags.length) { showToast('Isi minimal 1 ukuran'); return; }
     const colorsWithNoPrice = colorTags.filter(c =>
       !sizeTags.some(s => (parseInt((variantData[variantKey(c.name, s)] || {}).price) || 0) > 0)
     );
     if (colorsWithNoPrice.length) {
-      showToast(`Isi harga (minimal 1 ukuran) buat warna: ${colorsWithNoPrice.map(c=>c.name).join(', ')} — kalau kosong, warna itu nggak akan tersimpan`);
+      showToast(`Isi harga untuk warna: ${colorsWithNoPrice.map(c=>c.name).join(', ')}`);
       return;
     }
   }
 
-  // === mulai proses upload & simpan: tampilkan loading, biar admin tau lagi proses (bukan freeze) ===
   setProductSaving(true);
   try {
-  const preSlug = collectExtraFields(null).slug;
-  // Alamat halaman (slug) harus unik dan berformat benar.
-  if (preSlug) {
-    if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(preSlug)) { showToast('Alamat halaman (slug) hanya boleh huruf kecil, angka, dan tanda hubung'); return; }
-    const { data: dup, error: dupErr } = await sb.from('products').select('id,name').ilike('slug', preSlug).limit(5);
-    if (!dupErr && (dup || []).some(r => r.id !== editingProductId)) {
-      showToast('Alamat halaman "' + preSlug + '" sudah dipakai produk lain. Ubah slug di tab Deskripsi.');
-      pfSwitchTab(2);
-      return;
+    const preSlug = collectExtraFields(null).slug;
+    if (preSlug) {
+      if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(preSlug)) { showToast('Slug hanya boleh huruf kecil & angka'); return; }
+      const { data: dup } = await sb.from('products').select('id,name').ilike('slug', preSlug).limit(5);
+      if ((dup || []).some(r => r.id !== editingProductId)) {
+        showToast('Slug sudah dipakai produk lain');
+        pfSwitchTab(2);
+        return;
+      }
     }
-  }
 
-  // Upload foto produk dari photoSlots (url=langsung pakai, file/cropped=upload dulu)
-  const finalUrls = [];
-  const finalAlts = [];
-  for (const slot of photoSlots) {
-    if (slot.type === 'url') {
-      finalUrls.push(slot.url);
-      finalAlts.push((slot.alt || '').trim());
-    } else {
-      // file atau cropped blob
-      const raw = slot.blob || slot.file;
-      if (!raw) continue;
-      const compressed = await compressImage(raw);
-      const path = `${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`;
-      const { error: upErr } = await sb.storage.from('product-photos').upload(path, compressed, { contentType: 'image/jpeg' });
-      if (!upErr) {
-        const { data: urlData } = sb.storage.from('product-photos').getPublicUrl(path);
-        finalUrls.push(urlData.publicUrl);
+    const finalUrls = [];
+    const finalAlts = [];
+    for (const slot of photoSlots) {
+      if (slot.type === 'url') {
+        finalUrls.push(slot.url);
         finalAlts.push((slot.alt || '').trim());
+      } else {
+        const raw = slot.blob || slot.file;
+        if (!raw) continue;
+        const compressed = await compressImage(raw);
+        const path = `${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`;
+        const { error: upErr } = await sb.storage.from('product-photos').upload(path, compressed, { contentType: 'image/jpeg' });
+        if (!upErr) {
+          const { data: urlData } = sb.storage.from('product-photos').getPublicUrl(path);
+          finalUrls.push(urlData.publicUrl);
+          finalAlts.push((slot.alt || '').trim());
+        }
       }
     }
-  }
-  const image_urls = finalUrls.length ? finalUrls : null;
-  const extra = collectExtraFields(finalAlts.some(a => a) ? finalAlts : null);
-  const image_url = finalUrls.length ? finalUrls[0] : null;
+    const image_urls = finalUrls.length ? finalUrls : null;
+    const extra = collectExtraFields(finalAlts.some(a => a) ? finalAlts : null);
+    const image_url = finalUrls.length ? finalUrls[0] : null;
 
-  let prod;
-  let extrasMissing = false;
-  let existingVars = [];
-  if (editingProductId) {
-    const payload = {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls};
-    const res = await saveWithExtras(b => sb.from('products').update(b).eq('id',editingProductId).select().single(), payload, extra);
-    if (res.error) { console.error('Update produk gagal:', res.error); showToast('Gagal update: ' + res.error.message); return; }
-    prod = res.data; extrasMissing = !!res.extrasMissing;
-    // Varian TIDAK dihapus-lalu-dibuat-ulang: harga coret, flash sale, dan tautan promo ada di baris varian itu.
-    const exRes = await sb.from('variants').select('id,color_name,size').eq('product_id', prod.id);
-    if (exRes.error) { console.error('Baca varian gagal:', exRes.error); showToast('Gagal membaca varian: ' + exRes.error.message); return; }
-    existingVars = exRes.data || [];
-  } else {
-    const res = await saveWithExtras(b => sb.from('products').insert(b).select().single(), {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls}, extra);
-    if (res.error) { console.error('Insert produk gagal:', res.error); showToast('Gagal simpan: ' + res.error.message); return; }
-    prod = res.data; extrasMissing = !!res.extrasMissing;
-  }
-
-  // Variants dari tag system
-  const variants = [];
-  for (const c of colorTags) {
-    // ambil foto per warna (dari file baru atau existing)
-    const firstKey = variantKey(c.name, sizeTags[0]);
-    let variantImageUrl = null;
-    const existingPreview = document.getElementById(`vph-${firstKey}`);
-    if (existingPreview && existingPreview.dataset.existing) variantImageUrl = existingPreview.dataset.existing;
-    if (variantPhotoFiles[firstKey]) {
-      const compressed = await compressImage(variantPhotoFiles[firstKey]);
-      const path = `variant-${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`;
-      const { error: upErr } = await sb.storage.from('product-photos').upload(path, compressed, { contentType: 'image/jpeg' });
-      if (!upErr) {
-        const { data: urlData } = sb.storage.from('product-photos').getPublicUrl(path);
-        variantImageUrl = urlData.publicUrl;
-      }
-    }
-    for (const s of sizeTags) {
-      const key = variantKey(c.name, s);
-      const d = variantData[key] || {};
-      const price = parseInt(d.price)||0;
-      if (!price) continue;
-      variants.push({
-        product_id: prod.id,
-        color_name: c.name,
-        color_hex: c.hex,
-        size: s,
-        price,
-        original_price: null,
-        stock: parseInt(d.stock)||0,
-        image_url: variantImageUrl,
-        is_active: d.active !== false
-      });
-    }
-  }
-  // Varian yang sudah ada (warna+ukuran sama) diperbarui di tempat; original_price dan flash_sale_end tidak disentuh.
-  const vKey = v => String(v.color_name) + '\u0001' + String(v.size);
-  const existingByKey = new Map(existingVars.map(e => [vKey(e), e.id]));
-  const keepIds = new Set();
-  const toInsert = [];
-  for (const v of variants) {
-    const id = existingByKey.get(vKey(v));
-    if (id) {
-      keepIds.add(id);
-      const { error: uErr } = await sb.from('variants').update({
-        color_hex: v.color_hex, price: v.price, stock: v.stock, image_url: v.image_url, is_active: v.is_active
-      }).eq('id', id);
-      if (uErr) { console.error('Update varian gagal:', uErr); showToast('Gagal update varian: ' + uErr.message); return; }
+    let prod;
+    let extrasMissing = false;
+    let existingVars = [];
+    if (editingProductId) {
+      const payload = {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls};
+      const res = await saveWithExtras(b => sb.from('products').update(b).eq('id',editingProductId).select().single(), payload, extra);
+      if (res.error) { showToast('Gagal update: ' + res.error.message); return; }
+      prod = res.data; extrasMissing = !!res.extrasMissing;
+      const exRes = await sb.from('variants').select('id,color_name,size').eq('product_id', prod.id);
+      existingVars = exRes.data || [];
     } else {
-      toInsert.push(v);
+      const res = await saveWithExtras(b => sb.from('products').insert(b).select().single(), {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls}, extra);
+      if (res.error) { showToast('Gagal simpan: ' + res.error.message); return; }
+      prod = res.data; extrasMissing = !!res.extrasMissing;
     }
-  }
-  if (toInsert.length) await sb.from('variants').insert(toInsert);
-  const dropIds = existingVars.map(e => e.id).filter(id => !keepIds.has(id));
-  if (dropIds.length) await sb.from('variants').delete().in('id', dropIds);
 
-  showToast(extrasMissing
-    ? 'Produk tersimpan, TAPI kolom SEO/spesifikasi baru belum ada di database. Jalankan 01-migrasi-supabase.sql di Supabase dulu.'
-    : (editingProductId ? 'Produk berhasil diupdate ✓' : 'Produk berhasil disimpan ✓'), extrasMissing ? 9000 : undefined);
-  closeProductForm();
-  loadAdminProducts();
+    const variants = [];
+    for (const c of colorTags) {
+      const firstKey = variantKey(c.name, sizeTags[0]);
+      let variantImageUrl = null;
+      const existingPreview = document.getElementById(`vph-${firstKey}`);
+      if (existingPreview && existingPreview.dataset.existing) variantImageUrl = existingPreview.dataset.existing;
+      if (variantPhotoFiles[firstKey]) {
+        const compressed = await compressImage(variantPhotoFiles[firstKey]);
+        const path = `variant-${Date.now()}-${Math.random().toString(36).slice(2,7)}.jpg`;
+        const { error: upErr } = await sb.storage.from('product-photos').upload(path, compressed, { contentType: 'image/jpeg' });
+        if (!upErr) {
+          const { data: urlData } = sb.storage.from('product-photos').getPublicUrl(path);
+          variantImageUrl = urlData.publicUrl;
+        }
+      }
+      for (const s of sizeTags) {
+        const key = variantKey(c.name, s);
+        const d = variantData[key] || {};
+        const price = parseInt(d.price)||0;
+        if (!price) continue;
+        variants.push({
+          product_id: prod.id,
+          color_name: c.name,
+          color_hex: c.hex,
+          size: s,
+          price,
+          original_price: null,
+          stock: parseInt(d.stock)||0,
+          image_url: variantImageUrl,
+          is_active: d.active !== false
+        });
+      }
+    }
+    const vKey = v => String(v.color_name) + '' + String(v.size);
+    const existingByKey = new Map(existingVars.map(e => [vKey(e), e.id]));
+    const keepIds = new Set();
+    const toInsert = [];
+    for (const v of variants) {
+      const id = existingByKey.get(vKey(v));
+      if (id) {
+        keepIds.add(id);
+        await sb.from('variants').update({
+          color_hex: v.color_hex, price: v.price, stock: v.stock, image_url: v.image_url, is_active: v.is_active
+        }).eq('id', id);
+      } else {
+        toInsert.push(v);
+      }
+    }
+    if (toInsert.length) await sb.from('variants').insert(toInsert);
+    const dropIds = existingVars.map(e => e.id).filter(id => !keepIds.has(id));
+    if (dropIds.length) await sb.from('variants').delete().in('id', dropIds);
+
+    showToast(editingProductId ? 'Produk berhasil diupdate ✓' : 'Produk berhasil disimpan ✓');
+    closeProductForm();
+    loadAdminProducts();
   } finally {
     setProductSaving(false);
   }
@@ -1006,49 +710,25 @@ function setProductSaving(isSaving) {
   if (btn) {
     btn.disabled = isSaving;
     btn.style.opacity = isSaving ? '0.7' : '';
-    btn.style.cursor = isSaving ? 'not-allowed' : '';
     if (isSaving) {
       btn.dataset.originalText = btn.textContent;
-      btn.innerHTML = `<span class="pf-spinner" style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;vertical-align:-2px;margin-right:7px;animation:pf-spin .7s linear infinite"></span>Menyimpan...`;
+      btn.textContent = 'Menyimpan...';
     } else if (btn.dataset.originalText) {
       btn.textContent = btn.dataset.originalText;
     }
   }
-  let overlay = document.getElementById('product-saving-overlay');
-  if (isSaving) {
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'product-saving-overlay';
-      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,.55);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(1px)';
-      overlay.innerHTML = `<div style="background:#1a1a1a;color:#fff;padding:14px 22px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.2)">
-        <span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:pf-spin .7s linear infinite"></span>
-        Menyimpan produk, mohon tunggu...
-      </div>`;
-      document.body.appendChild(overlay);
-    }
-  } else if (overlay) {
-    overlay.remove();
-  }
 }
 
-function resetProductForm() {
-  document.getElementById('p-name').value='';
-  document.getElementById('p-desc').value='';
-  document.getElementById('p-bahan').value='';
-  document.getElementById('p-tipe-cutting').value='';
-  document.getElementById('p-ketebalan').value='';
-  document.getElementById('p-motif').value='';
-  document.getElementById('p-dipakai-model').value='';
-  document.getElementById('p-supplier').value='';
-  clearExtraFields();
-  document.getElementById('p-cat-id').value='';
-  const catBtn = document.getElementById('p-cat-btn');
-  catBtn.textContent = 'Pilih kategori';
-  catBtn.classList.remove('filled');
-  const genderSel = document.getElementById('p-gender');
-  if (genderSel && genderSel.options.length) genderSel.selectedIndex = 0;
-  resetUploadState();
-  resetVariantSystem();
+function resetUploadState() {
+  photoSlots = [];
+  photoStripRender();
+}
+
+function prefillPhotosFromProduct(p) {
+  const urls = (p.image_urls && p.image_urls.length) ? p.image_urls : (p.image_url ? [p.image_url] : []);
+  const alts = Array.isArray(p.image_alts) ? p.image_alts : [];
+  photoSlots = urls.map((url, i) => ({type:'url', url, file:null, blob:null, alt: alts[i] || ''}));
+  photoStripRender();
 }
 
 function cancelEdit() {
@@ -1091,11 +771,8 @@ function editProduct(id) {
   document.getElementById('p-dipakai-model').value = p.dipakai_model || '';
   fillExtraFields(p);
   prefillPhotosFromProduct(p);
-  // Prefill variant tag system dari data lama
   resetVariantSystem();
   const vars = p.variants || [];
-  console.log('[editProduct] id:', id, 'variants count:', vars.length, vars);
-  // Build unique colors dan sizes
   const seenColors = new Map();
   const seenSizes = new Set();
   vars.forEach(v => {
@@ -1104,7 +781,6 @@ function editProduct(id) {
   });
   colorTags = Array.from(seenColors.entries()).map(([name,hex]) => ({name,hex}));
   sizeTags = Array.from(seenSizes);
-  // Prefill variantData
   vars.forEach(v => {
     const key = variantKey(v.color_name, v.size);
     variantData[key] = {price: v.price, orig: v.original_price, stock: v.stock, image_url: v.image_url, active: v.is_active !== false};
@@ -1117,7 +793,6 @@ function editProduct(id) {
   document.getElementById('edit-actions-extra')?.classList.remove('hidden');
   document.getElementById('status-toggle-btn').textContent = productStatus(p) === 'nonaktif' ? 'Aktifkan' : 'Arsipkan';
   if (typeof pfResetTabs === 'function') pfResetTabs();
-  // render ulang setelah DOM visible dan tab reset ke 1
   requestAnimationFrame(() => { renderColorTags(); renderSizeTags(); });
   window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -1217,8 +892,6 @@ function productTotalStock(p) {
   return (p.variants || []).reduce((sum,v) => sum + (v.stock ?? 0), 0);
 }
 
-// Tombol urut Stok / Terjual: tiap klik pindah netral -> naik -> turun -> netral.
-// Nilainya disimpan di dropdown #pf-sort, jadi dropdown dan tombol selalu sinkron.
 function prodSortCycle(col) {
   const sel = document.getElementById('pf-sort');
   if (!sel) return;
@@ -1232,8 +905,6 @@ function prodSortSync() {
     const col = btn.dataset.col;
     const state = cur === col + '-asc' ? 'asc' : (cur === col + '-desc' ? 'desc' : '');
     btn.dataset.state = state;
-    const nama = col === 'stock' ? 'stok' : 'terjual';
-    btn.setAttribute('aria-label', 'Urutkan ' + nama + (state === 'asc' ? ' (naik)' : state === 'desc' ? ' (turun)' : ''));
   });
 }
 
@@ -1267,9 +938,8 @@ function renderAdminProductList() {
   else if (sortF === 'sold-desc') list = list.slice().sort((a,b)=>(productSalesMap[b.id]||0)-(productSalesMap[a.id]||0));
   else if (sortF === 'sold-asc') list = list.slice().sort((a,b)=>(productSalesMap[a.id]||0)-(productSalesMap[b.id]||0));
   else if (sortF === 'supplier') list = list.slice().sort((a,b)=>supplierName(a.supplier_id).localeCompare(supplierName(b.supplier_id)));
-  // 'newest' sudah urutan default dari query (created_at desc)
 
-  if (!list.length) { el.innerHTML=`<tr><td colspan="${selectModeOn?10:9}" style="color:var(--muted);font-size:13px;padding:20px">Nggak ada produk yang cocok dengan filter.</td></tr>`; updateBulkBar(); return; }
+  if (!list.length) { el.innerHTML=`<tr><td colspan="${selectModeOn?10:9}" style="color:var(--muted);font-size:13px;padding:20px">Nggak ada produk yang cocok.</td></tr>`; updateBulkBar(); return; }
 
   el.innerHTML = list.map(p => {
     const vars = p.variants || [];
@@ -1280,7 +950,6 @@ function renderAdminProductList() {
     const netStr = priceRangeStr(vars, 'price') || '-';
     const jualStr = hasDiscount ? priceRangeStr(vars, 'original_price') : null;
     const sold = productSalesMap[p.id] || 0;
-    // Kartu khusus HP (gaya Shopee "Produk Saya"); di desktop disembunyikan CSS, tabel tetap dipakai
     const pmTags = `${isLow?'<span class="pm-tag">Stok menipis</span>':''}${productHasPromo(p)?'<span class="pm-tag">Promo</span>':''}${productStatus(p)!=='aktif'?'<span class="pm-tag off">Di Arsipkan</span>':''}`;
     const pmCard = `
         <div class="pm-card">
@@ -1295,7 +964,7 @@ function renderAdminProductList() {
           <div class="pm-stats"><span>Penjualan<b>${sold}</b></span><span>Stok<b>${productTotalStock(p)}</b></span><span>${vars.length} varian</span></div>
           <div class="pm-actions">
             <button type="button" class="pm-btn pm-more" onclick="openProductSheet('${p.id}')" aria-label="Lainnya">&#8943;</button>
-            <button type="button" class="pm-btn pm-share" onclick="seoShareProduct('${p.id}')" aria-label="Bagikan link SEO">
+            <button type="button" class="pm-btn pm-share" onclick="seoShareProduct('${p.id}')" aria-label="Bagikan link">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
             </button>
             ${vars.length ? `<button type="button" class="pm-btn" onclick="toggleVariantBreakdown('${p.id}')">${isOpen?'Sembunyikan varian':'Lihat varian'}</button>` : ''}
@@ -1318,9 +987,7 @@ function renderAdminProductList() {
       </td>
       <td class="pt-x">
         <div class="seo-cell">
-          <button type="button" class="seo-share-btn" onclick="seoShareProduct('${p.id}')" title="${seoEsc(seoProductUrl(p))}">
-            <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Bagikan
-          </button>
+          <button type="button" class="seo-share-btn" onclick="seoShareProduct('${p.id}')">Bagikan</button>
           <button type="button" class="seo-copy-btn" onclick="seoCopyProduct('${p.id}')">Salin link</button>
         </div>
       </td>
@@ -1369,18 +1036,11 @@ function renderAdminProductList() {
   updateBulkBar();
 }
 
-function toggleSelectAll(checked) {
-  if (checked) lastRenderedIds.forEach(id => bulkSelected.add(id));
-  else bulkSelected.clear();
-  renderAdminProductList();
-}
-
 function toggleVariantBreakdown(id) {
   expandedProductId = (expandedProductId === id) ? null : id;
   renderAdminProductList();
 }
 
-// ---- Bulk selection ----
 function toggleBulkCheck(id, checked) {
   if (checked) bulkSelected.add(id); else bulkSelected.delete(id);
   updateBulkBar();
@@ -1394,23 +1054,6 @@ function updateBulkBar() {
   if (!bar) return;
   bar.classList.toggle('hidden', bulkSelected.size === 0);
   document.getElementById('prod-bulk-count').textContent = `${bulkSelected.size} dipilih`;
-}
-async function bulkSetActive(active) {
-  if (!bulkSelected.size) return;
-  await sb.from('products').update({is_active: active, status: active ? 'aktif' : 'nonaktif'}).in('id', [...bulkSelected]);
-  showToast(`${bulkSelected.size} produk di${active?'aktifkan':'arsipkan'} ✓`);
-  loadAdminProducts();
-}
-async function bulkDelete() {
-  if (!bulkSelected.size) return;
-  const n = bulkSelected.size;
-  showConfirmDialog(`Apakah kamu yakin ingin menghapus ${n} produk terpilih? Semua data termasuk foto bakal terhapus permanen dan nggak bisa dikembalikan.`, async () => {
-    for (const id of [...bulkSelected]) {
-      await deleteProductCascade(id);
-    }
-    showToast(`${n} produk & semua datanya dihapus`);
-    loadAdminProducts();
-  });
 }
 
 let _confirmCallback = null;
@@ -1441,14 +1084,12 @@ function extractStoragePath(url) {
 async function deleteProductCascade(id) {
   const p = adminProductsData.find(x => x.id === id);
   const vars = p?.variants || [];
-  // Kumpulin semua url foto (produk + tiap varian warna), unik, biar sekali hapus aja
   const urls = new Set();
   (p?.image_urls || (p?.image_url ? [p.image_url] : [])).forEach(u => urls.add(u));
   vars.forEach(v => { if (v.image_url) urls.add(v.image_url); });
   const paths = [...urls].map(extractStoragePath).filter(Boolean);
   if (paths.length) {
-    const { error: storageErr } = await sb.storage.from('product-photos').remove(paths);
-    if (storageErr) console.error('Gagal hapus foto di storage:', storageErr);
+    await sb.storage.from('product-photos').remove(paths);
   }
   await sb.from('wishlists').delete().eq('product_id', id);
   await sb.from('variants').delete().eq('product_id', id);
@@ -1469,15 +1110,14 @@ async function toggleActiveCurrent() {
 
 async function deleteProductFromForm() {
   if (!editingProductId) return;
-  showConfirmDialog('Apakah kamu yakin ingin menghapus produk ini? Semua data termasuk foto bakal terhapus permanen dan nggak bisa dikembalikan.', async () => {
+  showConfirmDialog('Yakin ingin menghapus produk ini?', async () => {
     await deleteProductCascade(editingProductId);
-    showToast('Produk & semua datanya dihapus');
+    showToast('Produk dihapus');
     closeProductForm();
     loadAdminProducts();
   });
 }
 
-// ===================== BOTTOM SHEET "LAINNYA" (mobile, tombol titik-3) =====================
 function closeProductSheet() {
   document.getElementById('prod-sheet-overlay').classList.remove('open');
 }
@@ -1502,7 +1142,6 @@ async function duplicateProduct(id) {
     bahan: p.bahan, tipe_cutting: p.tipe_cutting, ketebalan: p.ketebalan,
     motif: p.motif, dipakai_model: p.dipakai_model, image_url: p.image_url, image_urls: p.image_urls
   };
-  // slug TIDAK disalin (harus unik); sisanya ikut disalin
   const dupExtra = {
     seo_title: p.seo_title || null, seo_description: p.seo_description || null, image_alts: p.image_alts || null,
     lengan: p.lengan || null, gramasi_gsm: p.gramasi_gsm || null, lingkar_dada_cm: p.lingkar_dada_cm || null,
@@ -1511,7 +1150,7 @@ async function duplicateProduct(id) {
   };
   const dres = await saveWithExtras(b => sb.from('products').insert(b).select().single(), dupBase, dupExtra);
   const newProd = dres.data, error = dres.error;
-  if (error) { console.error('Duplikat produk gagal:', error); showToast('Gagal duplikat: ' + error.message); return; }
+  if (error) { showToast('Gagal duplikat: ' + error.message); return; }
   const vars = (p.variants || []).map(v => ({
     product_id: newProd.id, color_name: v.color_name, color_hex: v.color_hex, size: v.size,
     price: v.price, original_price: v.original_price, stock: v.stock, image_url: v.image_url, is_active: v.is_active
@@ -1523,9 +1162,9 @@ async function duplicateProduct(id) {
 }
 
 function deleteProductFromSheet(id) {
-  showConfirmDialog('Apakah kamu yakin ingin menghapus produk ini? Semua data termasuk foto bakal terhapus permanen dan nggak bisa dikembalikan.', async () => {
+  showConfirmDialog('Yakin ingin menghapus produk ini?', async () => {
     await deleteProductCascade(id);
-    showToast('Produk & semua datanya dihapus');
+    showToast('Produk dihapus');
     closeProductSheet();
     loadAdminProducts();
   });
@@ -1537,7 +1176,6 @@ async function openProductSheet(id) {
   const vars = p.variants || [];
   const netStr = priceRangeStr(vars, 'price') || '-';
   const stock = productTotalStock(p);
-  const soldAllTime = productSalesMap[p.id] || 0;
   const status = productStatus(p);
 
   document.getElementById('prod-sheet-overlay').classList.add('open');
@@ -1550,174 +1188,41 @@ async function openProductSheet(id) {
         <div style="font-size:13px;margin-top:2px">${netStr} · Stok ${stock}</div>
       </div>
     </div>
-    <h4 style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Performa Produk</h4>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Memuat data 30 hari terakhir...</p>
-    <h4 style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Link SEO</h4>
-    <div style="font-size:11.5px;color:var(--muted);word-break:break-all;margin-bottom:8px">${seoEsc(seoProductUrl(p)) || 'Belum ada alamat halaman (slug)'}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
       <button class="btn-edit" onclick="seoShareProduct('${p.id}')">Bagikan</button>
       <button class="btn-edit" onclick="seoCopyProduct('${p.id}')">Salin link</button>
     </div>
-    <h4 style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Aksi</h4>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn-edit" onclick="toggleProductActiveById('${p.id}')">${status === 'aktif' ? 'Arsipkan' : 'Aktifkan'}</button>
       <button class="btn-edit" onclick="duplicateProduct('${p.id}')">Salin</button>
       <button class="btn-danger" style="grid-column:1/-1" onclick="deleteProductFromSheet('${p.id}')">Hapus</button>
     </div>
   `;
+}
 
-  // Performa: fetch async, render belakangan biar sheet-nya langsung kebuka gak nunggu network
-  psCurId = id;
-  const dayKey = (d) => { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
-  // 30 hari kalender (termasuk hari ini) + 30 hari sebelumnya buat pembanding
-  const start30 = new Date(); start30.setHours(0, 0, 0, 0); start30.setDate(start30.getDate() - 29);
-  const start60 = new Date(start30); start60.setDate(start60.getDate() - 30);
-  const d30 = start30.toISOString(), d60 = start60.toISOString();
-  // Supabase membatasi 1000 baris per query -> ambil bertahap (maks 5000)
-  const fetchAll = async (build) => {
-    const out = [];
-    for (let i = 0; i < 5; i++) {
-      const { data, error } = await build().range(i * 1000, i * 1000 + 999);
-      if (error || !data) break;
-      out.push(...data);
-      if (data.length < 1000) break;
-    }
-    return out;
-  };
-
-  const [viewsAllRes, viewRows, orderRows] = await Promise.all([
-    sb.from('analytics_events').select('*', { count: 'exact', head: true }).eq('event_type', 'view_product').eq('product_id', id),
-    fetchAll(() => sb.from('analytics_events').select('created_at').eq('event_type', 'view_product').eq('product_id', id).gte('created_at', d60)),
-    fetchAll(() => sb.from('orders').select('items, created_at').gte('created_at', d60)),
-  ]);
-  if (psCurId !== id) return; // sheet sudah pindah ke produk lain
-
-  const labels = []; const idxOf = {};
-  for (let i = 0; i < 30; i++) { const d = new Date(start30); d.setDate(d.getDate() + i); labels.push(d); idxOf[dayKey(d)] = i; }
-  const sales = new Array(30).fill(0), visits = new Array(30).fill(0);
-  let qtyPrev30 = 0, viewsPrev30 = 0;
-  viewRows.forEach(e => { const k = idxOf[dayKey(e.created_at)]; if (k !== undefined) visits[k]++; else if (new Date(e.created_at) < start30) viewsPrev30++; });
-  orderRows.forEach(o => {
-    const q = (o.items || []).filter(i => i.productId === id).reduce((a, i) => a + (i.qty || 0), 0);
-    if (!q) return;
-    const k = idxOf[dayKey(o.created_at)];
-    if (k !== undefined) sales[k] += q; else if (new Date(o.created_at) < start30) qtyPrev30 += q;
-  });
-  const sum = (a) => a.reduce((x, y) => x + y, 0);
-  const qty30 = sum(sales), views30 = sum(visits);
-  const conv = sales.map((q, i) => visits[i] ? Math.round(q / visits[i] * 10000) / 100 : 0);
-  const konversi30 = views30 ? Math.round(qty30 / views30 * 10000) / 100 : 0;
-  const konversiPrev = viewsPrev30 ? Math.round(qtyPrev30 / viewsPrev30 * 10000) / 100 : 0;
-  const viewsAll = viewsAllRes.count || 0;
-
-  const pct = (cur, prev) => prev === 0 ? (cur > 0 ? 100 : 0) : Math.round((cur - prev) / prev * 1000) / 10;
-  const deltaHtml = (v) => `<span class="ps-delta" style="color:${v >= 0 ? '#1b8a4c' : '#c0392b'}">${v >= 0 ? '▲' : '▼'} ${Math.abs(v)}%</span>`;
-  const tile = (key, label, val, delta) => `<button type="button" class="ps-tile${key === 'sales' ? ' sel' : ''}" data-k="${key}" onclick="psSelect('${key}')"><span>${label}</span><b>${val}</b>${deltaHtml(delta)}</button>`;
-
-  psData = { labels, series: { sales, visits, conv }, key: 'sales', idx: 29 };
-
-  const perfEl = document.getElementById('prod-sheet-body');
-  if (!perfEl || !document.getElementById('prod-sheet-overlay').classList.contains('open')) return; // sheet udah ditutup duluan
-  const loadingP = perfEl.querySelector('p');
-  if (loadingP) {
-    loadingP.outerHTML = `
-    <div class="ps-wrap">
-      <div class="ps-sum">
-        <div><span>Penjualan</span><b>${soldAllTime.toLocaleString('id-ID')}</b></div>
-        <div><span>Jumlah Dilihat</span><b>${viewsAll.toLocaleString('id-ID')}</b></div>
-      </div>
-      <div class="ps-tiles">
-        ${tile('sales', 'Penjualan 30 Hari', qty30.toLocaleString('id-ID'), pct(qty30, qtyPrev30))}
-        ${tile('visits', 'Kunjungan 30 Hari', views30.toLocaleString('id-ID'), pct(views30, viewsPrev30))}
-        ${tile('conv', 'Konversi 30 Hari', konversi30.toLocaleString('id-ID') + '%', pct(konversi30, konversiPrev))}
-      </div>
-      <button type="button" class="ps-toggle" id="ps-toggle" onclick="psToggle()"><span>Tutup Rincian Performa</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button>
-      <div class="ps-chart" id="ps-chart"></div>
-    </div>`;
-    psRender();
+// ===================== TABEL UKURAN OTOMATIS DARI SPESIFIKASI =====================
+function pfInsertSizeTable() {
+  const ta = document.getElementById('p-desc');
+  if (!ta) return;
+  if (/^[ 	]*\|.*\|[ 	]*$/m.test(ta.value)) { 
+    showToast('Tabel ukuran sudah ada di deskripsi'); 
+    return; 
   }
-}
-
-// ===== Grafik 30 hari di sheet "Lainnya" (ala Shopee Produk Saya): pilih metrik lewat kartu, sentuh/hover grafik buat lihat nilai per hari =====
-let psCurId = null;
-let psData = null;
-const PS_MON = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-const PS_W = 340, PS_H = 230, PS_PL = 40, PS_PR = 14, PS_PT = 14, PS_PB = 28;
-function psFmt(key, v) {
-  if (key === 'conv') return (Math.round(v * 100) / 100).toLocaleString('id-ID') + '%';
-  return (Math.round(v * 10) / 10).toLocaleString('id-ID');
-}
-function psSelect(key) {
-  if (!psData || psData.key === key) return;
-  psData.key = key;
-  document.querySelectorAll('.ps-tile').forEach(t => t.classList.toggle('sel', t.dataset.k === key));
-  psRender();
-}
-function psToggle() {
-  const c = document.getElementById('ps-chart'), b = document.getElementById('ps-toggle');
-  if (!c || !b) return;
-  const hide = c.style.display !== 'none';
-  c.style.display = hide ? 'none' : '';
-  b.classList.toggle('closed', hide);
-  b.firstElementChild.textContent = hide ? 'Lihat Rincian Performa' : 'Tutup Rincian Performa';
-}
-function psScale(max, whole) {
-  const rough = Math.max(max, 1e-9) / 4;
-  const pow = Math.pow(10, Math.floor(Math.log10(rough)));
-  const n = rough / pow;
-  let step = (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * pow;
-  if (whole) step = Math.max(1, Math.ceil(step)); // jumlah pcs/kunjungan: sumbu kelipatan bulat
-  else if (max <= 0) step = 0.5;
-  return step;
-}
-function psMarkHTML() {
-  const d = psData, vals = d.series[d.key], n = vals.length;
-  const step = psScale(Math.max(...vals), d.key !== 'conv'), top = step * 4;
-  const iw = PS_W - PS_PL - PS_PR, ih = PS_H - PS_PT - PS_PB;
-  const x = PS_PL + d.idx * iw / (n - 1), y = PS_PT + ih - (vals[d.idx] / top) * ih;
-  const dt = d.labels[d.idx];
-  const t1 = psFmt(d.key, vals[d.idx]), t2 = dt.getDate() + ' ' + PS_MON[dt.getMonth()];
-  const bw = Math.max(62, t1.length * 9 + 24), bh = 44;
-  const bx = Math.min(Math.max(x - bw / 2, 2), PS_W - bw - 2);
-  const by = y - bh - 12 < 2 ? y + 12 : y - bh - 12;
-  return `<line x1="${x}" x2="${x}" y1="${PS_PT}" y2="${PS_PT + ih}" stroke="#111114" stroke-opacity=".35" stroke-dasharray="4 4"/>
-    <circle cx="${x}" cy="${y}" r="7" fill="#111114" fill-opacity=".14"/><circle cx="${x}" cy="${y}" r="3.5" fill="#111114"/>
-    <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="8" fill="#292A31"/>
-    <text x="${bx + bw / 2}" y="${by + 19}" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">${t1}</text>
-    <text x="${bx + bw / 2}" y="${by + 36}" font-size="11.5" fill="#fff" fill-opacity=".8" text-anchor="middle">${t2}</text>`;
-}
-function psRender() {
-  const el = document.getElementById('ps-chart');
-  if (!el || !psData) return;
-  const d = psData, vals = d.series[d.key], n = vals.length;
-  const step = psScale(Math.max(...vals), d.key !== 'conv'), top = step * 4;
-  const iw = PS_W - PS_PL - PS_PR, ih = PS_H - PS_PT - PS_PB;
-  const x = i => PS_PL + i * iw / (n - 1), y = v => PS_PT + ih - (v / top) * ih;
-  const grid = [0, 1, 2, 3, 4].map(k => {
-    const yy = y(step * k), v = step * k;
-    const lbl = d.key === 'conv' ? (Math.round(v * 100) / 100) + '%' : (Number.isInteger(v) ? v : v.toFixed(1));
-    return `<line x1="${PS_PL}" x2="${PS_W - PS_PR}" y1="${yy}" y2="${yy}" stroke="rgba(17,17,20,.12)"${k ? ' stroke-dasharray="4 4"' : ''}/><text x="${PS_PL - 6}" y="${yy + 3.5}" font-size="10" fill="rgba(41,42,49,.58)" text-anchor="end">${lbl}</text>`;
-  }).join('');
-  const xl = d.labels.map((dt, i) => i % 5 === 0 ? `<text x="${x(i)}" y="${PS_H - 8}" font-size="10" fill="rgba(41,42,49,.58)" text-anchor="middle">${dt.getDate()} ${PS_MON[dt.getMonth()]}</text>` : '').join('');
-  const line = vals.map((v, i) => `${x(i)},${y(v)}`).join(' ');
-  const gid = 'psg' + Math.random().toString(36).slice(2, 7);
-  el.innerHTML = `<svg viewBox="0 0 ${PS_W} ${PS_H}" style="width:100%;height:auto;display:block;touch-action:pan-y;user-select:none" role="img" onpointerdown="psPoint(event)" onpointermove="psPoint(event)">
-    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#111114" stop-opacity=".14"/><stop offset="1" stop-color="#111114" stop-opacity="0"/></linearGradient></defs>
-    ${grid}
-    <polygon points="${x(0)},${y(0)} ${line} ${x(n - 1)},${y(0)}" fill="url(#${gid})"/>
-    <polyline points="${line}" fill="none" stroke="#111114" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-    ${xl}
-    <g id="ps-mark">${psMarkHTML()}</g>
-  </svg>`;
-}
-function psPoint(e) {
-  if (!psData) return;
-  if (e.type === 'pointermove' && e.pointerType === 'touch') return; // di HP cukup ketuk; geser jari tetap buat scroll
-  const svg = e.currentTarget, r = svg.getBoundingClientRect();
-  const px = (e.clientX - r.left) / r.width * PS_W;
-  const n = psData.labels.length, iw = PS_W - PS_PL - PS_PR;
-  const idx = Math.min(n - 1, Math.max(0, Math.round((px - PS_PL) / iw * (n - 1))));
-  if (idx === psData.idx) return;
-  psData.idx = idx;
-  const g = document.getElementById('ps-mark'); if (g) g.innerHTML = psMarkHTML();
+  const val = id => { const el = document.getElementById(id); return el && String(el.value).trim() ? String(el.value).trim() : '-'; };
+  const panjang = val('p-panjang');
+  const dada = val('p-lingkar-dada');
+  
+  const block = 'Panduan Ukuran:\n' +
+    '| Ukuran | Panjang Atasan (cm) | Lingkar Dada (cm) | Panjang Lengan (cm) |\n' +
+    '| All Size | ' + panjang + ' | ' + dada + ' | - |';
+    
+  const pos = ta.selectionEnd != null && ta.value.length ? ta.selectionEnd : ta.value.length;
+  const before = ta.value.slice(0, pos), after = ta.value.slice(pos);
+  const pre = before && !before.endsWith('\n\n') ? (before.endsWith('\n') ? '\n' : '\n\n') : '';
+  const post = after && !after.startsWith('\n') ? '\n\n' : (after ? '\n' : '');
+  
+  ta.value = before + pre + block + post + after;
+  ta.dispatchEvent(new Event('input', { bubbles: true }));
+  ta.focus();
+  showToast('Tabel ukuran berhasil disisipkan dari data spesifikasi ✓');
 }
