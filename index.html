@@ -2370,19 +2370,7 @@
                     <label class="form-label">Gramasi (gr/m²)</label>
                     <input class="form-input" id="p-gramasi" type="number" min="0" inputmode="numeric" placeholder="cth: 290"/>
                   </div>
-                  <div class="form-group" style="margin-bottom:0">
-                    <label class="form-label">Lingkar Dada (cm)</label>
-                    <input class="form-input" id="p-lingkar-dada" type="number" min="0" step="0.5" inputmode="decimal" placeholder="cth: 110"/>
-                  </div>
-                  <div class="form-group" style="margin-bottom:0">
-                    <label class="form-label">Panjang Baju (cm)</label>
-                    <input class="form-input" id="p-panjang" type="number" min="0" step="0.5" inputmode="decimal" placeholder="cth: 60"/>
-                  </div>
-                  <div class="form-group" style="margin-bottom:0">
-                    <label class="form-label">Panjang Lengan (cm)</label>
-                    <input class="form-input" id="p-panjang-lengan" type="number" min="0" step="0.5" inputmode="decimal" placeholder="cth: 56"/>
-                  </div>
-                  <p style="grid-column:1/-1;font-size:11px;color:var(--muted);margin:-4px 0 0">Lingkar dada dan panjang adalah <strong>ukuran produk</strong> (diukur dari bajunya), bukan ukuran badan pemakai.</p>
+                  <p style="grid-column:1/-1;font-size:11px;color:var(--muted);margin:-4px 0 0">Ukuran baju (Panjang Atasan, Lingkar Dada, Panjang Lengan) diisi di tab <strong>Informasi Penjualan</strong>, tepat di bawah pilihan ukuran.</p>
                   <div class="form-group" style="margin-bottom:0;grid-column:1/-1">
                     <label class="form-label">Perawatan</label>
                     <input class="form-input" id="p-perawatan" placeholder="cth: Cuci tangan air dingin, jangan diperas, jemur diangin-anginkan"/>
@@ -2482,6 +2470,13 @@
                              oninput="sizeDropdownFilter(this.value)" onkeydown="sizeInputKeydown(event)" onfocus="sizeDropdownShow()" style="width:100%"/>
                       <div id="size-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);z-index:200;max-height:200px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.1)"></div>
                     </div>
+                  </div>
+
+                  <!-- Ukuran produk per ukuran (muncul otomatis setelah ukuran dipilih) -->
+                  <div id="size-chart-box" style="display:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">
+                    <div style="font-size:13px;font-weight:600;margin-bottom:4px">Ukuran Produk (cm)</div>
+                    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Diukur dari bajunya, bukan badan pemakai. Tampil di halaman produk sebagai Panduan Ukuran. Kolom boleh dikosongkan.</div>
+                    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="border-bottom:2px solid var(--border);text-align:left"><th style="padding:8px 6px">Ukuran</th><th style="padding:8px 6px">Panjang Atasan</th><th style="padding:8px 6px">Lingkar Dada</th><th style="padding:8px 6px">Panjang Lengan</th></tr></thead><tbody id="size-chart-rows"></tbody></table></div>
                   </div>
 
                   <!-- Tabel varian otomatis -->

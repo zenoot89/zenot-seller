@@ -1,6 +1,7 @@
 // ===================== VARIANT TAG SYSTEM =====================
 let colorTags = []; // [{name, hex}]
 let sizeTags = [];  // [string]
+let sizeChartData = {}; // ukuran -> {panjang, dada, lengan} (cm), disimpan di kolom products.size_chart
 
 function renderColorTags() {
   const el = document.getElementById('v1-tags');
@@ -20,6 +21,57 @@ function renderSizeTags() {
   el.innerHTML = sizeTags.map((s,i) => `
     <div class="var-tag">${s}<button class="var-tag-remove" onclick="removeSizeTag(${i})">✕</button></div>`).join('');
   rebuildVariantTable();
+  renderSizeChart();
+}
+
+// Kotak Ukuran Produk: satu baris per ukuran yang dipilih, muncul otomatis di bawah Variasi 2.
+function renderSizeChart() {
+  const box = document.getElementById('size-chart-box');
+  const body = document.getElementById('size-chart-rows');
+  if (!box || !body) return;
+  if (!sizeTags.length) { box.style.display = 'none'; body.innerHTML = ''; return; }
+  box.style.display = 'block';
+  const cell = (i, f, ph) => {
+    const c = sizeChartData[sizeTags[i]] || {};
+    return `<td style="padding:6px"><input class="form-input" style="padding:7px 10px;font-size:12px;min-width:84px" type="number" min="0" step="0.5" inputmode="decimal" placeholder="${ph}" value="${c[f] != null ? c[f] : ''}" oninput="updateSizeChart(${i},'${f}',this.value)"/></td>`;
+  };
+  body.innerHTML = sizeTags.map((s, i) => `
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:6px;white-space:nowrap;font-weight:600">${s}</td>
+      ${cell(i, 'panjang', 'cth: 60')}${cell(i, 'dada', 'cth: 110')}${cell(i, 'lengan', 'cth: 56')}
+    </tr>`).join('');
+}
+function updateSizeChart(i, field, value) {
+  const s = sizeTags[i];
+  if (s == null) return;
+  const v = parseFloat(value);
+  const row = sizeChartData[s] || (sizeChartData[s] = {});
+  if (Number.isFinite(v) && v > 0) row[field] = v; else delete row[field];
+}
+// Hanya ukuran yang masih dipilih dan punya minimal satu angka; kosong semua = null.
+function collectSizeChart() {
+  const out = {};
+  sizeTags.forEach(s => {
+    const c = sizeChartData[s] || {};
+    const r = {};
+    ['panjang', 'dada', 'lengan'].forEach(f => { if (Number(c[f]) > 0) r[f] = Number(c[f]); });
+    if (Object.keys(r).length) out[s] = r;
+  });
+  return Object.keys(out).length ? out : null;
+}
+// Memuat ukuran produk saat edit: size_chart kalau ada; produk lama dengan satu ukuran memakai kolom lama.
+function loadSizeChart(p) {
+  sizeChartData = {};
+  const chart = p && p.size_chart && typeof p.size_chart === 'object' ? p.size_chart : null;
+  if (chart) {
+    Object.keys(chart).forEach(s => { sizeChartData[s] = Object.assign({}, chart[s]); });
+  } else if (sizeTags.length === 1 && (p.panjang_cm || p.lingkar_dada_cm || p.panjang_lengan_cm)) {
+    const r = {};
+    if (Number(p.panjang_cm) > 0) r.panjang = Number(p.panjang_cm);
+    if (Number(p.lingkar_dada_cm) > 0) r.dada = Number(p.lingkar_dada_cm);
+    if (Number(p.panjang_lengan_cm) > 0) r.lengan = Number(p.panjang_lengan_cm);
+    sizeChartData[sizeTags[0]] = r;
+  }
 }
 
 function addColorTag(e) {
@@ -252,10 +304,11 @@ function applyToAll() {
 }
 
 function resetVariantSystem() {
-  colorTags = []; sizeTags = []; variantData = {}; variantPhotoFiles = {};
+  colorTags = []; sizeTags = []; variantData = {}; variantPhotoFiles = {}; sizeChartData = {};
   ['v1-tags','v2-tags'].forEach(id => { const el = document.getElementById(id); if(el) el.innerHTML=''; });
   const wrap = document.getElementById('variant-table-wrap');
   if (wrap) wrap.style.display='none';
+  renderSizeChart();
   const picker = document.getElementById('v1-color-picker');
   const hexInput = document.getElementById('v1-color-hex');
   if (picker) picker.value = '#1a1a1a';
@@ -795,9 +848,10 @@ function collectExtraFields(imageAlts) {
     image_alts: imageAlts,
     lengan: val('p-lengan') || null,
     gramasi_gsm: numOrNull('p-gramasi') ? Math.round(numOrNull('p-gramasi')) : null,
-    lingkar_dada_cm: numOrNull('p-lingkar-dada'),
-    panjang_cm: numOrNull('p-panjang'),
-    panjang_lengan_cm: numOrNull('p-panjang-lengan'),
+    size_chart: collectSizeChart(),
+    lingkar_dada_cm: null,
+    panjang_cm: null,
+    panjang_lengan_cm: null,
     perawatan: val('p-perawatan') || null,
     weight_gram: numOrNull('p-weight') ? Math.round(numOrNull('p-weight')) : null,
     pkg_length_cm: numOrNull('p-pkg-l'),
@@ -1105,6 +1159,7 @@ function editProduct(id) {
   });
   colorTags = Array.from(seenColors.entries()).map(([name,hex]) => ({name,hex}));
   sizeTags = Array.from(seenSizes);
+  loadSizeChart(p);
   // Prefill variantData
   vars.forEach(v => {
     const key = variantKey(v.color_name, v.size);
@@ -1507,7 +1562,7 @@ async function duplicateProduct(id) {
   const dupExtra = {
     seo_title: p.seo_title || null, seo_description: p.seo_description || null, image_alts: p.image_alts || null,
     lengan: p.lengan || null, gramasi_gsm: p.gramasi_gsm || null, lingkar_dada_cm: p.lingkar_dada_cm || null,
-    panjang_cm: p.panjang_cm || null, panjang_lengan_cm: p.panjang_lengan_cm || null, perawatan: p.perawatan || null, weight_gram: p.weight_gram || null,
+    panjang_cm: p.panjang_cm || null, panjang_lengan_cm: p.panjang_lengan_cm || null, size_chart: p.size_chart || null, perawatan: p.perawatan || null, weight_gram: p.weight_gram || null,
     pkg_length_cm: p.pkg_length_cm || null, pkg_width_cm: p.pkg_width_cm || null, pkg_height_cm: p.pkg_height_cm || null
   };
   const dres = await saveWithExtras(b => sb.from('products').insert(b).select().single(), dupBase, dupExtra);
