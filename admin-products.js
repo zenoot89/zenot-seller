@@ -258,7 +258,9 @@ function rebuildVariantTable() {
               <div id="vph-${key}" style="width:36px;height:36px;border-radius:6px;background:#f0ede8;background-size:cover;background-position:center;flex-shrink:0;${existingImg?`background-image:url('${existingImg}')`:''}" data-existing="${existingImg}"></div>
               <input type="file" id="vf-${key}" accept="image/*" style="display:none" onchange="previewVariantPhotoNew(this,'${key}')"/>
               <button type="button" class="variant-photo-btn" onclick="document.getElementById('vf-${key}').click()">📷</button>
-            </div>` : `<span style="margin-left:18px;color:var(--muted);font-size:12px">↳</span>`}
+              <button type="button" class="variant-photo-btn" title="Crop foto" onclick="variantOpenCrop('${key}')">✂</button>
+            </div>
+            <div class="vdim" id="vdim-${key}"></div>` : `<span style="margin-left:18px;color:var(--muted);font-size:12px">↳</span>`}
           </td>
           <td style="padding:10px 6px">${s}</td>
           <td style="padding:10px 6px"></td>
@@ -274,6 +276,7 @@ function rebuildVariantTable() {
     });
   });
   tbody.innerHTML = rows.join('');
+  variantDimsRefresh();
 }
 
 function updateVariantData(key, field, val) {
@@ -289,6 +292,7 @@ function previewVariantPhotoNew(input, key) {
   variantData[key].preview_url = objUrl; // simpan di state biar gak ilang pas tabel di-render ulang (nambah warna/ukuran)
   const preview = document.getElementById(`vph-${key}`);
   if (preview) preview.style.backgroundImage = `url(${objUrl})`;
+  variantDimUpdate(key);
 }
 
 function applyToAll() {
@@ -381,8 +385,10 @@ function photoStripRender() {
   if (!strip) return;
   const total = photoSlots.length;
   let html = '';
+  const srcs = [];
   photoSlots.forEach((slot, i) => {
     const src = slot.type === 'url' ? slot.url : URL.createObjectURL(slot.blob || slot.file);
+    srcs.push(src);
     html += `
       <div class="photo-item" id="pslot-${i}" draggable="true"
            ondragstart="photoDragStart(event,${i})" ondragover="photoDragOver(event,${i})"
@@ -390,6 +396,7 @@ function photoStripRender() {
         <div class="photo-item-inner">
           <img src="${src}" alt="foto ${i+1}"/>
         </div>
+        <div class="photo-dim" id="pdim-${i}"></div>
         ${i===0 ? '<div class="photo-item-cover">Cover</div>' : ''}
         <div class="photo-item-actions">
           <button class="photo-action-btn" onclick="photoOpenCrop(${i})" title="Crop">✂</button>
@@ -405,6 +412,7 @@ function photoStripRender() {
       </button>`;
   }
   strip.innerHTML = html;
+  photoDimsRefresh(srcs);
   if (typeof photoAltsRender === 'function') photoAltsRender();
 }
 
@@ -465,13 +473,15 @@ let _cropWrapH = 0;
 let _cropDragging = false;
 let _cropDragStart = {x:0, y:0};
 
-function photoOpenCrop(idx) {
-  cropTargetIdx = idx;
-  const slot = photoSlots[idx];
-  const overlay = document.getElementById('crop-overlay');
-  overlay.classList.add('open');
+let _cropOnSave = null;     // callback(blob) yang dipanggil saat Simpan (diisi pembuka: foto utama atau foto varian)
+
+// Buka editor crop untuk satu sumber gambar (URL biasa atau blob:). onSave(blob) menerima hasil JPEG.
+function _cropOpen(src, onSave) {
+  _cropOnSave = onSave;
+  document.getElementById('crop-overlay').classList.add('open');
 
   const img = new Image();
+  img.crossOrigin = 'anonymous';   // supaya foto dari storage bisa diproses ulang tanpa "tainted canvas"
   img.onload = () => {
     _cropImg = img;
     _cropCanvas = document.getElementById('crop-canvas');
@@ -487,29 +497,45 @@ function photoOpenCrop(idx) {
     _cropPreviewCanvas.width = 120;
     _cropPreviewCanvas.height = 120;
 
-    // Init scale: fit image in canvas, then 1:1 crop box = min(W,H)*0.8
-    const fitScale = Math.min(_cropWrapW / img.naturalWidth, _cropWrapH / img.naturalHeight) * 0.85;
-    _cropState = {scale: fitScale, angle: 0, flipH: false, flipV: false, offsetX: 0, offsetY: 0};
+    // Awal: foto menutupi penuh kotak crop 1:1 (potong bagian tengah). Geser untuk memilih bagian,
+    // perkecil (zoom out) untuk memasukkan lebih banyak foto; area kosong diisi putih.
+    const box = Math.min(_cropWrapW, _cropWrapH) * 0.78;
+    const cover = box / Math.min(img.naturalWidth, img.naturalHeight);
+    _cropState = {scale: cover, angle: 0, flipH: false, flipV: false, offsetX: 0, offsetY: 0};
     _cropInitState = {..._cropState};
     cropDraw();
-    cropDrawPreview();
     _cropBindMouse();
   };
-  const src = slot.type === 'url' ? slot.url : URL.createObjectURL(slot.blob || slot.file);
-  img.crossOrigin = 'anonymous';
+  img.onerror = () => {
+    showToast('Foto tidak bisa dimuat di editor (mungkin izin akses gambar). Unggah ulang dari file.', 4500);
+    cropClose();
+  };
   img.src = src;
 }
 
+function photoOpenCrop(idx) {
+  const slot = photoSlots[idx];
+  if (!slot) return;
+  cropTargetIdx = idx;
+  const src = slot.type === 'url' ? slot.url : URL.createObjectURL(slot.blob || slot.file);
+  _cropOpen(src, (blob) => {
+    const old = photoSlots[idx] || {};
+    photoSlots[idx] = {type:'cropped', blob, file:null, url:null, alt: old.alt || ''};
+    photoStripRender();
+  });
+}
+
+// Tampilan di layar. Kotak crop TETAP di tengah kanvas; fotonya yang digeser di bawah kotak.
 function cropDraw() {
   if (!_cropCtx || !_cropImg) return;
   const W = _cropWrapW, H = _cropWrapH;
   const boxSize = Math.min(W, H) * 0.78;
-  const cx = W/2 + _cropState.offsetX;
+  const cx = W/2 + _cropState.offsetX;     // pusat FOTO
   const cy = H/2 + _cropState.offsetY;
+  const bx = (W - boxSize) / 2, by = (H - boxSize) / 2;   // kotak crop (tetap)
 
   _cropCtx.clearRect(0, 0, W, H);
 
-  // Draw image
   _cropCtx.save();
   _cropCtx.translate(cx, cy);
   _cropCtx.rotate(_cropState.angle * Math.PI / 180);
@@ -518,22 +544,20 @@ function cropDraw() {
   _cropCtx.drawImage(_cropImg, -_cropImg.naturalWidth/2, -_cropImg.naturalHeight/2);
   _cropCtx.restore();
 
-  // Dim outside crop box
+  // Redupkan area di luar kotak
   _cropCtx.save();
   _cropCtx.fillStyle = 'rgba(0,0,0,0.5)';
-  const bx = cx - boxSize/2, by = cy - boxSize/2;
   _cropCtx.fillRect(0, 0, W, by);
   _cropCtx.fillRect(0, by+boxSize, W, H - (by+boxSize));
   _cropCtx.fillRect(0, by, bx, boxSize);
   _cropCtx.fillRect(bx+boxSize, by, W-(bx+boxSize), boxSize);
   _cropCtx.restore();
 
-  // Crop border
+  // Border dan garis bantu (hanya tampilan; TIDAK ikut ke hasil, lihat _cropRender)
   _cropCtx.save();
   _cropCtx.strokeStyle = 'rgba(100,160,255,0.9)';
   _cropCtx.lineWidth = 1.5;
   _cropCtx.strokeRect(bx, by, boxSize, boxSize);
-  // Grid lines (thirds)
   _cropCtx.strokeStyle = 'rgba(255,255,255,0.25)';
   _cropCtx.lineWidth = 1;
   for (let g=1; g<3; g++) {
@@ -551,22 +575,44 @@ function cropDraw() {
   cropDrawPreview();
 }
 
+// Hasil crop dirender dari FOTO ASLI pada resolusi penuh, bukan dari kanvas layar: tanpa border/grid dan tanpa kabur.
+// S = sisi hasil (piksel). hq=true -> turunkan ukuran bertahap (1/2 demi 1/2) agar foto besar tetap tajam tanpa aliasing.
+function _cropRender(S, hq) {
+  const box = Math.min(_cropWrapW, _cropWrapH) * 0.78;
+  const k = S / box;
+  const out = document.createElement('canvas');
+  out.width = out.height = S;
+  const c = out.getContext('2d');
+  c.fillStyle = '#fff';
+  c.fillRect(0, 0, S, S);
+  c.imageSmoothingEnabled = true;
+  c.imageSmoothingQuality = 'high';
+
+  let src = _cropImg, w = _cropImg.naturalWidth, h = _cropImg.naturalHeight;
+  let rem = _cropState.scale * k;   // skala akhir foto -> hasil
+  if (hq) {
+    while (rem < 0.5 && w > 2 && h > 2) {
+      const nw = Math.max(1, Math.round(w / 2)), nh = Math.max(1, Math.round(h / 2));
+      const cv = document.createElement('canvas');
+      cv.width = nw; cv.height = nh;
+      const cx = cv.getContext('2d');
+      cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high';
+      cx.drawImage(src, 0, 0, nw, nh);
+      src = cv; w = nw; h = nh; rem *= 2;
+    }
+  }
+  c.translate(S/2 + _cropState.offsetX * k, S/2 + _cropState.offsetY * k);
+  c.rotate(_cropState.angle * Math.PI / 180);
+  c.scale(_cropState.flipH ? -1 : 1, _cropState.flipV ? -1 : 1);
+  c.scale(rem, rem);
+  c.drawImage(src, -w/2, -h/2);
+  return out;
+}
+
 function cropDrawPreview() {
   if (!_cropPreviewCtx || !_cropImg) return;
-  const W = _cropWrapW, H = _cropWrapH;
-  const boxSize = Math.min(W, H) * 0.78;
-  const cx = W/2 + _cropState.offsetX;
-  const cy = H/2 + _cropState.offsetY;
-  const bx = cx - boxSize/2, by = cy - boxSize/2;
-
-  // offscreen for crop area
-  const off = document.createElement('canvas');
-  off.width = boxSize; off.height = boxSize;
-  const offCtx = off.getContext('2d');
-  offCtx.drawImage(_cropCanvas, bx, by, boxSize, boxSize, 0, 0, boxSize, boxSize);
-
-  _cropPreviewCtx.clearRect(0,0,120,120);
-  _cropPreviewCtx.drawImage(off, 0, 0, boxSize, boxSize, 0, 0, 120, 120);
+  _cropPreviewCtx.clearRect(0, 0, 120, 120);
+  _cropPreviewCtx.drawImage(_cropRender(120, false), 0, 0);
 }
 
 function _cropBindMouse() {
@@ -584,6 +630,7 @@ function _cropBindMouse() {
   };
   c.onmouseup = () => { _cropDragging = false; c.style.cursor = 'move'; };
   c.onmouseleave = () => { _cropDragging = false; };
+  c.onwheel = (e) => { e.preventDefault(); cropZoom(e.deltaY < 0 ? 0.08 : -0.08); };   // scroll mouse = zoom
   // Touch support
   c.ontouchstart = (e) => {
     const t = e.touches[0];
@@ -602,7 +649,7 @@ function _cropBindMouse() {
 }
 
 function cropZoom(delta) {
-  _cropState.scale = Math.max(0.1, Math.min(8, _cropState.scale + delta * _cropState.scale));
+  _cropState.scale = Math.max(0.02, Math.min(8, _cropState.scale + delta * _cropState.scale));
   cropDraw();
 }
 function cropRotate(deg) { _cropState.angle = (_cropState.angle + deg + 360) % 360; cropDraw(); }
@@ -614,30 +661,264 @@ function cropClose() {
   document.getElementById('crop-overlay').classList.remove('open');
   _cropImg = null;
   cropTargetIdx = null;
-  if (_cropCanvas) { _cropCanvas.onmousedown = null; _cropCanvas.onmousemove = null; _cropCanvas.onmouseup = null; }
+  _cropOnSave = null;
+  if (_cropCanvas) {
+    _cropCanvas.onmousedown = null; _cropCanvas.onmousemove = null; _cropCanvas.onmouseup = null;
+    _cropCanvas.onwheel = null; _cropCanvas.ontouchstart = null; _cropCanvas.ontouchmove = null;
+  }
 }
 
 function cropSave() {
-  if (cropTargetIdx === null || !_cropCanvas) return;
-  const W = _cropWrapW, H = _cropWrapH;
-  const boxSize = Math.min(W, H) * 0.78;
-  const cx = W/2 + _cropState.offsetX;
-  const cy = H/2 + _cropState.offsetY;
-  const bx = cx - boxSize/2, by = cy - boxSize/2;
+  if (!_cropImg || !_cropOnSave) return;
+  const box = Math.min(_cropWrapW, _cropWrapH) * 0.78;
+  const side = Math.max(16, Math.round(box / _cropState.scale));   // sisi area crop dalam piksel FOTO ASLI
+  const S = Math.min(1200, side);                                    // jangan diperbesar di sini; perbesaran ke 800 px dilakukan saat simpan produk
+  try {
+    const out = _cropRender(S, true);
+    out.toBlob((blob) => {
+      if (!blob) { showToast('Gagal membuat hasil crop'); return; }
+      const cb = _cropOnSave;
+      cropClose();
+      cb(blob);
+    }, 'image/jpeg', 0.92);
+  } catch (e) {
+    console.error('Crop gagal:', e);
+    showToast('Foto ini tidak bisa diproses (izin akses gambar). Unggah ulang dari file.', 4500);
+  }
+}
 
-  // Extract crop area at native resolution
-  const out = document.createElement('canvas');
-  const outSize = 1200; // output square size
-  out.width = outSize; out.height = outSize;
-  const outCtx = out.getContext('2d');
-  outCtx.drawImage(_cropCanvas, bx, by, boxSize, boxSize, 0, 0, outSize, outSize);
+// ===================== INFO UKURAN FOTO (piksel) =====================
+// Hijau >= 800 px (aman). Kuning 500-799 (lolos batas Google 500 px tapi kurang tajam). Merah < 500 (di bawah batas Google).
+const _dimCache = new Map();
+function imageDims(src) {
+  if (_dimCache.has(src)) return _dimCache.get(src);
+  const p = new Promise(res => {
+    const im = new Image();
+    im.onload = () => res({w: im.naturalWidth, h: im.naturalHeight});
+    im.onerror = () => res(null);
+    im.src = src;
+  });
+  _dimCache.set(src, p);
+  return p;
+}
+function dimLevel(w, h) { const m = Math.min(w, h); return m >= 800 ? 'ok' : (m >= 500 ? 'warn' : 'bad'); }
+function dimTitle(w, h) {
+  const lv = dimLevel(w, h);
+  if (lv === 'ok') return 'Ukuran baik';
+  if (lv === 'warn') return 'Di bawah 800 px: lolos batas Google (500 px) tapi kurang tajam. Pakai foto asli yang lebih besar bila ada.';
+  return 'Di bawah 500 px (batas Google mulai 31 Jan 2027). Saat disimpan, foto diperbesar otomatis ke 800 px (hasil kurang tajam). Pakai foto asli yang lebih besar bila ada.';
+}
+function dimApply(el, d) {
+  if (!el) return;
+  el.classList.remove('ok', 'warn', 'bad');
+  if (!d) { el.textContent = ''; el.removeAttribute('title'); return; }
+  el.classList.add(dimLevel(d.w, d.h));
+  el.textContent = d.w + '×' + d.h;
+  el.title = dimTitle(d.w, d.h);
+}
+let _stripRenderId = 0;
+function photoDimsRefresh(srcs) {
+  const rid = ++_stripRenderId;
+  srcs.forEach((src, i) => {
+    imageDims(src).then(d => { if (rid === _stripRenderId) dimApply(document.getElementById('pdim-' + i), d); });
+  });
+}
+function variantSrcFor(key) {
+  const d = variantData[key] || {};
+  const prev = document.getElementById('vph-' + key);
+  return d.preview_url || d.image_url || (prev && prev.dataset.existing) || '';
+}
+function variantDimUpdate(key) {
+  const el = document.getElementById('vdim-' + key);
+  if (!el) return;
+  const src = variantSrcFor(key);
+  if (!src) { dimApply(el, null); return; }
+  imageDims(src).then(d => dimApply(document.getElementById('vdim-' + key), d));
+}
+function variantDimsRefresh() { colorTags.forEach(c => variantDimUpdate(variantKey(c.name, sizeTags[0]))); }
 
-  out.toBlob((blob) => {
-    if (!blob) return;
-    photoSlots[cropTargetIdx] = {type:'cropped', blob, file:null, url:null, alt:(photoSlots[cropTargetIdx]||{}).alt||''};
-    photoStripRender();
-    cropClose();
-  }, 'image/jpeg', 0.88);
+// Crop foto varian (editor yang sama dengan foto utama)
+function variantOpenCrop(key) {
+  const f = variantPhotoFiles[key];
+  const src = f ? URL.createObjectURL(f) : variantSrcFor(key);
+  if (!src) { showToast('Pilih foto varian dulu (ikon kamera)'); return; }
+  _cropOpen(src, (blob) => {
+    variantPhotoFiles[key] = blob;
+    if (!variantData[key]) variantData[key] = {};
+    const u = URL.createObjectURL(blob);
+    variantData[key].preview_url = u;
+    const prev = document.getElementById('vph-' + key);
+    if (prev) prev.style.backgroundImage = `url(${u})`;
+    variantDimUpdate(key);
+  });
+}
+
+// ===================== PERIKSA FOTO PRODUK =====================
+// Memindai semua foto produk dan varian yang sudah tersimpan, menandai yang di bawah 500 px (batas Google) dan 800 px,
+// lalu memperbaikinya per foto: foto diperbesar halus + dipertajam (proses yang sama dengan saat unggah), diunggah sebagai
+// file BARU, dan URL-nya diganti di produk/varian. File lama tidak dihapus. Tiap perbaikan perlu konfirmasi setelah pratinjau.
+let paItems = [];       // {url, w, h, status:'pending'|'ok'|'error', refs:[{pid,name,kind}], fixed}
+let paFilter = 'small'; // 'small' (<500) | 'mid' (<800) | 'all'
+let paRun = 0;          // penanda sesi pemindaian (berhenti kalau modal ditutup)
+let paFix = null;       // {idx, blob, url, w, h, busy}
+
+function paCollect() {
+  const map = new Map();
+  const add = (url, ref) => {
+    if (!url) return;
+    const it = map.get(url) || {url, w:0, h:0, status:'pending', refs:[], fixed:false};
+    if (!it.refs.some(r => r.pid === ref.pid && r.kind === ref.kind)) it.refs.push(ref);   // satu warna punya beberapa baris ukuran: cukup sekali
+    map.set(url, it);
+  };
+  (adminProductsData || []).forEach(p => {
+    if (p.image_url) add(p.image_url, {pid:p.id, name:p.name, kind:'Foto utama'});
+    (Array.isArray(p.image_urls) ? p.image_urls : []).forEach((u, i) => { if (u && u !== p.image_url) add(u, {pid:p.id, name:p.name, kind:'Foto galeri ' + (i+1)}); });
+    (p.variants || []).forEach(v => { if (v.image_url) add(v.image_url, {pid:p.id, name:p.name, kind:'Varian ' + v.color_name}); });
+  });
+  return [...map.values()];
+}
+
+async function photoAuditOpen() {
+  document.getElementById('pa-overlay').classList.add('open');
+  const run = ++paRun;
+  paFix = null; paFilter = 'small';
+  paItems = paCollect();
+  paRender();
+  const queue = [...paItems];
+  const worker = async () => {
+    while (queue.length) {
+      const it = queue.shift();
+      const d = await imageDims(it.url);
+      if (run !== paRun) return;
+      if (d) { it.w = d.w; it.h = d.h; it.status = 'ok'; } else it.status = 'error';
+      if (!paFix) paRender();
+    }
+  };
+  await Promise.all(Array.from({length: 6}, worker));
+  if (run === paRun && !paFix) paRender();
+}
+function photoAuditClose() {
+  paRun++;   // hentikan pemindaian yang masih jalan
+  if (paFix && paFix.url) { try { URL.revokeObjectURL(paFix.url); } catch (_) {} }
+  paFix = null;
+  document.getElementById('pa-overlay').classList.remove('open');
+}
+function paSetFilter(f) { paFilter = f; paRender(); }
+
+function paRender() {
+  const body = document.getElementById('pa-body');
+  if (!body) return;
+  if (paFix) { paRenderCompare(); return; }
+  const ok = paItems.filter(i => i.status === 'ok');
+  const small = ok.filter(i => Math.min(i.w, i.h) < 500 && !i.fixed);
+  const mid = ok.filter(i => Math.min(i.w, i.h) >= 500 && Math.min(i.w, i.h) < 800 && !i.fixed);
+  const errs = paItems.filter(i => i.status === 'error');
+  const doneN = paItems.filter(i => i.status !== 'pending').length;
+  document.getElementById('pa-summary').innerHTML = doneN < paItems.length
+    ? 'Memeriksa foto… ' + doneN + '/' + paItems.length
+    : '<b>' + paItems.length + '</b> foto diperiksa: <b style="color:#c0392b">' + small.length + '</b> di bawah 500 px (batas Google mulai 31 Jan 2027), <b style="color:#c77d00">' + mid.length + '</b> antara 500 dan 799 px' + (errs.length ? ', ' + errs.length + ' gagal dimuat' : '') + '.';
+  const chip = (k, label, n) => '<button type="button" class="pa-chip' + (paFilter === k ? ' on' : '') + '" onclick="paSetFilter(\'' + k + '\')">' + label + ' (' + n + ')</button>';
+  document.getElementById('pa-chips').innerHTML = chip('small', 'Di bawah 500 px', small.length) + chip('mid', 'Di bawah 800 px', small.length + mid.length) + chip('all', 'Semua', paItems.length);
+
+  let rows = paItems.map((it, idx) => ({it, idx}));
+  rows = rows.filter(({it}) => {
+    if (it.status === 'pending') return false;
+    if (it.status === 'error') return true;
+    const m = Math.min(it.w, it.h);
+    if (paFilter === 'small') return m < 500 || it.fixed;
+    if (paFilter === 'mid') return m < 800 || it.fixed;
+    return true;
+  });
+  rows.sort((a, b) => (a.it.status === 'error' ? -1 : Math.min(a.it.w, a.it.h)) - (b.it.status === 'error' ? -1 : Math.min(b.it.w, b.it.h)));
+  body.innerHTML = rows.length ? rows.map(({it, idx}) => {
+    const refs = it.refs.slice(0, 3).map(r => chatEsc(r.name) + ' · ' + chatEsc(r.kind)).join('<br>') + (it.refs.length > 3 ? '<br>+' + (it.refs.length - 3) + ' lainnya' : '');
+    const lv = it.status === 'ok' ? dimLevel(it.w, it.h) : 'bad';
+    const dim = it.status === 'ok' ? it.w + '×' + it.h : 'Gagal dimuat';
+    const action = it.fixed ? '<span class="pa-done">✓ Diperbaiki</span>'
+      : (it.status === 'ok' && Math.min(it.w, it.h) < 800 ? '<button type="button" class="btn-pf-back" onclick="photoAuditFix(' + idx + ')">Perbaiki</button>' : '');
+    return '<div class="pa-row"><img class="pa-thumb" src="' + chatEsc(it.url) + '" alt="" loading="lazy"><div class="pa-info"><div class="pa-refs">' + refs + '</div></div><span class="pa-dim ' + lv + '">' + dim + '</span>' + action + '</div>';
+  }).join('') : (doneN < paItems.length ? '<p class="pa-empty">Memuat…</p>' : '<p class="pa-empty">Tidak ada foto di kategori ini. 🎉</p>');
+}
+
+async function photoAuditFix(idx) {
+  const it = paItems[idx];
+  if (!it) return;
+  document.getElementById('pa-body').innerHTML = '<p class="pa-empty">Menyiapkan hasil…</p>';
+  try {
+    const res = await fetch(it.url, {mode: 'cors', cache: 'no-store'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const src = await res.blob();
+    const out = await compressImage(src);   // proses SAMA dengan saat unggah: perbesar ke 800 px (sisi pendek) + pertajam + JPEG
+    const bmp = await createImageBitmap(out);
+    paFix = {idx, blob: out, url: URL.createObjectURL(out), w: bmp.width, h: bmp.height, busy: false};
+    paRender();
+  } catch (e) {
+    console.error('Perbaiki foto gagal:', e);
+    showToast('Foto ini tidak bisa diproses dari sini (' + (e && e.message ? e.message : 'izin akses gambar') + '). Unggah ulang foto aslinya lewat Edit Produk.', 6000);
+    paFix = null;
+    paRender();
+  }
+}
+function paRenderCompare() {
+  const f = paFix, it = paItems[f.idx];
+  document.getElementById('pa-summary').innerHTML = 'Pratinjau perbaikan';
+  document.getElementById('pa-chips').innerHTML = '';
+  document.getElementById('pa-body').innerHTML =
+    '<div class="pa-compare">' +
+      '<div><div class="pa-cap">Sebelum · <b>' + it.w + '×' + it.h + ' px</b></div><div class="pa-cbox"><img src="' + chatEsc(it.url) + '" alt=""></div></div>' +
+      '<div><div class="pa-cap">Sesudah · <b>' + f.w + '×' + f.h + ' px</b></div><div class="pa-cbox"><img src="' + chatEsc(f.url) + '" alt=""></div></div>' +
+    '</div>' +
+    '<p class="pa-note">Foto diperbesar halus dan dipertajam. Ukurannya memenuhi aturan Google, tetapi detail aslinya tidak bertambah. Untuk hasil terbaik, unggah ulang foto asli yang lebih besar lewat Edit Produk. Dipakai di: ' +
+      it.refs.map(r => chatEsc(r.name) + ' (' + chatEsc(r.kind) + ')').join(', ') + '.</p>' +
+    '<div class="pa-actions"><button type="button" class="btn-pf-back" onclick="photoAuditCancelFix()"' + (f.busy ? ' disabled' : '') + '>Batal</button>' +
+    '<button type="button" class="btn-primary" style="width:auto;padding:10px 22px" onclick="photoAuditApply()"' + (f.busy ? ' disabled' : '') + '>' + (f.busy ? 'Menyimpan…' : 'Pakai hasil ini') + '</button></div>';
+}
+function photoAuditCancelFix() {
+  if (paFix && paFix.url) { try { URL.revokeObjectURL(paFix.url); } catch (_) {} }
+  paFix = null;
+  paRender();
+}
+async function photoAuditApply() {
+  const f = paFix;
+  if (!f || f.busy) return;
+  const it = paItems[f.idx];
+  f.busy = true; paRender();
+  const bucket = sb.storage.from('product-photos');
+  if (!f.newUrl) {   // unggah sekali saja; kalau pembaruan data gagal dan diulang, file yang sama dipakai lagi
+    const path = 'fix-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg';
+    const up = await bucket.upload(path, f.blob, {contentType: 'image/jpeg'});
+    if (up.error) {
+      f.busy = false; paRender();
+      showToast('Gagal mengunggah foto baru: ' + up.error.message, 5000);
+      return;
+    }
+    f.newUrl = bucket.getPublicUrl(path).data.publicUrl;
+  }
+  const newUrl = f.newUrl;
+  const errs = [];
+  // 1) Produk: foto utama dan foto galeri yang memakai URL lama
+  const prods = (adminProductsData || []).filter(p => p.image_url === it.url || (Array.isArray(p.image_urls) && p.image_urls.includes(it.url)));
+  for (const p of prods) {
+    const payload = {};
+    if (p.image_url === it.url) payload.image_url = newUrl;
+    if (Array.isArray(p.image_urls) && p.image_urls.includes(it.url)) payload.image_urls = p.image_urls.map(u => u === it.url ? newUrl : u);
+    const r = await sb.from('products').update(payload).eq('id', p.id);
+    if (r.error) errs.push(p.name + ': ' + r.error.message);
+  }
+  // 2) Varian: semua baris yang memakai foto itu (satu warna biasanya punya beberapa baris ukuran)
+  const vr = await sb.from('variants').update({image_url: newUrl}).eq('image_url', it.url);
+  if (vr.error) errs.push('Varian: ' + vr.error.message);
+  if (errs.length) {
+    f.busy = false; paRender();
+    showToast('Sebagian gagal diperbarui (' + errs.join('; ') + '). Klik "Pakai hasil ini" lagi untuk mengulang; foto baru tidak diunggah dua kali.', 8000);
+    return;
+  }
+  it.url = newUrl; it.w = f.w; it.h = f.h; it.fixed = true; it.status = 'ok';
+  _dimCache.set(newUrl, Promise.resolve({w: f.w, h: f.h}));
+  paFix = null;
+  await loadAdminProducts();   // segarkan data produk di memori dan daftar
+  paRender();
+  showToast('Foto diperbaiki. Feed Google ikut berubah di pembaruan berikutnya.');
 }
 
 // ===================== RESET / PREFILL HELPERS =====================
