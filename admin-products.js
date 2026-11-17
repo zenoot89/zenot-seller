@@ -1178,7 +1178,10 @@ function clearExtraFields() {
   });
 })();
 
-async function saveProduct() {
+async function saveProduct(opts) {
+  opts = opts || {};
+  // Status hanya diubah kalau diminta (Simpan & Arsipkan / Simpan & Tampilkan / Arsipkan / Tampilkan). Update biasa tidak menyentuhnya.
+  const visibility = opts.status ? {status: opts.status, is_active: opts.status === 'aktif'} : {};
   const name = document.getElementById('p-name').value.trim();
   const category_id = document.getElementById('p-cat-id').value || null;
   const category = category_id ? catName(category_id) : null; // nama leaf, buat kompatibilitas filter toko lama
@@ -1257,7 +1260,7 @@ async function saveProduct() {
   let extrasMissing = false;
   let existingVars = [];
   if (editingProductId) {
-    const payload = {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls};
+    const payload = {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls,...visibility};
     const res = await saveWithExtras(b => sb.from('products').update(b).eq('id',editingProductId).select().single(), payload, extra);
     if (res.error) { console.error('Update produk gagal:', res.error); showToast('Gagal update: ' + res.error.message); return; }
     prod = res.data; extrasMissing = !!res.extrasMissing;
@@ -1266,7 +1269,7 @@ async function saveProduct() {
     if (exRes.error) { console.error('Baca varian gagal:', exRes.error); showToast('Gagal membaca varian: ' + exRes.error.message); return; }
     existingVars = exRes.data || [];
   } else {
-    const res = await saveWithExtras(b => sb.from('products').insert(b).select().single(), {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls}, extra);
+    const res = await saveWithExtras(b => sb.from('products').insert(b).select().single(), {name,category,category_id,gender,supplier,supplier_id,description,bahan,tipe_cutting,ketebalan,motif,dipakai_model,image_url,image_urls,...visibility}, extra);
     if (res.error) { console.error('Insert produk gagal:', res.error); showToast('Gagal simpan: ' + res.error.message); return; }
     prod = res.data; extrasMissing = !!res.extrasMissing;
   }
@@ -1327,9 +1330,12 @@ async function saveProduct() {
   const dropIds = existingVars.map(e => e.id).filter(id => !keepIds.has(id));
   if (dropIds.length) await sb.from('variants').delete().in('id', dropIds);
 
+  const savedMsg = editingProductId
+    ? (opts.status === 'nonaktif' ? 'Produk diperbarui dan diarsipkan ✓' : opts.status === 'aktif' ? 'Produk diperbarui dan ditampilkan ✓' : 'Produk berhasil diupdate ✓')
+    : (opts.status === 'nonaktif' ? 'Produk disimpan ke Arsip ✓ (belum tampil di toko)' : 'Produk berhasil disimpan ✓');
   showToast(extrasMissing
     ? 'Produk tersimpan, TAPI kolom SEO/spesifikasi baru belum ada di database. Jalankan 01-migrasi-supabase.sql di Supabase dulu.'
-    : (editingProductId ? 'Produk berhasil diupdate ✓' : 'Produk berhasil disimpan ✓'), extrasMissing ? 9000 : undefined);
+    : savedMsg, extrasMissing ? 9000 : undefined);
   closeProductForm();
   loadAdminProducts();
   } finally {
@@ -1338,7 +1344,8 @@ async function saveProduct() {
 }
 
 function setProductSaving(isSaving) {
-  const btn = document.getElementById('save-product-btn-final');
+  const btn = document.getElementById('pf-bar-main');
+  ['pf-bar-back', 'pf-bar-archive'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = isSaving; });
   if (btn) {
     btn.disabled = isSaving;
     btn.style.opacity = isSaving ? '0.7' : '';
@@ -1393,6 +1400,7 @@ function cancelEdit() {
   document.getElementById('form-mode-title').textContent = 'Tambah Produk';
   document.getElementById('edit-actions-extra')?.classList.add('hidden');
   if (typeof pfResetTabs === 'function') pfResetTabs();
+  pfBarRefresh();
 }
 
 function openProductForm() {
@@ -1400,13 +1408,116 @@ function openProductForm() {
   document.getElementById('product-list-view').classList.add('hidden');
   document.getElementById('product-form-card').classList.remove('hidden');
   window.scrollTo({top:0, behavior:'smooth'});
+  pfBarRefresh();
+  pfBarLayout();
+  pfMarkClean();
 }
 
 function closeProductForm() {
   cancelEdit();
   document.getElementById('product-form-card').classList.add('hidden');
   document.getElementById('product-list-view').classList.remove('hidden');
+  pfBarLayout();
 }
+
+// ===================== BAR AKSI PRODUK (menempel di bawah form) =====================
+// Produk baru : [Kembali] [Simpan & Arsipkan] [Simpan & Tampilkan]
+// Edit produk : [Kembali] [Arsipkan / Tampilkan] [Update]
+// "Arsip" = status 'nonaktif' + is_active=false, sama dengan tombol Arsipkan yang sudah ada. Produk di arsip TIDAK tampil di toko,
+// dan otomatis keluar dari halaman statis, sitemap, dan feed Google karena semuanya hanya memakai produk dengan is_active=true.
+let pfBaseline = '';
+function pfSnapshot() {
+  const st = {f: {}};
+  document.querySelectorAll('#product-form-card [id^="p-"]').forEach(el => {
+    if (/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName) && el.type !== 'file') st.f[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  st.photos = photoSlots.map(s => [s.type, s.type === 'url' ? s.url : ((s.blob || s.file || {}).size || 0), s.alt || '']);
+  st.colors = colorTags; st.sizes = sizeTags; st.variants = variantData;
+  st.vfiles = Object.keys(variantPhotoFiles).map(k => [k, (variantPhotoFiles[k] || {}).size || 0]);
+  try { st.chart = collectSizeChart(); } catch (_) {}
+  return JSON.stringify(st, (k, v) => k === 'preview_url' ? undefined : v);
+}
+function pfMarkClean() { pfBaseline = pfSnapshot(); }
+function pfIsDirty() { return pfSnapshot() !== pfBaseline; }
+function pfIsEditingArchived() {
+  if (!editingProductId) return false;
+  const p = adminProductsData.find(x => x.id === editingProductId);
+  return !!p && productStatus(p) === 'nonaktif';
+}
+function pfBarRefresh() {
+  const arch = document.getElementById('pf-bar-archive'), main = document.getElementById('pf-bar-main');
+  if (!arch || !main) return;
+  if (editingProductId) {
+    arch.textContent = pfIsEditingArchived() ? 'Tampilkan' : 'Arsipkan';
+    main.textContent = 'Update';
+  } else {
+    arch.textContent = 'Simpan & Arsipkan';
+    main.textContent = 'Simpan & Tampilkan';
+  }
+}
+// Tombol Kembali: kalau ada perubahan yang belum disimpan, tanya dulu (seperti Shopee)
+async function pfRequestClose() {
+  if (pfIsDirty() && !(await uiConfirm('Buang perubahan?', {title: 'Konfirmasi', okText: 'Buang', cancelText: 'Kembali', danger: true}))) return;
+  closeProductForm();
+}
+// Atribut yang dibutuhkan supaya produk layak tampil (toko, halaman statis/SEO, feed Google, ongkir)
+function pfMissingAttrs() {
+  const miss = [];
+  const v = id => ((document.getElementById(id) || {}).value || '').trim();
+  if (!v('p-name')) miss.push({label: 'Nama produk', tab: 0});
+  if (!v('p-cat-id')) miss.push({label: 'Kategori', tab: 0});
+  if (!photoSlots.length) miss.push({label: 'Foto produk (minimal 1)', tab: 0});
+  if (!v('p-desc')) miss.push({label: 'Deskripsi produk', tab: 2});
+  const priced = colorTags.length > 0 && sizeTags.length > 0 &&
+    colorTags.every(c => sizeTags.some(s => (parseInt((variantData[variantKey(c.name, s)] || {}).price) || 0) > 0));
+  if (!priced) miss.push({label: 'Variasi: minimal 1 warna dan 1 ukuran dengan harga', tab: 3});
+  if (!numOrNull('p-weight')) miss.push({label: 'Berat paket (gram)', tab: 4});
+  return miss.sort((a, b) => a.tab - b.tab);
+}
+async function pfBarMain() {
+  if (editingProductId) { await saveProduct(); return; }   // Update: status produk tidak berubah
+  const miss = pfMissingAttrs();
+  if (miss.length) {
+    const ok = await uiConfirm('Yang masih kosong:\n' + miss.map(m => '• ' + m.label).join('\n') + '\n\nProduk belum bisa ditampilkan di toko. Simpan ke Arsip dulu?',
+      {title: 'Atribut belum lengkap', okText: 'Simpan ke Arsip', cancelText: 'Lengkapi'});
+    if (ok) await saveProduct({status: 'nonaktif'}); else pfSwitchTab(miss[0].tab);
+    return;
+  }
+  await saveProduct({status: 'aktif'});
+}
+async function pfBarArchive() {
+  if (!editingProductId) { await saveProduct({status: 'nonaktif'}); return; }   // produk baru: simpan sebagai arsip
+  if (pfIsEditingArchived()) {                                                   // sedang diarsipkan -> Tampilkan
+    const miss = pfMissingAttrs();
+    if (miss.length) {
+      showToast('Belum bisa ditampilkan. Lengkapi: ' + miss.map(m => m.label).join(', '), 7000);
+      pfSwitchTab(miss[0].tab);
+      return;
+    }
+    await saveProduct({status: 'aktif'});
+    return;
+  }
+  const ok = await uiConfirm('Produk akan disembunyikan dari toko. Halaman produk, sitemap, dan feed Google ikut dibersihkan pada pembaruan berikutnya (sekitar 4 jam).\nPerubahan yang ada di form ikut disimpan.',
+    {title: 'Arsipkan produk?', okText: 'Arsipkan', cancelText: 'Batal', danger: true});
+  if (ok) await saveProduct({status: 'nonaktif'});
+}
+
+// Bar menempel di dasar layar (fixed). Posisi dan lebarnya mengikuti kartu form, jadi tidak menimpa sidebar.
+function pfBarLayout() {
+  const card = document.getElementById('product-form-card'), bar = document.getElementById('pf-bar');
+  const on = !!(card && bar && !card.classList.contains('hidden') && card.offsetParent !== null);
+  document.body.classList.toggle('pf-bar-on', on);   // dipakai CSS: tombol melayang Pesan naik supaya tidak menutupi bar
+  if (!on) return;
+  const r = card.getBoundingClientRect();
+  bar.style.setProperty('--pf-left', r.left + 'px');
+  bar.style.setProperty('--pf-width', r.width + 'px');
+}
+(function () {
+  const c = document.getElementById('product-form-card');
+  if (c && 'ResizeObserver' in window) new ResizeObserver(pfBarLayout).observe(c);
+  window.addEventListener('resize', pfBarLayout);
+})();
+
 
 function editProduct(id) {
   const p = adminProductsData.find(x=>x.id===id);
@@ -1452,11 +1563,13 @@ function editProduct(id) {
   document.getElementById('product-list-view').classList.add('hidden');
   document.getElementById('product-form-card').classList.remove('hidden');
   document.getElementById('edit-actions-extra')?.classList.remove('hidden');
-  document.getElementById('status-toggle-btn').textContent = productStatus(p) === 'nonaktif' ? 'Aktifkan' : 'Arsipkan';
+  pfBarRefresh();
   if (typeof pfResetTabs === 'function') pfResetTabs();
   // render ulang setelah DOM visible dan tab reset ke 1
   requestAnimationFrame(() => { renderColorTags(); renderSizeTags(); });
   window.scrollTo({top:0, behavior:'smooth'});
+  pfBarLayout();
+  pfMarkClean();
 }
 
 const LOW_STOCK_THRESHOLD = 5;
