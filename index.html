@@ -479,6 +479,11 @@
     .pf-tab.done{color:var(--text)}
     .pf-panel{display:none;padding:24px 0 0}
     .pf-panel.active{display:block}
+    /* ===== Form produk SATU HALAMAN (seperti Shopee): semua bagian tampil bertumpuk, tab di atas menempel dan ikut berganti saat digulir ===== */
+    .pf-panel{display:block !important;padding:30px 0 10px;scroll-margin-top:70px}
+    .pf-panel + .pf-panel{border-top:1px solid var(--border);margin-top:18px}
+    .pf-sec-title{font-size:16px;font-weight:700;letter-spacing:-.01em;color:var(--text);margin:0 0 18px}
+    #pf-tabs{position:sticky;top:0;z-index:30;box-shadow:0 6px 12px -10px rgba(0,0,0,.25)}
     .pf-footer{display:flex;justify-content:space-between;align-items:center;padding:20px 0 4px;border-top:1px solid var(--border);margin-top:24px;gap:10px}
     .pf-footer-right{display:flex;gap:10px;align-items:center}
     .btn-pf-next{padding:11px 24px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer}
@@ -2331,7 +2336,7 @@
           <div class="prod-fab-bar"><button type="button" class="btn-primary" onclick="openProductForm()">Tambah Produk Baru</button></div>
           </div>
 
-          <div class="admin-card hidden" id="product-form-card" style="padding:0;overflow:hidden">
+          <div class="admin-card hidden" id="product-form-card" style="padding:0;overflow:hidden;overflow:clip">
 
             <!-- Header -->
             <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px 0">
@@ -2351,7 +2356,8 @@
             <div style="padding:0 24px 24px">
 
               <!-- ===== TAB 1: INFORMASI PRODUK ===== -->
-              <div class="pf-panel active" id="pf-panel-0">
+              <div class="pf-panel" id="pf-panel-0">
+                <h3 class="pf-sec-title">Informasi Produk</h3>
                 <div class="form-group">
                   <label class="form-label">Foto Produk 1:1 <span style="text-transform:none;font-weight:400;color:var(--muted)">(maks. 9 · drag untuk ubah urutan)</span></label>
                   <input type="file" id="p-photos" multiple accept="image/*" style="display:none" onchange="photoStripHandleFiles(this)"/>
@@ -2385,16 +2391,12 @@
                   <button type="button" class="catpick-btn" id="p-cat-btn" onclick="openCategoryPicker()">Pilih kategori</button>
                   <input type="hidden" id="p-cat-id" value=""/>
                 </div>
-                <div class="pf-footer">
-                  <span></span>
-                  <div class="pf-footer-right">
-                    <button class="btn-pf-next" onclick="pfSwitchTab(1)">Selanjutnya →</button>
-                  </div>
-                </div>
+                
               </div>
 
               <!-- ===== TAB 2: SPESIFIKASI ===== -->
               <div class="pf-panel" id="pf-panel-1">
+                <h3 class="pf-sec-title">Spesifikasi</h3>
                 <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Lengkapi spesifikasi agar produk mudah dicari dan tampil lebih informatif di halaman produk.</p>
                 <div class="spec-fields-grid" style="gap:14px">
                   <div class="form-group" style="margin-bottom:0">
@@ -2432,16 +2434,12 @@
                     <input class="form-input" id="p-perawatan" placeholder="cth: Cuci tangan air dingin, jangan diperas, jemur diangin-anginkan"/>
                   </div>
                 </div>
-                <div class="pf-footer">
-                  <button class="btn-pf-back" onclick="pfSwitchTab(0)">← Sebelumnya</button>
-                  <div class="pf-footer-right">
-                    <button class="btn-pf-next" onclick="pfSwitchTab(2)">Selanjutnya →</button>
-                  </div>
-                </div>
+                
               </div>
 
               <!-- ===== TAB 3: DESKRIPSI ===== -->
               <div class="pf-panel" id="pf-panel-2">
+                <h3 class="pf-sec-title">Deskripsi</h3>
                 <div class="form-group">
                   <label class="form-label">Deskripsi Produk</label>
                   <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Jelaskan detail produk: keunggulan, cara pakai, panduan ukuran, bahan, dll.</p>
@@ -2489,16 +2487,12 @@
                   </div>
                 </div>
 
-                <div class="pf-footer">
-                  <button class="btn-pf-back" onclick="pfSwitchTab(1)">← Sebelumnya</button>
-                  <div class="pf-footer-right">
-                    <button class="btn-pf-next" onclick="pfSwitchTab(3)">Selanjutnya →</button>
-                  </div>
-                </div>
+                
               </div>
 
               <!-- ===== TAB 4: INFORMASI PENJUALAN ===== -->
               <div class="pf-panel" id="pf-panel-3">
+                <h3 class="pf-sec-title">Informasi Penjualan</h3>
                 <div class="form-group">
                   <label class="form-label">Variasi</label>
 
@@ -2562,16 +2556,12 @@
                     </div>
                   </div>
                 </div>
-                <div class="pf-footer">
-                  <button class="btn-pf-back" onclick="pfSwitchTab(2)">← Sebelumnya</button>
-                  <div class="pf-footer-right">
-                    <button class="btn-pf-next" onclick="pfSwitchTab(4)">Selanjutnya →</button>
-                  </div>
-                </div>
+                
               </div>
 
               <!-- ===== TAB 5: PENGIRIMAN ===== -->
               <div class="pf-panel" id="pf-panel-4">
+                <h3 class="pf-sec-title">Pengiriman</h3>
                 <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Berat dan ukuran paket per produk. Berat paket dipakai menghitung <strong>ongkir di checkout</strong> (kosong dihitung 300 g per pcs) dan dikirim ke feed Google dan Meta sebagai berat pengiriman.</p>
                 <div class="spec-fields-grid" style="gap:14px">
                   <div class="form-group" style="margin-bottom:0;grid-column:1/-1">
@@ -2590,16 +2580,13 @@
                 <div style="margin-top:16px;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:12px;line-height:1.6;color:var(--sec)">
                   <strong>Gratis ongkir</strong> diatur lewat menu <strong>Voucher</strong> (jenis Gratis Ongkir), bukan per produk, jadi tidak ditulis di deskripsi produk. Layanan kurir diatur di menu <strong>Pengiriman</strong>.
                 </div>
-                <div class="pf-footer">
-                  <button class="btn-pf-back" onclick="pfSwitchTab(3)">← Sebelumnya</button>
-                  <div class="pf-footer-right">
-                    <div style="display:flex;gap:10px" id="edit-actions-extra" class="hidden">
-                      <button class="btn-danger" onclick="deleteProductFromForm()">Hapus Produk</button>
-                    </div>
-                  </div>
-                </div>
+                
               </div>
 
+              <div id="edit-actions-extra" class="hidden" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--border)">
+                <button class="btn-danger" onclick="deleteProductFromForm()">Hapus Produk</button>
+                <span style="margin-left:10px;font-size:12px;color:var(--muted)">Hapus permanen. Untuk menyembunyikan saja, pakai Arsipkan.</span>
+              </div>
             </div><!-- end padding wrapper -->
 
             <!-- Bar aksi yang menempel di bawah. Baru: Kembali / Simpan & Arsipkan / Simpan & Tampilkan. Edit: Kembali / Arsipkan(Tampilkan) / Update -->
@@ -3521,28 +3508,79 @@ let allCategories = [];
 let allSuppliers = [];
 const capitalize = s => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
 
-// ===================== PRODUCT FORM TABS =====================
+// ===================== PRODUCT FORM: SATU HALAMAN + TAB YANG IKUT BERGULIR =====================
+// Semua bagian (Informasi Produk ... Pengiriman) tampil bertumpuk. Tab di atas menempel: klik tab = gulir ke bagiannya,
+// dan saat form digulir, tab aktif otomatis mengikuti bagian yang sedang berada di bawah tab bar (naik atau turun).
 let pfCurrentTab = 0;
 const PF_TAB_COUNT = 5;
+let pfSpyLockUntil = 0;
 
-function pfSwitchTab(idx) {
+function pfScroller() { return document.querySelector('.admin-content'); }
+
+function pfSetActiveTab(idx) {
+  const changed = idx !== pfCurrentTab;
   pfCurrentTab = idx;
   for (let i = 0; i < PF_TAB_COUNT; i++) {
     const tab = document.getElementById(`pf-tab-${i}`);
-    const panel = document.getElementById(`pf-panel-${i}`);
-    if (!tab || !panel) continue;
-    tab.classList.toggle('active', i === idx);
-    panel.classList.toggle('active', i === idx);
+    if (tab) tab.classList.toggle('active', i === idx);
   }
-  if (idx === 2 && typeof seoFormChanged === 'function') seoFormChanged();
-  // scroll form back to top
-  const card = document.getElementById('product-form-card');
-  if (card) card.scrollIntoView({behavior:'smooth', block:'start'});
+  if (changed && idx === 2 && typeof seoFormChanged === 'function') seoFormChanged();
+  // geser deretan tab (HP) supaya tab aktif selalu kelihatan
+  const nav = document.getElementById('pf-tabs'), t = document.getElementById(`pf-tab-${idx}`);
+  if (nav && t && nav.scrollWidth > nav.clientWidth) nav.scrollTo({left: t.offsetLeft - (nav.clientWidth - t.offsetWidth) / 2, behavior: 'smooth'});
 }
 
+// Klik tab, atau lompat dari "Lengkapi" / validasi: gulir halus ke bagian itu
+function pfSwitchTab(idx) {
+  const sc = pfScroller(), panel = document.getElementById(`pf-panel-${idx}`), nav = document.getElementById('pf-tabs');
+  pfSetActiveTab(idx);
+  if (!sc || !panel) return;
+  const top = panel.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - (nav ? nav.offsetHeight : 0) + 14;   // judul bagian muncul tepat di bawah tab bar
+  pfSpyLockUntil = Date.now() + 900;   // jangan biarkan scroll-spy mengganti tab selama gulir halus berjalan
+  sc.scrollTo({top: Math.max(0, top), behavior: 'smooth'});
+}
+
+// Scroll-spy: tab aktif = bagian terakhir yang bagian atasnya sudah melewati garis di bawah tab bar
+function pfSpy() {
+  const card = document.getElementById('product-form-card'), nav = document.getElementById('pf-tabs'), sc = pfScroller();
+  if (!card || !nav || !sc || card.classList.contains('hidden') || card.offsetParent === null) return;
+  if (Date.now() < pfSpyLockUntil) return;
+  const line = nav.getBoundingClientRect().bottom + 24;
+  let idx = 0;
+  for (let i = 0; i < PF_TAB_COUNT; i++) {
+    const p = document.getElementById(`pf-panel-${i}`);
+    if (p && p.getBoundingClientRect().top <= line) idx = i;
+  }
+  if (sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4) idx = PF_TAB_COUNT - 1;   // mentok di bawah = bagian terakhir
+  if (idx !== pfCurrentTab) pfSetActiveTab(idx);
+}
+(function () {
+  const sc = pfScroller();
+  if (!sc) return;
+  let ticking = false;
+  sc.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { ticking = false; pfSpy(); });
+  }, {passive: true});
+})();
+
+// Tab bar harus menempel rata di tepi atas area gulir, bukan di bawah padding-nya
+function pfStickyFix() {
+  const sc = pfScroller(), nav = document.getElementById('pf-tabs');
+  if (!sc || !nav) return;
+  nav.style.top = (-(parseFloat(getComputedStyle(sc).paddingTop) || 0)) + 'px';
+}
+window.addEventListener('resize', pfStickyFix);
+pfStickyFix();
+
 function pfResetTabs() {
-  pfCurrentTab = 0;
-  pfSwitchTab(0);
+  pfStickyFix();
+  pfCurrentTab = -1;          // paksa tampilan tab diperbarui
+  pfSetActiveTab(0);
+  pfSpyLockUntil = 0;
+  const sc = pfScroller();
+  if (sc) { sc.scrollTop = 0; requestAnimationFrame(() => { sc.scrollTop = 0; }); }
 }
 
 // ===================== TOAST =====================
