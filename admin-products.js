@@ -1198,6 +1198,13 @@ async function saveProduct(opts) {
   const dipakai_model = document.getElementById('p-dipakai-model').value.trim() || null;
   if (!name) { showToast('Nama produk wajib diisi'); return; }
   if (!category_id) { showToast('Kategori wajib dipilih'); return; }
+  // Batas deskripsi 950 karakter (Google menyembunyikan produk yang deskripsinya lebih dari 1.000).
+  // Simpan ke Arsip tetap boleh supaya produk lama yang kepanjangan masih bisa disembunyikan.
+  if (opts.status !== 'nonaktif' && typeof pfDescLen === 'function' && pfDescLen() > DESC_MAX) {
+    showToast('Deskripsi ' + pfDescLen() + ' karakter, maksimal ' + DESC_MAX + '. Ringkas dulu di tab Deskripsi.', 6000);
+    pfSwitchTab(2);
+    return;
+  }
 
   // Validasi variant SEBELUM ada write apa pun ke DB: tiap warna wajib punya minimal 1
   // kombinasi ukuran+harga terisi. Kalau tidak, warna itu bakal diam-diam nggak ke-save
@@ -1377,6 +1384,7 @@ function setProductSaving(isSaving) {
 function resetProductForm() {
   document.getElementById('p-name').value='';
   document.getElementById('p-desc').value='';
+  if (typeof pfDescCount === 'function') pfDescCount();
   document.getElementById('p-bahan').value='';
   document.getElementById('p-tipe-cutting').value='';
   document.getElementById('p-ketebalan').value='';
@@ -1468,6 +1476,7 @@ function pfMissingAttrs() {
   if (!v('p-cat-id')) miss.push({label: 'Kategori', tab: 0});
   if (!photoSlots.length) miss.push({label: 'Foto produk (minimal 1)', tab: 0});
   if (!v('p-desc')) miss.push({label: 'Deskripsi produk', tab: 2});
+  else if (typeof pfDescLen === 'function' && pfDescLen() > DESC_MAX) miss.push({label: 'Deskripsi maksimal ' + DESC_MAX + ' karakter (sekarang ' + pfDescLen() + ')', tab: 2});
   const priced = colorTags.length > 0 && sizeTags.length > 0 &&
     colorTags.every(c => sizeTags.some(s => (parseInt((variantData[variantKey(c.name, s)] || {}).price) || 0) > 0));
   if (!priced) miss.push({label: 'Variasi: minimal 1 warna dan 1 ukuran dengan harga', tab: 3});
@@ -1531,6 +1540,7 @@ function editProduct(id) {
   else { catBtn.textContent = p.category || 'Pilih kategori'; catBtn.classList.remove('filled'); }
   document.getElementById('p-gender').value = p.gender || 'pria';
   document.getElementById('p-desc').value = p.description || '';
+  if (typeof pfDescCount === 'function') pfDescCount();
   document.getElementById('p-bahan').value = p.bahan || '';
   document.getElementById('p-tipe-cutting').value = p.tipe_cutting || '';
   document.getElementById('p-ketebalan').value = p.ketebalan || '';

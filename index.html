@@ -2442,8 +2442,9 @@
                 <h3 class="pf-sec-title">Deskripsi</h3>
                 <div class="form-group">
                   <label class="form-label">Deskripsi Produk</label>
-                  <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Jelaskan detail produk: keunggulan, cara pakai, panduan ukuran, bahan, dll.</p>
-                  <textarea class="form-input" id="p-desc" placeholder="Jelaskan produkmu: bahan, ukuran, keunggulan, cara pakai, dll." style="resize:vertical;min-height:280px;line-height:1.7"></textarea>
+                  <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Jelaskan detail produk: keunggulan, cara pakai, panduan ukuran, bahan, dll. <strong>Maksimal 950 karakter</strong> supaya produk tidak disembunyikan Google (Profil Bisnis). Tulis tiap info sekali saja, tanpa kalimat penutup promosi.</p>
+                  <textarea class="form-input" id="p-desc" oninput="pfDescCount()" placeholder="Jelaskan produkmu: bahan, ukuran, keunggulan, cara pakai, dll." style="resize:vertical;min-height:280px;line-height:1.7"></textarea>
+                  <div id="p-desc-count" style="font-size:12px;margin-top:6px;color:var(--muted)"></div>
                   <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
                     <button type="button" class="btn-pf-back" style="padding:6px 12px;font-size:12px" onclick="pfCleanDesc()">Bersihkan simbol</button>
                     <span style="font-size:11px;color:var(--muted)">Teks yang ditempel dari AI otomatis dibersihkan dari simbol #, ** dan *.</span>
@@ -3463,6 +3464,23 @@ function descMdToPlain(s) {
     .replace(/`([^`\n]+)`/g, '$1')
     .replace(/\[([^\]\n]+)\]\((?:[^)\n]+)\)/g, '$1')
     .replace(/\n{3,}/g, '\n\n');
+}
+
+// Batas deskripsi: Google (Profil Bisnis) menyembunyikan produk yang deskripsinya lebih dari 1.000 karakter.
+// Batas di form 950 supaya ada ruang aman (feed Google merapikan teks dulu, jadi panjangnya bisa sedikit beda).
+var DESC_MAX = 950;
+var DESC_WARN = 900;
+function pfDescLen() {
+  const ta = document.getElementById('p-desc');
+  return ta ? String(ta.value || '').replace(/\r\n?/g, '\n').trim().length : 0;
+}
+function pfDescCount() {
+  const el = document.getElementById('p-desc-count');
+  if (!el) return;
+  const n = pfDescLen();
+  el.textContent = n + ' / ' + DESC_MAX + ' karakter' + (n > DESC_MAX ? ' · kelebihan ' + (n - DESC_MAX) + ', ringkas dulu sebelum disimpan' : '');
+  el.style.color = n > DESC_MAX ? '#d32f2f' : (n > DESC_WARN ? '#b26a00' : 'var(--muted)');
+  el.style.fontWeight = n > DESC_MAX ? '600' : '400';
 }
 
 function pfCleanDesc() {
